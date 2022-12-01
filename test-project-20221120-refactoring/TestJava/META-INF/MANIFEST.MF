@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: TestJava Module
+Bundle-SymbolicName: TestJava
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .
+Bundle-Vendor: TIBCO Software Inc.
+Export-Package: com.test
+Provide-Capability: com.tibco.bw.module; name="TestJava"; version:Version="1.0.0"
+TIBCO-BW-Version: 6.8.0 V55 2021-11-10
+Import-Package: com.fasterxml.jackson.core;version="2.11.600",
+ com.fasterxml.jackson.databind;version="2.11.600"
+TIBCO-BW-SharedModule: META-INF/module.bwm
+TIBCO-BW-JobSharedVariables: META-INF/module.jsv
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+TIBCO-BW-ConfigProfile: META-INF/default.substvar
+TIBCO-BW-ModuleSharedVariables: META-INF/module.msv
+TIBCO-BW-Edition: bwe
+Require-Capability: com.tibco.bw.model; filter:="(name=bwext)"

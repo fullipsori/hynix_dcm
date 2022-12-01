@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sca:composite xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:BW="http://xsd.tns.tibco.com/amf/models/sca/implementationtype/BW" xmlns:XMLSchema="http://www.w3.org/2001/XMLSchema" xmlns:compositeext="http://schemas.tibco.com/amx/3.0/compositeext" xmlns:sca="http://www.osoa.org/xmlns/sca/1.0" xmlns:scaext="http://xsd.tns.tibco.com/amf/models/sca/extensions" xmi:id="_N4OnMPRiEey0FNKs2VDF1Q" targetNamespace="http://tns.tibco.com/bw/composite/DynamicJarLoading.module" name="DynamicJarLoading.module" compositeext:version="1.0.0" compositeext:formatVersion="2">
+  <sca:property xmi:id="_QDp88PRiEey0FNKs2VDF1Q" name="BW.DEPLOYMENTUNIT.TYPE" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QDyf0PRiEey0FNKs2VDF1Q" name="BW.APPNODE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QD1jIPRiEey0FNKs2VDF1Q" name="BW.DEPLOYMENTUNIT.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QD3_YPRiEey0FNKs2VDF1Q" name="BW.HOST.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QD6boPRiEey0FNKs2VDF1Q" name="BW.DOMAIN.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QD834PRiEey0FNKs2VDF1Q" name="BW.DEPLOYMENTUNIT.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QD_7MPRiEey0FNKs2VDF1Q" name="BW.APPSPACE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QEC-gPRiEey0FNKs2VDF1Q" name="BW.MODULE.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_QEFawPRiEey0FNKs2VDF1Q" name="BW.MODULE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:component xmi:id="_sjbpsBPyEe2vbN1TRCR_Iw" name="ComponentActivator" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_sjbpsRPyEe2vbN1TRCR_Iw" processName="dynamicjarloading.module.Activator"/>
+  </sca:component>
+  <sca:component xmi:id="_H3qvwBQbEe2ZQqVeIkHEyA" name="ComponentEMS_CONTROL" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_H3qvwRQbEe2ZQqVeIkHEyA" processName="dynamicjarloading.module.EMS_CTRL"/>
+  </sca:component>
+  <sca:component xmi:id="_k2HcEBQbEe2ZQqVeIkHEyA" name="ComponentEMS_RECV" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_k2HcERQbEe2ZQqVeIkHEyA" processName="dynamicjarloading.module.EMS_RECV"/>
+  </sca:component>
+</sca:composite>

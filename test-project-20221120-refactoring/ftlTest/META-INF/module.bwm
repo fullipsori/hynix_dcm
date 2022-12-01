@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sca:composite xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:BW="http://xsd.tns.tibco.com/amf/models/sca/implementationtype/BW" xmlns:XMLSchema="http://www.w3.org/2001/XMLSchema" xmlns:compositeext="http://schemas.tibco.com/amx/3.0/compositeext" xmlns:sca="http://www.osoa.org/xmlns/sca/1.0" xmlns:scaext="http://xsd.tns.tibco.com/amf/models/sca/extensions" xmi:id="_ZNCSYGI2Ee2ocrWCuTd4Og" targetNamespace="http://tns.tibco.com/bw/composite/ftlTest" name="ftlTest" compositeext:version="1.0.0" compositeext:formatVersion="2">
+  <sca:property xmi:id="_Z9QOYGI2Ee2ocrWCuTd4Og" name="BW.DEPLOYMENTUNIT.TYPE" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9W8EGI2Ee2ocrWCuTd4Og" name="BW.APPNODE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9ZYUGI2Ee2ocrWCuTd4Og" name="BW.DEPLOYMENTUNIT.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9bNgGI2Ee2ocrWCuTd4Og" name="BW.HOST.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9dpwGI2Ee2ocrWCuTd4Og" name="BW.DOMAIN.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9e34GI2Ee2ocrWCuTd4Og" name="BW.DEPLOYMENTUNIT.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9hUIGI2Ee2ocrWCuTd4Og" name="BW.APPSPACE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9jJUGI2Ee2ocrWCuTd4Og" name="BW.MODULE.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_Z9llkGI2Ee2ocrWCuTd4Og" name="BW.MODULE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:component xmi:id="_eXY3YGI2Ee2ocrWCuTd4Og" name="ComponentFTLPubProc" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_eXY3YWI2Ee2ocrWCuTd4Og" processName="FTLPubProc"/>
+  </sca:component>
+  <sca:component xmi:id="_ek35wGI2Ee2ocrWCuTd4Og" name="ComponentFTLRepsonProc" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ek35wWI2Ee2ocrWCuTd4Og" processName="FTLRepsonProc"/>
+  </sca:component>
+  <sca:component xmi:id="_evPWsGI2Ee2ocrWCuTd4Og" name="ComponentFTLReqReply" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_evPWsWI2Ee2ocrWCuTd4Og" processName="FTLReqReply"/>
+  </sca:component>
+  <sca:component xmi:id="_e1fvsGI2Ee2ocrWCuTd4Og" name="ComponentFTLSubProc" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_e1fvsWI2Ee2ocrWCuTd4Og" processName="FTLSubProc"/>
+  </sca:component>
+</sca:composite>

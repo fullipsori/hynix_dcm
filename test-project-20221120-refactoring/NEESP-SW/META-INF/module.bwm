@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sca:composite xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:BW="http://xsd.tns.tibco.com/amf/models/sca/implementationtype/BW" xmlns:XMLSchema="http://www.w3.org/2001/XMLSchema" xmlns:compositeext="http://schemas.tibco.com/amx/3.0/compositeext" xmlns:sca="http://www.osoa.org/xmlns/sca/1.0" xmlns:scaext="http://xsd.tns.tibco.com/amf/models/sca/extensions" xmi:id="_piPcQFGNEe21JKJ09Gk6VQ" targetNamespace="http://tns.tibco.com/bw/composite/NEESP-SW" name="NEESP-SW" compositeext:version="1.0.0" compositeext:formatVersion="2">
+  <sca:property xmi:id="_ps_6wFGNEe21JKJ09Gk6VQ" name="BW.DEPLOYMENTUNIT.TYPE" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptEMMFGNEe21JKJ09Gk6VQ" name="BW.APPNODE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptGocFGNEe21JKJ09Gk6VQ" name="BW.DEPLOYMENTUNIT.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptJEsFGNEe21JKJ09Gk6VQ" name="BW.HOST.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptK54FGNEe21JKJ09Gk6VQ" name="BW.DOMAIN.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptMIAFGNEe21JKJ09Gk6VQ" name="BW.DEPLOYMENTUNIT.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptN9MFGNEe21JKJ09Gk6VQ" name="BW.APPSPACE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptPyYFGNEe21JKJ09Gk6VQ" name="BW.MODULE.VERSION" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_ptSOoFGNEe21JKJ09Gk6VQ" name="BW.MODULE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="_V_5rUGMjEe2_UINjVrQ1lg" name="LISTEN_QUEUENAME" type="XMLSchema:string" publicAccess="true"/>
+  <sca:property xmi:id="_dmwNUGM2Ee2wMagQYpbJUA" name="TOPIC_CTRL_FROM_SWNODES" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_jIILMGM2Ee2wMagQYpbJUA" name="EMS_SERVER_ECM" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_nmXREGM2Ee2wMagQYpbJUA" name="EMS_SERVER_FDC" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_E6q1oGNYEe2wMagQYpbJUA" name="GET_MESSAGE_TIMEOUT" type="XMLSchema:int" scaext:simpleValue="0" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_Qls6UGaCEe22UZEGeQhciw" name="QUEUE_CTRL_FROM_SWNODES" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:component xmi:id="_pnd6gFGNEe21JKJ09Gk6VQ" name="ComponentProcess" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_pnd6gVGNEe21JKJ09Gk6VQ" processName="neesp-sw.SW-Init"/>
+  </sca:component>
+  <sca:component xmi:id="_ZLhG0FHMEe21JKJ09Gk6VQ" name="ComponentEMS_CTRL_INVOKE" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ZLhG0VHMEe21JKJ09Gk6VQ" processName="admin.EMS_CTRL_INVOKE"/>
+  </sca:component>
+  <sca:component xmi:id="_ZWj5MFHMEe21JKJ09Gk6VQ" name="ComponentEMS_CTRL_LOAD" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ZWj5MVHMEe21JKJ09Gk6VQ" processName="admin.EMS_CTRL_LOAD"/>
+  </sca:component>
+  <sca:component xmi:id="_O908EFHSEe21JKJ09Gk6VQ" name="ComponentActivator" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_O908EVHSEe21JKJ09Gk6VQ" processName="neesp-sw.Activator"/>
+  </sca:component>
+  <sca:component xmi:id="_ggUX0GiOEe2_-OxfcY_slg" name="ComponentMODULE_TEST" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ggUX0WiOEe2_-OxfcY_slg" processName="neesp-test.MODULE_TEST"/>
+  </sca:component>
+</sca:composite>

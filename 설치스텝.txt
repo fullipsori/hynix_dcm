@@ -1,0 +1,326 @@
+자료 공유
+
+개발 내용이다.  .java => .zip으로 바꿔서 임포트 하면 됨.
+AS 4.8
+EMS 10.1
+FTL 6.8.1 => 바이러스가 있어서 prom2influx.exe가를 삭제해줘야 함.
+KAFKA 3.1.0 이상이었던 걸로 기억함.  localhost:9192 포트로 하였고, topic name은 quickstart-events 인가로 되어 있음 LogManager.java 소스보면 확인 가능
+
+현재 너의 시스템에 구성된 버전에 맞춰서 작업하고 나중에 바꿔도 됨.
+
+TEA 설치는 생각보다 쉬워 PostgreSQL와 EMS가 설치되어야 함. 그리고 설치 순서는 아래와 같아.
+필요없는 항목은 스킵하여도 됨. Linux 기준으로 작성된 문서임
+
+제어용 큐 네임은 내가 정리를 못했다. Module Property에 선언되어 있으니까 Gems로 미리 생성해줘야 함.
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+BusinessWorks 6.8 설치
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+[기본 설치]
+
+CentOS 7의 경우 - ant 설치를 먼저한다. -
+
+
+
+[오라클 드라이버 설치]
+
+ojdbc8-19.3.0.0.jar 준비
+/tibco/bw/6.8/config/drivers/shells/jdbc.oracle.runtime/runtime/plugins/com.tibco.bw.jdbc.datasourcefactoryoracle/lib   밑에 복사
+/tibco/bw/6.8/bin   디렉토리 이동
+./bwinstall oracle-driver 실행
+"BUILD SUCCESSFUL" 확인
+
+
+[EMS 드라이버 설치]
+
+/tibco/ems/x.x/components/shared/1.0.0/plugins 경로 이동
+이전 버전의 plugin 삭제
+/tibco/bw/6.8/bin
+./bwinstall ems-driver -Dzip.location.esc=/tibco/ems/x.x/components/shared/1.0.0/plugins
+
+
+[BW System Shared Jar 설정]
+
+BW System Shared에 적용할 jar 파일과 logback 파일 준비
+/tibco/bw/6.8/system/shared 디렉토리 이동
+
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+TEA (Tibco Enterprise Adminsitrator) 2.4.1 설치
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+[설치 파일 준비]
+
+JDK 1.8 이상 필요
+
+[확인]
+
+/tibco/tea 폴더 확인
+/tibco/cfgmgmt/tea/conf  디렉토리에 tea.conf 파일에서 tea.http.port가 8777로 설정되어 있는지 확인
+
+
+[기동 스크립트 작성 및 실행]
+
+/tibco/tea/2.4/bin &vi start.sh
+nohup ./tea &
+chmod 755 start.sh
+./start.sh
+실행 확인: ps command ./tea --innerProcess
+cat nohup.out
+Server started.
+Web Server Started at http://m16mesappdev002.localhost.local:8777/
+
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+EMS(Enterprise Message Service) 8.5.1 설치
+FT 구성은 않해도 된다.
+
+포트 : 7222/7223 두개로 구성
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+[설치 파일 및 핫픽스 준비]
+
+TIB_ems_8.5.1/tar 파일 내 tar 파일 압축 해제
+
+for f in tar/*; do tar -xvf $f; done
+opt/tibco/ems 디렉토리에 파일 생성 확인
+cp -R ems /tibco/ems 폴더 및으로 모두 복사
+핫픽스 1 설치
+./post-install.sh TIBCO_HOME
+ex)  ./post-install.sh /tibco/
+핫픽스 2 설치
+chmod 755 /tibco/ems/8.5/bin/tibemsd
+cd bin
+cp -R * /tibco/ems/8.5/bin
+핫픽스 3 설치
+cp -R components /tibco/ems/8.5
+cd lib
+cp tibjsm.jar /tibco/ems/8.5/bli/
+
+
+8.5.1 FT 구성
+
+[EMS factories.conf 설정]
+
+factories.conf 수정
+
+tcp://ip1:port,tcp://ip2:port
+
+
+
+[FTConnectionFactory]
+
+type = generic
+
+url   = tcp://ip1:port,tcp://ip2:port
+
+
+
+[SSLConnectionFactory]
+
+type = generic
+
+url   = tcp://ip1:port,tcp://ip2:port
+
+
+
+[FTTopicConnectionFactory]
+
+type = topic
+
+url   = tcp://ip1:port,tcp://ip2:port
+
+
+
+[FTQueueConnectionFactory]
+
+type = queue
+
+url   = tcp://ip1:port,tcp://ip2:port
+
+
+
+
+
+EMS FT 구성은 tibemsdft-1.conf를 첨조하는 instance와  tibemsdft-2.conf 를 참조하는 instance 두 개의 인스턴스로 이뤄진다.
+
+
+
+EMS tibemsdft-1.conf
+
+
+
+max_connections=0
+
+max_msg_memory=400G
+
+msg_swapping=enabled
+
+listen=EMS#1 ex) tcp://ip1:port
+
+authorization=disabled
+
+routing=disabled
+
+multicast=disabled
+
+ft_active=EMS#2  ex) tcp://ip2:port
+
+ft_heartbeat=3
+
+ft_activation=10
+
+ft_reconnect_timeout=60
+
+logfile=/ESP/logs/ems/7222/ems.log
+
+logfile_max_size=500MB
+
+logfile_max_count=100 (setup after calculating the disk size.
+
+log_trace=DEFAULT, +CONNECT, +PRODCONS
+
+console_trace=1
+
+statistics=enabled
+
+rate_interval=3
+
+detailed_statistics=NONE
+
+max_stat_memory=64MB
+
+clock_sync_interval=3600
+
+client_heartbeat_server=10
+
+server_timeout_client_connection=35
+
+server_heartbeat_client=10
+
+client_timeout_server_connection=35
+
+
+
+
+
+ EMS tibesmdft-2.conf의 경우 listen=EMS#2,  ft_active=EMS#1
+
+
+
+[실행 스크립트 및 구동 방법]
+
+vi start_ems_7222.sh
+
+nohup ./tibemsd -confg /conf_dir/tibemsdft-1.conf 1> /dev/null 2>&1 &
+
+
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+BW-Agent 설정 : bw installation 마다 동작되는 daemon 으로 synchronization 을 담당
+
+https://docs.tibco.com/pub/activematrix_businessworks/6.6.0/doc/html/GUID-BE2973C4-7FA0-49EA-9360-586B10C3E6FC.html
+
+++++++++++++++++++++++++++++++++++++++++++++
+
+선제 조건
+
+Businessworks
+BusinessWorks Driver
+EMS 설치 및 FT 구성
+TEA 설치
+
+
+[ BW Driver 설치 정보  -  bwagent.ini 파일 업데이트
+
+bwadmin config -cf ../config/bwagent_db.json agent
+
+
+
+bwagent.ini 파일 업데이트
+
+
+
+[EMS, TEA, DATABASE  설정 정보 업데이트]
+
+= Administration > Administration and Agent > bwagent > Configuring bwagent
+
+
+
+bw.admin.mode=enterprise
+
+bw.agent.memberName=m16mesappdev002주로 서버명으로 설정한다.
+
+bw.agent.technology.dbems.ems.requestQUeueName=bw6.admin.operations.queue.m16mesappdev002
+
+bw.agent.http.host=IP_ADDRESS
+
+bw.agent.tea.agent.host=IP_ADDRESS
+
+bw.agent.tea.server.url=http://IP_ADDRESS:8777/tea
+
+bw.agent.technology.requestTimeout=90000
+
+bw.agent.technology.dbems.db.provider=oracle
+
+bw.agent.technology.dbems.db.driver=oracle.jdbc.OracleDriver
+
+bw.agent.technology.dbems.db.connectionURL=TNS STRING
+
+bw.agent.technology.dbems.db.userName=DBUSER
+
+bw.agent.technology.dbems.db.password=PASSWORD
+
+bw.agent.technology.dbems.ems.serverURL=tcp://IP1:7222,tcp://IP2:7222
+
+bw.governance.server.url=tcp://IP1:7222,tcp://IP2:7222
+
+
+
+
+
+[구동 스크립트 및 구동]
+
+vi start.sh
+
+nohup ./bwagent -config ../config/bwagent.ini &
+
+chmod 755 start.sh
+
+./start.sh
+
+
+
+[bwagent TEA 등록]
+
+bwadmin registerteaagent http://<TEA_HOST>:8777/tea
+
+bwadmin registerteaagent http://192.168.232.133:8777/tea
+
+
+
+bwadmin 실행 후
+
+show agents 명령어 실행
+
+
+
+[AS와 같은 플러그인 파일 사용시 버전이 맞지 않는 경우]
+
+TIBCO_HOME/bw/palettes/as/8.0/design/plugins/com.tibco.as.tibdg_4.6.0.001
+
+TIBCO_HOME/bw/palettes/as/8.0/runtime/plugins/com.tibco.as.tibdg_4.6.0.001
+
+TIBCO_HOME/ecplipse-platform/bundlepool/1.0/org.eclipse.equinox.p2.touchpoint.eclipse/plugins/com.tibco.as.tibdg_4.6.0.001
+
+

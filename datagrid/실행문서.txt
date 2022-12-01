@@ -1,0 +1,11 @@
+1. ftl 실행 폴더로 이동
+2. ftl server 실행
+  - tibftlserver -n as_realm@localhost:8585
+3. copyset/keeper/proxy/table 을 생성한다.  
+  - tibdg -r http://localhost:8585 -s my_grid.tibdg 
+4. keeper 시작
+  - tibdgkeeper -r http://localhost:8585 -name my_keeper
+5. node 시작
+  - tibdgnode -r http://localhost:8585 -name my_node
+6. proxy 시작
+  - tibdgproxy -r http://localhost:8585 -n my_proxy

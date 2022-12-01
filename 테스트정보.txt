@@ -1,0 +1,9 @@
+[EMS 테스트]
+    {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q"}
+    {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q", "role": "receiver"}
+
+[KAFKA]
+    {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"test.kafka.topic"}
+
+[AS]
+
