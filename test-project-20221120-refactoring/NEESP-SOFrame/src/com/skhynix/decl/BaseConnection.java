@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.hynix.common.StringUtil;
 import com.skhynix.model.BaseSessModel;
 
 abstract public class BaseConnection implements Sessionable, Joinable {
