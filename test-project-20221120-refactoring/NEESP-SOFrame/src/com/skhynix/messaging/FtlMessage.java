@@ -22,11 +22,11 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 
 	public FtlMessage() {
 		// TODO Auto-generated constructor stub
-		this.connectableType = "ftl";
+		this.connectionInfo = "ftl";
 	}
 	
-	public FtlMessage(String connectableType) {
-		this.connectableType = connectableType;
+	public FtlMessage(String connectionInfo) {
+		this.connectionInfo = connectionInfo;
 	}
 
 	public boolean sendMessage(String sessionKey, String msg) {
@@ -50,19 +50,21 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	public String receivedMessage(String sessionKey) {
+	public String receiveMessage(String sessionKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected BaseSessModel initParams(String jsonParams) {
+	public BaseSessModel makeSessModel(String domain, String jsonParams) {
 		// TODO Auto-generated method stub
-		return StringUtil.jsonToObject(jsonParams, FtlSessModel.class);
+		FtlSessModel model = StringUtil.jsonToObject(jsonParams, FtlSessModel.class);
+		if( model != null) model.serverDomain = domain;
+		return model;
 	}
 
 	@Override
-	protected boolean connectServer(BaseSessModel client) {
+	public boolean connectServer(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!FtlSessModel.class.isInstance(client)) return false; 
 		FtlSessModel ftlSessModel = (FtlSessModel) client;
@@ -116,7 +118,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected void disconnectServer() {
+	public void disconnectServer() {
 		try {
 			if(serverModel.serverHandle != null) {
 				((Realm)serverModel.serverHandle).close();
@@ -127,7 +129,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 	
 	@Override
-	protected String getSessionName(BaseSessModel client) {
+	public String getSessionName(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!FtlSessModel.class.isInstance(client)) return null; 
 		FtlSessModel ftlSessModel = (FtlSessModel) client;
@@ -135,7 +137,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected BaseSessModel connectSession(BaseSessModel client) {
+	public BaseSessModel connectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!FtlSessModel.class.isInstance(client)) return null; 
 		FtlSessModel ftlSessModel = (FtlSessModel) client;
@@ -156,7 +158,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected void disconnectSession(BaseSessModel client) {
+	public void disconnectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!FtlSessModel.class.isInstance(client)) return; 
 		FtlSessModel ftlSessModel = (FtlSessModel) client;

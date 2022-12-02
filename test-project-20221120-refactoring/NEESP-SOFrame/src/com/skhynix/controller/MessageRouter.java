@@ -8,14 +8,16 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.skhynix.decl.Messageable;
+import com.skhynix.decl.Sessionable;
 import com.skhynix.manager.MessageManager;
-import com.skhynix.manager.MetaDataManager;
+import com.skhynix.model.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class MessageRouter {
+public class MessageRouter implements Sessionable, Messageable {
 	private static final MessageRouter instance = new MessageRouter();
 	
 	private final LogManager logger = LogManager.getInstance();
@@ -66,22 +68,6 @@ public class MessageRouter {
 		messageManager.unregister(jointype);
 	}
 	
-	public String openSession(String jointype, String jsonParams) {
-		return messageManager.openSession(jointype, jsonParams);
-	}
-	
-	public void closeSession(String handle) {
-		messageManager.closeSession(handle);
-	}
-	
-	public boolean sendMessage(String handle, String message) {
-		return messageManager.sendMessage(handle, message);
-	}
-	
-	public String receiveMessage(String handle) {
-		return messageManager.receiveMessage(handle);
-	}
-	
 	public void sendAsyncTo(String[] handles, String message) {
 		Observable.fromArray(handles)
 			.subscribeOn(Schedulers.from(executorService))
@@ -109,6 +95,70 @@ public class MessageRouter {
 		
 		futureList.stream().map(CompletableFuture::join);
 		*/
+	}
+
+	@Override
+	public boolean sendMessage(String handle, String message) {
+		return messageManager.sendMessage(handle, message);
+	}
+	
+	@Override
+	public String receiveMessage(String sessionKey) {
+		// TODO Auto-generated method stub
+		return messageManager.receiveMessage(sessionKey);
+	}
+
+	@Override
+	public String openSession(String jointype, String serverUrl, String jsonParams) {
+		return messageManager.openSession(jointype, serverUrl, jsonParams);
+	}
+	
+	@Override
+	public boolean closeSession(String sessionKey) {
+		// TODO Auto-generated method stub
+		return messageManager.closeSession(sessionKey);
+	}
+
+	@Override
+	public BaseSessModel makeSessModel(String domain, String jsonParams) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean connectServer(BaseSessModel client) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void disconnectServer() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getSessionName(BaseSessModel client) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BaseSessModel connectSession(BaseSessModel client) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void disconnectSession(BaseSessModel client) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void closeAllSession() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

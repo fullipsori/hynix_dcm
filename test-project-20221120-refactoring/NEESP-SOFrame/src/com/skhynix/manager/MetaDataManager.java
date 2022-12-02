@@ -46,7 +46,7 @@ public class MetaDataManager extends BaseManager {
 	}
 
 	@Override
-	public Joinable createMember(String jointype) {
+	public Joinable createMember(String jointype, String serverUrl) {
 		// TODO Auto-generated method stub
 		return null;
 	}

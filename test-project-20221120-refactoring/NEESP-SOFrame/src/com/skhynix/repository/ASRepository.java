@@ -54,11 +54,11 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 	private static final ASRepository instance = new ASRepository();
 	
 	public ASRepository() {
-		this.connectableType = "as";
+		this.connectionInfo = "as";
 	}
 	
-	public ASRepository(String connectableType) {
-		this.connectableType = connectableType;
+	public ASRepository(String connectionInfo) {
+		this.connectionInfo = connectionInfo;
 	}
 
 	public static ASRepository getInstance() {
@@ -157,12 +157,14 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 	}
 
 	@Override
-	protected BaseSessModel initParams(String jsonParams) {
-		return StringUtil.jsonToObject(jsonParams, ASSessModel.class);
+	public BaseSessModel makeSessModel(String domain, String jsonParams) {
+		ASSessModel model = StringUtil.jsonToObject(jsonParams, ASSessModel.class);
+		if( model != null) model.serverDomain = domain;
+		return model;
 	}
 
 	@Override
-	protected boolean connectServer(BaseSessModel client) {
+	public boolean connectServer(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return false;
 		ASSessModel asClient = (ASSessModel) client;
@@ -184,7 +186,7 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 	}
 
 	@Override
-    protected void disconnectServer() {
+	public void disconnectServer() {
 		closeAllSession();
     	if(serverModel.serverHandle != null) {
     		try {
@@ -198,7 +200,7 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
     }
 	
 	@Override
-	protected String getSessionName(BaseSessModel client) {
+	public String getSessionName(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return null;
 		ASSessModel asClient = (ASSessModel) client;
@@ -206,7 +208,7 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 	}
 
 	@Override
-	protected BaseSessModel connectSession(BaseSessModel client) {
+	public BaseSessModel connectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return null;
 		ASSessModel asClient = (ASSessModel) client;
@@ -223,7 +225,7 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 	}
 
 	@Override
-	protected void disconnectSession(BaseSessModel client) {
+	public void disconnectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return;
 		ASSessModel asClient = (ASSessModel) client;

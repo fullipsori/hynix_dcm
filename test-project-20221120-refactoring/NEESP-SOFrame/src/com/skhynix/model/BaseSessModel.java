@@ -11,5 +11,6 @@ abstract public class BaseSessModel implements Serializable {
 	public String username = null;
 	public String password = null;
 	
+	public transient String serverDomain = null;
 	public transient Object serverHandle = null;
 }

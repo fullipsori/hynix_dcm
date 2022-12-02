@@ -18,11 +18,11 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	
 	public KafkaMessage() {
 		// TODO Auto-generated constructor stub
-		this.connectableType = "kafka";
+		this.connectionInfo = "kafka";
 	}
 	
-	public KafkaMessage(String connectableType) {
-		this.connectableType = connectableType;
+	public KafkaMessage(String connectionInfo) {
+		this.connectionInfo = connectionInfo;
 	}
 	
 	@Override
@@ -60,19 +60,21 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	public String receivedMessage(String sessionKey) {
+	public String receiveMessage(String sessionKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected BaseSessModel initParams(String jsonParams) {
+	public BaseSessModel makeSessModel(String domain, String jsonParams) {
 		// TODO Auto-generated method stub
-		return StringUtil.jsonToObject(jsonParams, KafkaSessModel.class);
+		KafkaSessModel model = StringUtil.jsonToObject(jsonParams, KafkaSessModel.class);
+		if( model != null) model.serverDomain = domain;
+		return model;
 	}
 
 	@Override
-	protected boolean connectServer(BaseSessModel client) {
+	public boolean connectServer(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(StringUtil.isEmpty(client.serverUrl)) {
 			client.serverUrl = "localhost:9092";
@@ -82,12 +84,12 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	protected void disconnectServer() {
+	public void disconnectServer() {
 		closeAllSession();
 	}
 	
 	@Override
-	protected String getSessionName(BaseSessModel client) {
+	public String getSessionName(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!KafkaSessModel.class.isInstance(client)) return null;
 		KafkaSessModel kafkaSessModel = (KafkaSessModel) client;
@@ -95,7 +97,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	protected BaseSessModel connectSession(BaseSessModel client) {
+	public BaseSessModel connectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!KafkaSessModel.class.isInstance(client)) return null;
 		KafkaSessModel kafkaSessModel = (KafkaSessModel) client;
@@ -136,7 +138,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void disconnectSession(BaseSessModel client) {
+	public void disconnectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!KafkaSessModel.class.isInstance(client)) return;
 		KafkaSessModel kafkaSessModel = (KafkaSessModel) client;

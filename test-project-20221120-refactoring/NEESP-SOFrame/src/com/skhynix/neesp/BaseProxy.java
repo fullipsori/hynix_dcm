@@ -1,26 +1,20 @@
 package com.skhynix.neesp;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.hynix.common.StringUtil;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
-import com.skhynix.manager.MetaDataManager;
-import com.skhynix.messaging.EmsMessage;
-import com.skhynix.messaging.FtlMessage;
-import com.skhynix.messaging.KafkaMessage;
 import com.skhynix.model.EmsSessModel;
-import com.skhynix.neesp.log.NEESPLogger;
 import com.skhynix.neesp.log.LogManager;
+import com.skhynix.neesp.log.NEESPLogger;
 import com.skhynix.neesp.util.Counter;
 import com.skhynix.neesp.util.RandomCollection;
 
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.*;
 
 
 public class BaseProxy {
@@ -52,9 +46,13 @@ public class BaseProxy {
 		return new String[] {(String)params.get("type"), Optional.ofNullable((String)params.get("role")).orElse("sender")};
 	}
 
-	public String openSession(String type, String param) {
-		if(StringUtil.isEmpty(type)) return "";
-		return messageRouter.openSession(type, param);
+	@SuppressWarnings("unchecked")
+	public String openSession(String domain, String jsonString) {
+		if(StringUtil.isEmpty(domain) || StringUtil.isEmpty(jsonString)) return "";
+		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
+		String serverUrl = (String)params.get("serverUrl");
+		if(serverUrl == null) return "";
+		return messageRouter.openSession(domain, serverUrl, jsonString);
 	}
 	
 	public void closeSession(String handle) {

@@ -60,12 +60,8 @@ public class ResourceManager extends BaseManager {
 		return "resource";
 	}
 	@Override
-	public Joinable createMember(String jointype) {
+	public Joinable createMember(String jointype, String serverUrl) {
 		// TODO Auto-generated method stub
-		switch(jointype)  {
-			case "resource:as" : return new ASRepository();
-			default: break;
-		}
 		return null;
 	}
 }

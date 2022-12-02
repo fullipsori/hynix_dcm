@@ -14,20 +14,22 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	
 	public EmsMessage() {
 		// TODO Auto-generated constructor stub
-		this.connectableType = "ems";
+		this.connectionInfo = "ems";
 	}
 	
-	public EmsMessage(String connectableType) {
-		this.connectableType = connectableType;
+	public EmsMessage(String connectionInfo) {
+		this.connectionInfo = connectionInfo;
 	}
 
 	@Override
-	protected BaseSessModel initParams(String jsonParams) {
-		return StringUtil.jsonToObject(jsonParams, EmsSessModel.class);
+	public BaseSessModel makeSessModel(String domain, String jsonParams) {
+		EmsSessModel model = StringUtil.jsonToObject(jsonParams, EmsSessModel.class);
+		if( model != null) model.serverDomain = domain;
+		return model;
 	}
 
 	@Override
-	protected String getSessionName(BaseSessModel client) {
+	public String getSessionName(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!EmsSessModel.class.isInstance(client)) return "";
 		EmsSessModel emsSessModel = (EmsSessModel) client;
@@ -35,7 +37,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected BaseSessModel connectSession(BaseSessModel client) {
+	public BaseSessModel connectSession(BaseSessModel client) {
 		if(!EmsSessModel.class.isInstance(client)) return null;
 		EmsSessModel emsSessModel = (EmsSessModel) client;
 		
@@ -95,7 +97,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected void disconnectSession(BaseSessModel client) {
+	public void disconnectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!EmsSessModel.class.isInstance(client)) return;
 		EmsSessModel emsSessModel = (EmsSessModel) client;
@@ -121,7 +123,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected boolean connectServer(BaseSessModel client) {
+	public boolean connectServer(BaseSessModel client) {
 		if(StringUtil.isEmpty(client.serverUrl)) {
 			client.serverUrl = "localhost:7222";
 		}
@@ -143,7 +145,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	protected void disconnectServer() {
+	public void disconnectServer() {
 		// TODO Auto-generated method stub
 		
 		closeAllSession();
@@ -189,7 +191,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	public String receivedMessage(String sessionKey) {
+	public String receiveMessage(String sessionKey) {
 		// TODO Auto-generated method stub
 		return Optional.ofNullable(clientMap.get(sessionKey)).map(client -> {
 			EmsSessModel emsSessModel = (EmsSessModel) client;

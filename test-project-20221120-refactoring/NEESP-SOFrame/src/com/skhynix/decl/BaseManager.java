@@ -10,7 +10,7 @@ public abstract class BaseManager {
 	private final Map<String, Joinable> members = new ConcurrentHashMap<>();
 	
 	abstract public String getDomain();
-	abstract public Joinable createMember(String jointype);
+	abstract public Joinable createMember(String jointype, String serverUrl);
 
 	private boolean isJoinable(String key) {
 		return StringUtil.contains(key, getDomain(), ":");
@@ -38,4 +38,5 @@ public abstract class BaseManager {
 				.filter(entry -> handle.startsWith(entry.getKey()))
 				.map(entry -> (Object)entry.getValue()).findFirst();
 	}
+
 }

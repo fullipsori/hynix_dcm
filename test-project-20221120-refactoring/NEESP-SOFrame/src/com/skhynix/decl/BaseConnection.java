@@ -13,22 +13,14 @@ abstract public class BaseConnection implements Sessionable, Joinable {
 
 	protected BaseSessModel serverModel = null;
 	protected Map<String, BaseSessModel> clientMap = new ConcurrentHashMap<>();
-	protected String connectableType;
+	protected String connectionInfo;
 	
-	abstract protected BaseSessModel initParams(String jsonParams);
-	abstract protected boolean connectServer(BaseSessModel client);
-	abstract protected void disconnectServer();
-
-	abstract protected String getSessionName(BaseSessModel client);
-	abstract protected BaseSessModel connectSession(BaseSessModel client);
-	abstract protected void disconnectSession(BaseSessModel client);
-
-	public String getConnectableType() {
-		return connectableType;
+	public String getConnectionInfo() {
+		return connectionInfo;
 	}
 
-	protected void initConnectable(String jsonParams) {
-		serverModel = initParams(jsonParams);
+	protected void initConnectable(String domain, String jsonParams) {
+		serverModel = makeSessModel(domain, jsonParams);
 		connectServer(serverModel);
 	}
 	
@@ -42,22 +34,22 @@ abstract public class BaseConnection implements Sessionable, Joinable {
 		return String.valueOf(ThreadLocalRandom.current().nextInt(100000));
 	}
 	
-	private String getSessionKey(String prefixKey, String sessionName) {
-		return String.format("%s:%s:%s", prefixKey, sessionName, getRandomKey());
+	private String getSessionKey(String domain, String sessionName) {
+		return String.format("%s:%s:%s", domain, sessionName, getRandomKey());
 	}
 	
 	@Override
-	public String openSession(String prefixKey, String jsonParams) {
+	public String openSession(String domain, String serverUrl, String jsonParams) {
 
 		if(serverModel == null) {
-			initConnectable(jsonParams);
+			initConnectable(domain, jsonParams);
 		}
 
-		BaseSessModel client = initParams(jsonParams);
+		BaseSessModel client = makeSessModel(domain, jsonParams);
 
 		try {
 			client = connectSession(client);
-			String sessionKey = getSessionKey(prefixKey, getSessionName(client));
+			String sessionKey = getSessionKey(domain, getSessionName(client));
 			if(client != null) {
 				clientMap.put(sessionKey, client);
 			} else {
