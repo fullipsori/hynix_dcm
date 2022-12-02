@@ -4,17 +4,19 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-
-import com.hynix.base.BaseConnection;
-import com.hynix.common.StringUtil;
+import com.tibco.tibjms.Tibjms;
+import com.skhynix.base.BaseConnection;
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.model.BaseSessModel;
 import com.skhynix.model.EmsSessModel;
+import com.skhynix.model.EmsSessModel.SESS_MODE;
 
 public class EmsMessage extends BaseConnection implements DynaLoadable, Messageable {
 	
@@ -57,15 +59,13 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		boolean sendMode = emsSessModel.role.equals("sender")? true : false;
 		String queueName = emsSessModel.queueName;
 		String topicName = emsSessModel.topicName;
-		String deliveryMode = emsSessModel.deliveryMode;
-		Integer sessionMode = (emsSessModel.sessionMode.equals("AUTO_ACK")) ? Session.AUTO_ACKNOWLEDGE : Session.CLIENT_ACKNOWLEDGE;
 
 		Session session = null;
 		Object msgClient = null;
 		Destination destination = null;
 
 		try {
-			session = connection.createSession(false, sessionMode);
+			session = connection.createSession(false, emsSessModel.getSessMode().modeValue);
 			if(session != null) {
 				if(queueName != null && !queueName.isEmpty()) {
 					destination = session.createQueue(queueName);
@@ -79,13 +79,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					if(msgClient != null) {
 						if(MessageProducer.class.isInstance(msgClient)) {
 							MessageProducer msgProducer = (MessageProducer)msgClient;
-							if(deliveryMode.compareTo("PERSISTENT")==0) {
-								msgProducer.setDeliveryMode(javax.jms.DeliveryMode.PERSISTENT);
-							} else if(deliveryMode.compareTo("NON_PERSISTENT")==0) {
-								msgProducer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
-							} else if(deliveryMode.compareTo("RELIABLE")==0) {
-								msgProducer.setDeliveryMode(com.tibco.tibjms.Tibjms.RELIABLE_DELIVERY);
-							}
+							msgProducer.setDeliveryDelay(emsSessModel.getDeliveryMode().modeValue);
 							msgProducer.setDisableMessageID(true);
 							msgProducer.setDisableMessageTimestamp(true);
 						}else if(MessageConsumer.class.isInstance(msgClient)) {
@@ -180,8 +174,8 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 
 	@Override
-	public boolean sendMessage(String sessionKey, String msg) {
-		Object client = clientMap.get(sessionKey);
+	public boolean sendMessage(String handle, String msg) {
+		Object client = clientMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
@@ -201,21 +195,42 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	public String receiveMessage(String sessionKey) {
+	public String receiveMessage(String handle) {
 		// TODO Auto-generated method stub
-		Object client = clientMap.get(sessionKey);
+		Object client = clientMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
 				try {
-					TextMessage message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive();
-					if(message != null) return message.getText();
+					Message message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive();
+					if(emsSessModel.getSessMode() == SESS_MODE.CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT_DUPS_OK)
+						emsSessModel.message = message;
+					if(message != null) return ((TextMessage)message).getText();
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 		return "";
+	}
+	
+	@Override
+	public void confirmMessage(String handle) {
+		// TODO Auto-generated method stub
+		Object client = clientMap.get(handle);
+		if(client != null && EmsSessModel.class.isInstance(client)) {
+			EmsSessModel emsSessModel = (EmsSessModel) client;
+			if(emsSessModel.message != null && 
+					(emsSessModel.getSessMode() == SESS_MODE.CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT_DUPS_OK)) {
+				try {
+					((Message)emsSessModel.message).acknowledge();
+					emsSessModel.message = null;
+				} catch (JMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	@Override

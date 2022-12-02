@@ -7,8 +7,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import com.hynix.base.BaseConnection;
-import com.hynix.common.StringUtil;
+import com.skhynix.base.BaseConnection;
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.model.BaseSessModel;
@@ -56,8 +56,8 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean sendMessage(String sessionKey, String msg) {
-		Object client = clientMap.get(sessionKey);
+	public boolean sendMessage(String handle, String msg) {
+		Object client = clientMap.get(handle);
 		if(client != null  && KafkaSessModel.class.isInstance(client)) {
 			KafkaSessModel kafkaSessModel = (KafkaSessModel)client;
 			if(kafkaSessModel.msgClient != null && !StringUtil.isEmpty(kafkaSessModel.topic)) {
@@ -69,9 +69,15 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	public String receiveMessage(String sessionKey) {
+	public String receiveMessage(String handle) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void confirmMessage(String handle) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.hynix.common;
+package com.skhynix.common;
 
 public class Pair<F, S> {
 	private F first;

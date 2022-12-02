@@ -1,4 +1,4 @@
-package com.hynix.base;
+package com.skhynix.base;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,9 +67,9 @@ abstract public class BaseConnection implements Sessionable, Joinable {
 	}
 	
 	@Override
-	public boolean closeSession(String sessionKey) {
+	public boolean closeSession(String handle) {
 		try {
-			Optional.ofNullable(clientMap.remove(sessionKey)).ifPresent(elem -> disconnectSession(elem));
+			Optional.ofNullable(clientMap.remove(handle)).ifPresent(elem -> disconnectSession(elem));
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

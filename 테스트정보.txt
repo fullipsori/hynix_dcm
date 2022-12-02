@@ -9,4 +9,4 @@
 
 
 [load jar] ctrl.q
-   {"command":"load-jar", "parameter":"com.hynix.logic.BusinessLogic","parameter2":"/Users/fullipsori/projects/tibco/hynix/ecm_dcm/workspace/BusinessLogic/target/BusinessLogic-0.0.1.jar", "parameter3":"","parameter4":""}
+   {"command":"load-jar", "parameter":"com.hynix.logic.BusinessLogic","parameter2":"business","parameter3":"/Users/fullipsori/projects/tibco/hynix/ecm_dcm/workspace/BusinessLogic/target/BusinessLogic-0.0.1.jar","parameter4":""}

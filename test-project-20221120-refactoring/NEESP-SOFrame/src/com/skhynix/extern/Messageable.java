@@ -1,6 +1,7 @@
 package com.skhynix.extern;
 
 public interface Messageable {
-	public boolean sendMessage(String sessionKey, String msg);
-	public String receiveMessage(String sessionKey);
+	public boolean sendMessage(String handle, String msg);
+	public String receiveMessage(String handle);
+	public void confirmMessage(String handle);
 }

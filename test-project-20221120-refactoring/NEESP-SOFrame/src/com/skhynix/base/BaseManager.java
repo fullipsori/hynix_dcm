@@ -1,8 +1,9 @@
-package com.hynix.base;
+package com.skhynix.base;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.hynix.common.StringUtil;
+
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
 
 public abstract class BaseManager {

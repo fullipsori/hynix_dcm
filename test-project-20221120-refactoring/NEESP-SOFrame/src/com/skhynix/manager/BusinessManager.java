@@ -1,6 +1,6 @@
 package com.skhynix.manager;
 
-import com.hynix.base.BaseManager;
+import com.skhynix.base.BaseManager;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.extern.BusinessBehavior;
 import com.skhynix.extern.Joinable;

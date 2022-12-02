@@ -109,6 +109,12 @@ public class MessageRouter implements Sessionable, Messageable {
 	}
 
 	@Override
+	public void confirmMessage(String handle) {
+		// TODO Auto-generated method stub
+		messageManager.confirmMessage(handle);
+	}
+
+	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
 		return messageManager.openSession(jointype, serverUrl, jsonParams);
 	}

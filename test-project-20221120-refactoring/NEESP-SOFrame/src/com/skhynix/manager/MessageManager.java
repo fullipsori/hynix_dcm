@@ -2,7 +2,7 @@ package com.skhynix.manager;
 
 import java.util.Optional;
 
-import com.hynix.base.BaseManager;
+import com.skhynix.base.BaseManager;
 import com.skhynix.extern.Joinable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.extern.Sessionable;
@@ -78,6 +78,14 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 	}
 	
 	@Override
+	public void confirmMessage(String handle) {
+		// TODO Auto-generated method stub
+		Object client = getMember(handle);
+		if(client != null && Messageable.class.isInstance(client))
+			((Messageable)client).confirmMessage(handle);
+	}
+
+	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
 		String handle = String.format("%s:%s", jointype, serverUrl);
 		Object client = getMember(handle);
@@ -87,7 +95,6 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 				return c;
 			}).orElse(null);
 		}
-
 		return (client != null && Sessionable.class.isInstance(client)) ? 
 				((Sessionable)client).openSession(jointype, serverUrl, jsonParams) : "";
 	}

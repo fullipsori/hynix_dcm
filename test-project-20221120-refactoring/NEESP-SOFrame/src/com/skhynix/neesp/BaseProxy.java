@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.hynix.common.StringUtil;
+import com.skhynix.common.StringUtil;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
 import com.skhynix.manager.BusinessManager;
@@ -72,6 +72,10 @@ public class BaseProxy {
 			});
 			**/
 		return messageRouter.receiveMessage(handle);
+	}
+	
+	public void confirmMessage(String handle) {
+		messageRouter.confirmMessage(handle);
 	}
 	
 	public String doBusiness(String eventType, String message) {

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.hynix.base.BaseManager;
+import com.skhynix.base.BaseManager;
 import com.skhynix.extern.Joinable;
 
 public class MetaDataManager extends BaseManager {

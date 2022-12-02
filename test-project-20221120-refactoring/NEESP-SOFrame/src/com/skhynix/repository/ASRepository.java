@@ -12,9 +12,9 @@ import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
-import com.hynix.base.BaseConnection;
-import com.hynix.common.Pair;
-import com.hynix.common.StringUtil;
+import com.skhynix.base.BaseConnection;
+import com.skhynix.common.Pair;
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.model.ASSessModel;
 import com.skhynix.model.BaseSessModel;
@@ -76,7 +76,7 @@ public class ASRepository extends BaseConnection {
         TABLE
     }
     
-    private enum OPERATION{
+    private enum OPERATION {
     	NONE("none") {
 			@Override
 			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {

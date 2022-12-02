@@ -1,4 +1,4 @@
-package com.hynix.base;
+package com.skhynix.base;
 
 import com.skhynix.extern.DynaLoadable;
 

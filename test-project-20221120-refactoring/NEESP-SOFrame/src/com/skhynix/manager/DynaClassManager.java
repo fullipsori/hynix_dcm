@@ -8,8 +8,8 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.hynix.common.Pair;
-import com.hynix.common.StringUtil;
+import com.skhynix.common.Pair;
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.neesp.log.LogManager;
 

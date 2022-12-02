@@ -14,6 +14,6 @@ public interface Sessionable {
 	public void disconnectSession(BaseSessModel client);
 
 	public String openSession(String domain, String serverUrl, String jsonParams); 
-	public boolean closeSession(String sessionKey);
+	public boolean closeSession(String handle);
 	public void closeAllSession();
 }

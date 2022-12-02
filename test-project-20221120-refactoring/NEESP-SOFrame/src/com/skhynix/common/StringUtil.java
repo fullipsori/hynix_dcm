@@ -1,4 +1,4 @@
-package com.hynix.common;
+package com.skhynix.common;
 
 import java.util.Arrays;
 import java.util.HashSet;
