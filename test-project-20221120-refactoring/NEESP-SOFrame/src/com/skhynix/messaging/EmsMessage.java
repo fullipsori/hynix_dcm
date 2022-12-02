@@ -233,10 +233,4 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		}
 	}
 
-	@Override
-	public String getClassDomain() {
-		// TODO Auto-generated method stub
-		return "message:ems";
-	}
-
 }

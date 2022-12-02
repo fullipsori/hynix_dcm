@@ -202,12 +202,6 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 		disconnectServer();
 	}
 
-	@Override
-	public String getClassDomain() {
-		// TODO Auto-generated method stub
-		return "message:ftl";
-	}
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 

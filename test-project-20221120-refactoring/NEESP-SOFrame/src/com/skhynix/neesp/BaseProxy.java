@@ -83,12 +83,12 @@ public class BaseProxy {
 		}
 	}
 	
-	public boolean loadJar(String className, String classPath) {
-		return dynaClassManager.loadJar(className, classPath);
+	public boolean loadJar(String className, String classDomain, String classPath) {
+		return dynaClassManager.loadJar(className, classDomain, classPath);
 	}
 	
-	public boolean unloadJar(String className) {
-		return dynaClassManager.unloadJar(className);
+	public boolean unloadJar(String className, String classDomain) {
+		return dynaClassManager.unloadJar(className, classDomain);
 	}
 	
 	

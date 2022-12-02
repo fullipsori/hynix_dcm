@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.hynix.common.Pair;
+import com.hynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.neesp.log.LogManager;
 
@@ -17,7 +18,6 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 public class DynaClassManager {
 	private static final DynaClassManager dynaClassLoader = new DynaClassManager();
 
-	private LogManager logger = null;
 	private final Map<String, URLClassLoader> loaderMap = new HashMap<String, URLClassLoader>();
 	private final Map<String, Object> instanceMap = new HashMap<>();	
 	
@@ -26,15 +26,16 @@ public class DynaClassManager {
 	public final PublishSubject<Pair<String,String>> unloadJarSubject = PublishSubject.create();
 
 	public DynaClassManager() {
-		logger = LogManager.getInstance();
 	}
 	
 	public static DynaClassManager getInstance() {
 		return dynaClassLoader;	
 	}
 	
-	public boolean loadJar(String className, String jarFilePath) {
+	public boolean loadJar(String className, String classDomain, String jarFilePath) {
 		
+		if(StringUtil.isEmpty(className) || StringUtil.isEmpty(classDomain) || StringUtil.isEmpty(jarFilePath)) return false;
+
 		File jarFile = new File(jarFilePath);
 		
 		try {
@@ -43,7 +44,7 @@ public class DynaClassManager {
 			URL classURL = new URL("jar:" + jarFile.toURI().toURL() + "!/");
 			
 			if(loaderMap.containsKey(className)) {
-				unloadJar(className);
+				unloadJar(className, classDomain);
 			}
 			
 			URLClassLoader urlClassLoader = new URLClassLoader(new URL [] {classURL}, contextLoader);
@@ -56,8 +57,7 @@ public class DynaClassManager {
 					instanceMap.put(className, classInstance);
 					if(DynaLoadable.class.isInstance(classInstance)) {
 						((DynaLoadable) classInstance).loadClass();
-						String classDomain = ((DynaLoadable)classInstance).getClassDomain();
-						if(classDomain != null) loadJarSubject.onNext(new Pair<>(classDomain, className));
+						loadJarSubject.onNext(new Pair<>(classDomain, className));
 					}
 				}
 			} catch (Exception e) {
@@ -73,12 +73,12 @@ public class DynaClassManager {
 		return true;
 	}
 
-	public boolean unloadJar(String className) {
+	public boolean unloadJar(String className, String classDomain) {
+		if(StringUtil.isEmpty(className) || StringUtil.isEmpty(classDomain)) return false;
+
 		Object classInstance = instanceMap.remove(className);
-		String classDomain = null;
 		if(classInstance != null && DynaLoadable.class.isInstance(classInstance)) {
 			((DynaLoadable)classInstance).unloadClass();
-			classDomain = ((DynaLoadable)classInstance).getClassDomain();
 		}
 		
 		try {
@@ -90,7 +90,7 @@ public class DynaClassManager {
 			e.printStackTrace();
 			return false;
 		}finally {
-			if(classDomain != null) unloadJarSubject.onNext(new Pair<>(classDomain, className));
+			unloadJarSubject.onNext(new Pair<>(classDomain, className));
 		}
 	}
 

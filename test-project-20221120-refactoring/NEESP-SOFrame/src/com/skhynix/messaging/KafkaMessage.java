@@ -49,12 +49,6 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 		disconnectServer();
 	}
 	
-	@Override
-	public String getClassDomain() {
-		// TODO Auto-generated method stub
-		return "message:kafka";
-	}
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 

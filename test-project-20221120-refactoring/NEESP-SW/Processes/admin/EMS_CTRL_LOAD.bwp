@@ -526,6 +526,8 @@
                     <element form="unqualified" maxOccurs="1"
                         minOccurs="1" name="className" type="string"/>
                     <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="classDomain" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
                         minOccurs="1" name="classPath" type="string"/>
                 </sequence>
             </complexType>
@@ -594,6 +596,8 @@
                 <sequence>
                     <element form="unqualified" maxOccurs="1"
                         minOccurs="1" name="className" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="classDomain" type="string"/>
                 </sequence>
             </complexType>
             <element name="JavaInvokeActivityInput" type="tns:MutTypeMethodInputRoot"/>
@@ -1389,7 +1393,7 @@
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
-                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns8=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+b038f007-b5eb-4f29-a6b7-5e8cfba14818+JavaInvokeActivityInput&quot; xmlns:tns7=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:template name=&quot;JavaInvoke-input&quot; match=&quot;/&quot;>&lt;tns8:JavaInvokeActivityInput>&lt;MethodParameters>&lt;className>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter&quot;/>&lt;/className>&lt;classPath>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter2&quot;/>&lt;/classPath>&lt;/MethodParameters>&lt;/tns8:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns8=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+b038f007-b5eb-4f29-a6b7-5e8cfba14818+JavaInvokeActivityInput&quot; xmlns:tns7=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:template name=&quot;LoadJar-input&quot; match=&quot;/&quot;>&lt;tns8:JavaInvokeActivityInput>&lt;MethodParameters>&lt;className>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter&quot;/>&lt;/className>&lt;classDomain>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter2&quot;/>&lt;/classDomain>&lt;classPath>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter3&quot;/>&lt;/classPath>&lt;/MethodParameters>&lt;/tns8:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:config>
                         <bwext:BWActivity
@@ -1409,6 +1413,8 @@
                                     methodReturn="boolean" xsi:type="java:JavaMethod">
                                     <methodParameter
                                     paramName="className" paramType="string"/>
+                                    <methodParameter
+                                    paramName="classDomain" paramType="string"/>
                                     <methodParameter
                                     paramName="classPath" paramType="string"/>
                                     </value>
@@ -1430,7 +1436,7 @@
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
-                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns9=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+0b128d22-4e49-4144-86bb-db074d5238ad+JavaInvokeActivityInput&quot; xmlns:tns7=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:template name=&quot;UnloadJar-input&quot; match=&quot;/&quot;>&lt;tns9:JavaInvokeActivityInput>&lt;MethodParameters>&lt;className>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter&quot;/>&lt;/className>&lt;/MethodParameters>&lt;/tns9:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns9=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+0b128d22-4e49-4144-86bb-db074d5238ad+JavaInvokeActivityInput&quot; xmlns:tns7=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:template name=&quot;UnloadJar-input&quot; match=&quot;/&quot;>&lt;tns9:JavaInvokeActivityInput>&lt;MethodParameters>&lt;className>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter&quot;/>&lt;/className>&lt;classDomain>&lt;xsl:value-of select=&quot;$ParseJSON/tns7:parameter2&quot;/>&lt;/classDomain>&lt;/MethodParameters>&lt;/tns9:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:config>
                         <bwext:BWActivity
@@ -1450,6 +1456,8 @@
                                     methodReturn="boolean" xsi:type="java:JavaMethod">
                                     <methodParameter
                                     paramName="className" paramType="string"/>
+                                    <methodParameter
+                                    paramName="classDomain" paramType="string"/>
                                     </value>
                                 </properties>
                             </activityConfig>

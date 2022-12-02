@@ -42,7 +42,7 @@ public class BusinessManager extends BaseManager {
 	@Override
 	public String getDomain() {
 		// TODO Auto-generated method stub
-		return "business:logic";
+		return "business";
 	}
 
 	@Override
