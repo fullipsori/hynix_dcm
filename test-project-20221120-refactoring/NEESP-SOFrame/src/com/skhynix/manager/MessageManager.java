@@ -2,10 +2,10 @@ package com.skhynix.manager;
 
 import java.util.Optional;
 
-import com.skhynix.decl.Joinable;
-import com.skhynix.decl.BaseManager;
-import com.skhynix.decl.Messageable;
-import com.skhynix.decl.Sessionable;
+import com.hynix.base.BaseManager;
+import com.skhynix.extern.Joinable;
+import com.skhynix.extern.Messageable;
+import com.skhynix.extern.Sessionable;
 import com.skhynix.messaging.EmsMessage;
 import com.skhynix.messaging.FtlMessage;
 import com.skhynix.messaging.KafkaMessage;
@@ -26,7 +26,7 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 		dynaClassManager.loadJarSubject
 			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
 			.subscribe(jarInfo -> {
-				dynaClassManager.getClassInstance(jarInfo.getSecond()).ifPresent(clazz -> {
+				Optional.ofNullable(dynaClassManager.getClassInstance(jarInfo.getSecond())).ifPresent(clazz -> {
 					register(jarInfo.getFirst(), clazz);
 					System.out.println("load jar:" + jarInfo.getSecond()); 
 				});
@@ -53,51 +53,51 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
-		String connectionInfo = String.format("%s:%s", jointype, serverUrl);
 		switch(jointype) {
-			case "message:ems" : return new EmsMessage(connectionInfo); 
-			case "message:ftl" : return new FtlMessage(connectionInfo); 
-			case "message:kafka" : return new KafkaMessage(connectionInfo); 
+			case "message:ems" : return new EmsMessage(jointype, serverUrl); 
+			case "message:ftl" : return new FtlMessage(jointype, serverUrl); 
+			case "message:kafka" : return new KafkaMessage(jointype, serverUrl); 
 		}
 		return null;
 	}
 
 	@Override
 	public boolean sendMessage(String handle, String message) {
-		return getMember(handle).map(client -> {
-			if(client != null && Messageable.class.isInstance(client))
-				return ((Messageable)client).sendMessage(handle, message);
-			else return false;
-		}).get();
+		Object client = getMember(handle);
+		if(client != null && Messageable.class.isInstance(client))
+			return ((Messageable)client).sendMessage(handle, message);
+		else return false;
 	}
 	
 	@Override
-	public String receiveMessage(String sessionKey) {
-		return getMember(sessionKey).map(client -> {
-			if(client != null && Messageable.class.isInstance(client))
-				return ((Messageable)client).receiveMessage(sessionKey);
-			else return "error";
-		}).get();
+	public String receiveMessage(String handle) {
+		Object client = getMember(handle);
+		if(client != null && Messageable.class.isInstance(client))
+			return ((Messageable)client).receiveMessage(handle);
+		else return "";
 	}
 	
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
 		String handle = String.format("%s:%s", jointype, serverUrl);
-		
-		return getMember(handle).or(() -> {
-			Optional<Joinable> client = Optional.ofNullable(createMember(jointype, serverUrl));
-			client.ifPresent(c -> register(jointype, c));
-			return client;
-		}).filter(Sessionable.class::isInstance).map(client -> ((Sessionable)client).openSession(jointype, serverUrl, jsonParams)).get();
+		Object client = getMember(handle);
+		if(client == null) {
+			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
+				register(jointype, c);
+				return c;
+			}).orElse(null);
+		}
+
+		return (client != null && Sessionable.class.isInstance(client)) ? 
+				((Sessionable)client).openSession(jointype, serverUrl, jsonParams) : "";
 	}
 
 	@Override
 	public boolean closeSession(String handle) {
-		return getMember(handle).map(client -> {
-			if(client != null && Sessionable.class.isInstance(client))
-				return ((Sessionable)client).closeSession(handle);
-			else return false;
-		}).get();
+		Object client = getMember(handle);
+		if(client != null && Sessionable.class.isInstance(client))
+			return ((Sessionable)client).closeSession(handle);
+		else return false;
 	}
 	
 	@Override

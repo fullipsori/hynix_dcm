@@ -8,15 +8,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
+import com.hynix.base.BaseConnection;
 import com.hynix.common.Pair;
 import com.hynix.common.StringUtil;
-import com.skhynix.decl.BaseConnection;
-import com.skhynix.decl.DynaLoadable;
+import com.skhynix.extern.DynaLoadable;
 import com.skhynix.model.ASSessModel;
 import com.skhynix.model.BaseSessModel;
 import com.tibco.datagrid.BatchResult;
@@ -49,23 +48,25 @@ import com.tibco.datagrid.TableMetadata;
  * If the data grid is created by running the as-start (or as-start.bat) script that is provided with the installation
  * then the required table will be defined.
  */
-public class ASRepository extends BaseConnection implements DynaLoadable {
+public class ASRepository extends BaseConnection {
 
 	private static final ASRepository instance = new ASRepository();
 	
+	private static final String defaultServerUrl  = "http://localhost:8585";
+	
 	public ASRepository() {
-		this.connectionInfo = "as";
+		// TODO Auto-generated constructor stub
 	}
 	
-	public ASRepository(String connectionInfo) {
-		this.connectionInfo = connectionInfo;
+	@Override
+	public String getDefaultServerUrl() {
+		// TODO Auto-generated method stub
+		return defaultServerUrl;
 	}
 
 	public static ASRepository getInstance() {
 		return instance;
 	}
-
-    private static final String DEFAULT_GRIDURL = "http://localhost:8585";
 
     private Predicate<Object> CheckObject = obj -> Integer.class.isInstance(obj) || Long.class.isInstance(obj) || String.class.isInstance(obj);
 
@@ -78,37 +79,37 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
     private enum OPERATION{
     	NONE("none") {
 			@Override
-			Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
-				return Optional.ofNullable(null);
+				return null;
 			}
 		},
     	GET("get") {
 			@Override
-			Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
-				return Optional.ofNullable(ASRepository.getInstance().getRow(table, keyName, key, defaultProperties));
+				return ASRepository.getInstance().getRow(table, keyName, key, defaultProperties);
 			}
 		},
     	PUT("put") {
 			@Override
-			Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
-				return Optional.ofNullable(ASRepository.getInstance().putRow(table, keyName, key, valueName, value, defaultProperties));
+				return ASRepository.getInstance().putRow(table, keyName, key, valueName, value, defaultProperties);
 			}
 		},
     	DELETE("delete") {
 			@Override
-			Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
-				return Optional.ofNullable(ASRepository.getInstance().deleteRow(table, keyName, key, defaultProperties));
+				return ASRepository.getInstance().deleteRow(table, keyName, key, defaultProperties);
 			}
 		},
     	UPDATE("update") {
 			@Override
-			Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
-				return Optional.ofNullable(ASRepository.getInstance().updateRow(table, keyName, key, valueName, value, defaultProperties));
+				return ASRepository.getInstance().updateRow(table, keyName, key, valueName, value, defaultProperties);
 			}
 		};
 
@@ -125,9 +126,9 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
     		return NONE;
     	}
     	
-    	abstract Optional<Object> apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties);
+    	abstract Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties);
     	
-    	public static Optional<Object> applyOperation(String operation, Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+    	public static Object applyOperation(String operation, Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
     		return getType(operation).apply(table, keyName, key, valueName, value, defaultProperties);
     	}
     }
@@ -138,23 +139,13 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
         if(tableName == null || tableName.isEmpty())  return null;
 
         try( Table table = ((Session)asClient.session).openTable(tableName, asClient.properties) ) {
-        	return OPERATION.applyOperation(op, table, keyName, key, valueName, value, asClient.properties).orElse("");
+        	return OPERATION.applyOperation(op, table, keyName, key, valueName, value, asClient.properties);
 
         }catch(DataGridException dataGridException) {
             dataGridException.printStackTrace(System.err);
             return null;
         }
     }
-
-	@Override
-	public void loadClass() {
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public void unloadClass() {
-		// TODO Auto-generated method stub
-		disconnectServer();
-	}
 
 	@Override
 	public BaseSessModel makeSessModel(String domain, String jsonParams) {
@@ -170,7 +161,7 @@ public class ASRepository extends BaseConnection implements DynaLoadable {
 		ASSessModel asClient = (ASSessModel) client;
 
 		if(StringUtil.isEmpty(client.serverUrl)) {
-			client.serverUrl = DEFAULT_GRIDURL;
+			client.serverUrl = defaultServerUrl;
 		}
 
 		try {

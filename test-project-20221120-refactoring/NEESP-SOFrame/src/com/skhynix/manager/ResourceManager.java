@@ -3,8 +3,8 @@ package com.skhynix.manager;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import com.skhynix.decl.Joinable;
-import com.skhynix.decl.BaseManager;
+import com.hynix.base.BaseManager;
+import com.skhynix.extern.Joinable;
 import com.skhynix.repository.ASRepository;
 import com.skhynix.repository.DBRepository;
 import com.skhynix.repository.FileRepository;

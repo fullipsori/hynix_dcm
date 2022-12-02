@@ -1,10 +1,12 @@
-package com.skhynix.decl;
+package com.hynix.base;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.skhynix.extern.Joinable;
+import com.skhynix.extern.Sessionable;
 import com.skhynix.model.BaseSessModel;
 
 abstract public class BaseConnection implements Sessionable, Joinable {
@@ -14,6 +16,8 @@ abstract public class BaseConnection implements Sessionable, Joinable {
 	protected BaseSessModel serverModel = null;
 	protected Map<String, BaseSessModel> clientMap = new ConcurrentHashMap<>();
 	protected String connectionInfo;
+	
+	abstract public String getDefaultServerUrl();
 	
 	public String getConnectionInfo() {
 		return connectionInfo;

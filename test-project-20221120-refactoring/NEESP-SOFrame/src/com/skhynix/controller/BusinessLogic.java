@@ -1,9 +1,9 @@
 package com.skhynix.controller;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-import com.skhynix.decl.BusinessBehavior;
+import com.skhynix.extern.BusinessBehavior;
 import com.skhynix.manager.MetaDataManager;
 
 /**
@@ -14,7 +14,7 @@ import com.skhynix.manager.MetaDataManager;
 public class BusinessLogic implements BusinessBehavior {
 
 	private static final BusinessLogic instance = new BusinessLogic();
-	private volatile Optional<BusinessBehavior> businessBehavior = Optional.ofNullable(null);
+	private volatile BusinessBehavior businessBehavior = null;
 	private final MetaDataManager metaDataManager = MetaDataManager.getInstance();
 
 	public BusinessLogic() { }
@@ -24,20 +24,26 @@ public class BusinessLogic implements BusinessBehavior {
 	}
 
 	public void setBusinessBehavior(BusinessBehavior businessBehavior) {
-		this.businessBehavior = Optional.ofNullable(businessBehavior);
+		System.out.println("fullip: set BusinessManager");
+		this.businessBehavior = businessBehavior;
 	}
 
+	public Consumer<Object> resultConsumer = result -> {
+		System.out.println("result:" + (String)result);
+	};
+
 	@Override
-	public String doBusiness(String metaData, String data) throws Exception {
-		String converted = metaDataManager.getMetaInfo(metaData);
-		try {
-			if(businessBehavior.isPresent()) {
-				return businessBehavior.get().doBusiness(converted, data);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	public String doBusiness(String eventType, String message, Function<Object, Object> metaSource, Consumer<Object> resultConsumer) throws Exception {
+		// TODO Auto-generated method stub
+		if(businessBehavior != null) {
+			String result = businessBehavior.doBusiness(eventType, message, 
+					(metaSource == null)? metaDataManager.defaultDataSourcer : metaSource, 
+					(resultConsumer == null)? this.resultConsumer : resultConsumer);
+			System.out.println("ok loaded logic: " + result);
+			return result;
+		} else {
+			System.out.println("no business Logic");
+			return "no business Logic";
 		}
-		return "";
 	}
-	
 }

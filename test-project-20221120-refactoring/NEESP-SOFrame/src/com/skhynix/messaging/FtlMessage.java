@@ -1,12 +1,11 @@
 package com.skhynix.messaging;
 
 import java.time.Instant;
-import java.util.Optional;
 
+import com.hynix.base.BaseConnection;
 import com.hynix.common.StringUtil;
-import com.skhynix.decl.BaseConnection;
-import com.skhynix.decl.DynaLoadable;
-import com.skhynix.decl.Messageable;
+import com.skhynix.extern.DynaLoadable;
+import com.skhynix.extern.Messageable;
 import com.skhynix.model.BaseSessModel;
 import com.skhynix.model.FtlSessModel;
 import com.skhynix.neesp.log.LogManager;
@@ -20,18 +19,23 @@ import com.tibco.ftl.TibProperties;
 public class FtlMessage extends BaseConnection implements DynaLoadable, Messageable {
 	private final LogManager logger = LogManager.getInstance();
 
-	public FtlMessage() {
-		// TODO Auto-generated constructor stub
-		this.connectionInfo = "ftl";
-	}
-	
-	public FtlMessage(String connectionInfo) {
-		this.connectionInfo = connectionInfo;
+	private final String defaultServerUrl = "localhost:8585";
+
+	public FtlMessage(String connectionInfo, String serverUrl) {
+		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 
-	public boolean sendMessage(String sessionKey, String msg) {
+	@Override
+	public String getDefaultServerUrl() {
 		// TODO Auto-generated method stub
-		Optional.ofNullable(clientMap.get(sessionKey)).ifPresent(client -> {
+		return defaultServerUrl;
+	}
+
+	@Override
+	public boolean sendMessage(String handle, String msg) {
+		// TODO Auto-generated method stub
+		Object client =  clientMap.get(handle);
+		if(client != null && FtlSessModel.class.isInstance(client)) {
 			FtlSessModel ftlSessModel = (FtlSessModel) client;
 			if(ftlSessModel.publisher != null && ftlSessModel.msgObject != null) {
 				Message msgObject = (Message)ftlSessModel.msgObject;
@@ -40,13 +44,14 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 					msgObject.setString("type", "hello");
 					msgObject.setString("message", msg);
 					publisher.send(msgObject);
+					return true;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-		});
-		return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -75,7 +80,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 		}
 		
 		if(StringUtil.isEmpty(ftlSessModel.serverUrl)) {
-			ftlSessModel.serverUrl = "localhost:8585";
+			ftlSessModel.serverUrl = defaultServerUrl;
 		}
 
 		String clientName =  ftlSessModel.clientName;
@@ -195,6 +200,12 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 			unregister = null;
 		}
 		disconnectServer();
+	}
+
+	@Override
+	public String getClassDomain() {
+		// TODO Auto-generated method stub
+		return "message:ftl";
 	}
 
 	public static void main(String[] args) {

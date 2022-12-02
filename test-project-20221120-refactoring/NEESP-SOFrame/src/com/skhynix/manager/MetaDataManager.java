@@ -2,10 +2,10 @@ package com.skhynix.manager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
 
-import com.skhynix.decl.Joinable;
-import com.skhynix.decl.BaseManager;
+import com.hynix.base.BaseManager;
+import com.skhynix.extern.Joinable;
 
 public class MetaDataManager extends BaseManager {
 	private static final MetaDataManager instance = new MetaDataManager();
@@ -24,19 +24,12 @@ public class MetaDataManager extends BaseManager {
 		serverInfo.put(serverKey, info);
 	}
 
-	public Optional<String> getServerInfo(String serverKey) {
-		return Optional.ofNullable(serverInfo.get(serverKey));
+	public String getServerInfo(String serverKey) {
+		return serverInfo.getOrDefault(serverKey, "");
 	}
 	
 	public String getMetaInfo(String resourceKey) {
-		return Optional.ofNullable(resourceInfo.get(resourceKey)).map(data -> {
-			if(data == null) {
-				resourceInfo.put(resourceKey, "initial");
-				return "initial";
-			} else {
-				return data;
-			}
-		}).get();
+		return resourceInfo.computeIfAbsent(resourceKey, resource -> "initial");
 	}
 
 	@Override
@@ -50,4 +43,12 @@ public class MetaDataManager extends BaseManager {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public Function<Object,Object> defaultDataSourcer = request -> {
+		switch((String)request) {
+			case "1" : return "supply 1";
+			case "2" : return "supply_2;";
+			default : return "supply_unknown";
+		}
+	};
 }

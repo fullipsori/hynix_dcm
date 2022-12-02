@@ -2,18 +2,14 @@ package com.skhynix.manager;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.logging.Level;
 
 import com.hynix.common.Pair;
-import com.skhynix.decl.DynaLoadable;
+import com.skhynix.extern.DynaLoadable;
 import com.skhynix.neesp.log.LogManager;
 
 import io.reactivex.rxjava3.subjects.PublishSubject;
@@ -37,7 +33,7 @@ public class DynaClassManager {
 		return dynaClassLoader;	
 	}
 	
-	public boolean loadJar(String className, String classCategory, String jarFilePath) {
+	public boolean loadJar(String className, String jarFilePath) {
 		
 		File jarFile = new File(jarFilePath);
 		
@@ -47,7 +43,7 @@ public class DynaClassManager {
 			URL classURL = new URL("jar:" + jarFile.toURI().toURL() + "!/");
 			
 			if(loaderMap.containsKey(className)) {
-				unloadJar(className, classCategory);
+				unloadJar(className);
 			}
 			
 			URLClassLoader urlClassLoader = new URLClassLoader(new URL [] {classURL}, contextLoader);
@@ -60,8 +56,9 @@ public class DynaClassManager {
 					instanceMap.put(className, classInstance);
 					if(DynaLoadable.class.isInstance(classInstance)) {
 						((DynaLoadable) classInstance).loadClass();
+						String classDomain = ((DynaLoadable)classInstance).getClassDomain();
+						if(classDomain != null) loadJarSubject.onNext(new Pair<>(classDomain, className));
 					}
-					loadJarSubject.onNext(new Pair<>(classCategory, className));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -76,10 +73,12 @@ public class DynaClassManager {
 		return true;
 	}
 
-	public boolean unloadJar(String className, String classCategory) {
+	public boolean unloadJar(String className) {
 		Object classInstance = instanceMap.remove(className);
+		String classDomain = null;
 		if(classInstance != null && DynaLoadable.class.isInstance(classInstance)) {
 			((DynaLoadable)classInstance).unloadClass();
+			classDomain = ((DynaLoadable)classInstance).getClassDomain();
 		}
 		
 		try {
@@ -91,12 +90,12 @@ public class DynaClassManager {
 			e.printStackTrace();
 			return false;
 		}finally {
-			unloadJarSubject.onNext(new Pair<>(classCategory, className));
+			if(classDomain != null) unloadJarSubject.onNext(new Pair<>(classDomain, className));
 		}
 	}
 
-	public Optional<Object> getClassInstance(String className) {
-		return Optional.ofNullable(instanceMap.get(className));
+	public Object getClassInstance(String className) {
+		return instanceMap.get(className);
 	}
 
 }

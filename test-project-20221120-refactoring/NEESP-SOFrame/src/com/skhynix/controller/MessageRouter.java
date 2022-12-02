@@ -8,8 +8,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.skhynix.decl.Messageable;
-import com.skhynix.decl.Sessionable;
+import com.skhynix.extern.Messageable;
+import com.skhynix.extern.Sessionable;
 import com.skhynix.manager.MessageManager;
 import com.skhynix.model.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;

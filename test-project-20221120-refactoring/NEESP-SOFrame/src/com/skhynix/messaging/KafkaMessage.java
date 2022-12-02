@@ -7,24 +7,32 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import com.hynix.base.BaseConnection;
 import com.hynix.common.StringUtil;
-import com.skhynix.decl.BaseConnection;
-import com.skhynix.decl.DynaLoadable;
-import com.skhynix.decl.Messageable;
+import com.skhynix.extern.DynaLoadable;
+import com.skhynix.extern.Messageable;
 import com.skhynix.model.BaseSessModel;
 import com.skhynix.model.KafkaSessModel;
 
 public class KafkaMessage extends BaseConnection implements DynaLoadable, Messageable {
 	
+	private final String defaultServerUrl = "localhost:9092";
+
 	public KafkaMessage() {
 		// TODO Auto-generated constructor stub
 		this.connectionInfo = "kafka";
 	}
 	
-	public KafkaMessage(String connectionInfo) {
-		this.connectionInfo = connectionInfo;
+	public KafkaMessage(String connectionInfo, String serverUrl) {
+		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 	
+	@Override
+	public String getDefaultServerUrl() {
+		// TODO Auto-generated method stub
+		return defaultServerUrl;
+	}
+
 	@Override
 	public void loadClass() {
 		// TODO Auto-generated method stub
@@ -40,6 +48,12 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 		}
 		disconnectServer();
 	}
+	
+	@Override
+	public String getClassDomain() {
+		// TODO Auto-generated method stub
+		return "message:kafka";
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -49,14 +63,15 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean sendMessage(String sessionKey, String msg) {
-		// TODO Auto-generated method stub
-		Optional.ofNullable(clientMap.get(sessionKey)).ifPresent(client -> {
+		Object client = clientMap.get(sessionKey);
+		if(client != null  && KafkaSessModel.class.isInstance(client)) {
 			KafkaSessModel kafkaSessModel = (KafkaSessModel)client;
 			if(kafkaSessModel.msgClient != null && !StringUtil.isEmpty(kafkaSessModel.topic)) {
 				((KafkaProducer<String, String>)kafkaSessModel.msgClient).send(new ProducerRecord<String, String>(kafkaSessModel.topic, "keyData", msg /*String.format("Test Message: 한글처리가 제대로 되는지 확인한다.")*/));
+				return true;
 			}
-		});
-		return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -77,7 +92,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	public boolean connectServer(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(StringUtil.isEmpty(client.serverUrl)) {
-			client.serverUrl = "localhost:9092";
+			client.serverUrl = defaultServerUrl;
 			return true;
 		}
 		return false;

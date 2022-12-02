@@ -1,13 +1,15 @@
 package com.skhynix.neesp;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.hynix.common.StringUtil;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
+import com.skhynix.manager.BusinessManager;
+import com.skhynix.manager.DynaClassManager;
+import com.skhynix.manager.MessageManager;
 import com.skhynix.model.EmsSessModel;
 import com.skhynix.neesp.log.LogManager;
 import com.skhynix.neesp.log.NEESPLogger;
@@ -24,7 +26,10 @@ public class BaseProxy {
 	private static Counter testCounter = new Counter("testCounter");
 	private NEESPLogger eqpLogger = null;
 	
+	/** setupObservable 이 필요한 항목들은 모두 초기화 해두자 **/ 
+	private final DynaClassManager dynaClassManager = DynaClassManager.getInstance();
 	private final MessageRouter messageRouter = MessageRouter.getInstance();
+	private final BusinessManager businessManager = BusinessManager.getInstance();
 	private final BusinessLogic businessLogic = BusinessLogic.getInstance();
 
 	public BaseProxy() {
@@ -36,23 +41,13 @@ public class BaseProxy {
 		System.out.println("/// 최초 생성- 장비 생성시점에 같이 생성한다. NEESPLogger: " + parameter);		
 		eqpLogger = new NEESPLogger(parameter, "sw-node-1", LogManager.getInstance().getLogger());		
 		LogManager.getInstance().startMonitor();
-		Single<String> single = Single.just("Test RxJava");
-		single.subscribe(System.out::println);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public String[] getTestMode(String jsonString) {
-		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		return new String[] {(String)params.get("type"), Optional.ofNullable((String)params.get("role")).orElse("sender")};
-	}
-
 	@SuppressWarnings("unchecked")
 	public String openSession(String domain, String jsonString) {
 		if(StringUtil.isEmpty(domain) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		String serverUrl = (String)params.get("serverUrl");
-		if(serverUrl == null) return "";
-		return messageRouter.openSession(domain, serverUrl, jsonString);
+		return messageRouter.openSession(domain, (String)params.get("serverUrl"), jsonString);
 	}
 	
 	public void closeSession(String handle) {
@@ -79,13 +74,21 @@ public class BaseProxy {
 		return messageRouter.receiveMessage(handle);
 	}
 	
-	public String doBusiness(String key, String message) {
+	public String doBusiness(String eventType, String message) {
 		try {
-			return businessLogic.doBusiness(key, message);
+			return businessLogic.doBusiness(eventType, message, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "error";
 		}
+	}
+	
+	public boolean loadJar(String className, String classPath) {
+		return dynaClassManager.loadJar(className, classPath);
+	}
+	
+	public boolean unloadJar(String className) {
+		return dynaClassManager.unloadJar(className);
 	}
 	
 	
@@ -360,6 +363,7 @@ public class BaseProxy {
      public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge) {
         String[] retVals = {"",""}; 
         
+        System.out.println("doBusiness");
         retVals[0] = "succeed-do-business";
         retVals[1] = String.format("[%s][%s] 메시지 작업을 수행합니다.", eqpId, eventType);
 
@@ -384,6 +388,9 @@ public class BaseProxy {
         
         // 처리 이벤트 카운트 하기
         SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).increaseEventCount(eventType);
+        
+        // fullipsori
+        doBusiness(eventType, messge);
         return retVals;
     }
      
@@ -489,7 +496,7 @@ public class BaseProxy {
 		/*
 		 * 1. 초기화 작업을 진행합니다.
 		 */		
-		String[] retVals = {"","",""};		 
+		String[] retVals = {"",""};		 
 		retVals[1] = String.format("%s|%s|%s|%s| 장비 큐 처리용 작업자 정상적으로 생성되었습니다..", eqpId, appNodeName, applicationName, procInstanceId);
 		
 		if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) != null) {
@@ -511,17 +518,6 @@ public class BaseProxy {
     		
             retVals[0] = "succeed-init-swworker";
             retVals[1] = sb.toString(); 
-
-            {
-				//fullipsori: make ems-session
-				EmsSessModel emsModel = new EmsSessModel();
-				emsModel.role = "receiver";
-				emsModel.serverUrl = "localhost:7222";
-				emsModel.queueName = eqpId;
-				String jsonParams = StringUtil.objectToJson(emsModel);
-				System.out.println("fullipsori:" + jsonParams);
-				retVals[2] = openSession("message:ems", jsonParams);
-            }
 
          } else {
             // 없는 경우

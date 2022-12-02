@@ -1,24 +1,33 @@
 package com.skhynix.messaging;
 
-import java.util.*;
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
+import com.hynix.base.BaseConnection;
 import com.hynix.common.StringUtil;
-import com.skhynix.decl.BaseConnection;
-import com.skhynix.decl.DynaLoadable;
-import com.skhynix.decl.Messageable;
+import com.skhynix.extern.DynaLoadable;
+import com.skhynix.extern.Messageable;
 import com.skhynix.model.BaseSessModel;
 import com.skhynix.model.EmsSessModel;
 
 public class EmsMessage extends BaseConnection implements DynaLoadable, Messageable {
 	
-	public EmsMessage() {
-		// TODO Auto-generated constructor stub
-		this.connectionInfo = "ems";
-	}
+	private final String defaultServerUrl = "localhost:7222";
 	
-	public EmsMessage(String connectionInfo) {
-		this.connectionInfo = connectionInfo;
+	public EmsMessage(String connectionInfo, String serverUrl) {
+		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+	}
+
+	@Override
+	public String getDefaultServerUrl() {
+		// TODO Auto-generated method stub
+		return defaultServerUrl;
 	}
 
 	@Override
@@ -125,7 +134,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	@Override
 	public boolean connectServer(BaseSessModel client) {
 		if(StringUtil.isEmpty(client.serverUrl)) {
-			client.serverUrl = "localhost:7222";
+			client.serverUrl = defaultServerUrl;
 		}
 		String serverUrl = client.serverUrl;
 		String username = client.username;
@@ -172,8 +181,8 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 	@Override
 	public boolean sendMessage(String sessionKey, String msg) {
-		Optional.ofNullable(clientMap.get(sessionKey)).ifPresent(client -> {
-			System.out.println("send key:" +sessionKey);
+		Object client = clientMap.get(sessionKey);
+		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
 				Session session = (Session)emsSessModel.session;
@@ -182,20 +191,22 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					message.setText(msg);
 					MessageProducer msgProducer = (MessageProducer)emsSessModel.msgClient;
 					msgProducer.send(message);
+					return true;
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
-		});
-		return true;
+		}
+		return false;
 	}
 
 	@Override
 	public String receiveMessage(String sessionKey) {
 		// TODO Auto-generated method stub
-		return Optional.ofNullable(clientMap.get(sessionKey)).map(client -> {
+		Object client = clientMap.get(sessionKey);
+		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
-			if(emsSessModel.msgClient != null) {
+			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
 				try {
 					TextMessage message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive();
 					if(message != null) return message.getText();
@@ -203,8 +214,8 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					e.printStackTrace();
 				}
 			}
-			return "";
-		}).orElse("");
+		}
+		return "";
 	}
 	
 	@Override
@@ -220,6 +231,12 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 			unregister.run();
 			unregister = null;
 		}
+	}
+
+	@Override
+	public String getClassDomain() {
+		// TODO Auto-generated method stub
+		return "message:ems";
 	}
 
 }

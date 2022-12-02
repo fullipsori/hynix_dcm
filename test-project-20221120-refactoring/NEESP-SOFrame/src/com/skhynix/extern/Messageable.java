@@ -1,4 +1,4 @@
-package com.skhynix.decl;
+package com.skhynix.extern;
 
 public interface Messageable {
 	public boolean sendMessage(String sessionKey, String msg);

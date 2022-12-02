@@ -1,10 +1,9 @@
-package com.skhynix.decl;
+package com.hynix.base;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.hynix.common.StringUtil;
+import com.skhynix.extern.Joinable;
 
 public abstract class BaseManager {
 	private final Map<String, Joinable> members = new ConcurrentHashMap<>();
@@ -32,11 +31,11 @@ public abstract class BaseManager {
 		}
 	}
 	
-	public Optional<Object> getMember(String handle) {
-		if(!isJoinable(handle)) return Optional.empty();
+	public Object getMember(String handle) {
+		if(!isJoinable(handle)) return null;
 		return members.entrySet().stream()
 				.filter(entry -> handle.startsWith(entry.getKey()))
-				.map(entry -> (Object)entry.getValue()).findFirst();
+				.map(entry -> (Object)entry.getValue()).findFirst().orElse(null);
 	}
 
 }

@@ -1,12 +1,9 @@
 package com.skhynix.manager;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.hynix.base.BaseManager;
 import com.skhynix.controller.BusinessLogic;
-import com.skhynix.decl.Joinable;
-import com.skhynix.decl.BaseManager;
-import com.skhynix.decl.BusinessBehavior;
+import com.skhynix.extern.BusinessBehavior;
+import com.skhynix.extern.Joinable;
 import com.skhynix.neesp.log.LogManager;
 
 public class BusinessManager extends BaseManager {
@@ -20,15 +17,18 @@ public class BusinessManager extends BaseManager {
 	}
 	
 	public BusinessManager() {
+		setupObservable();
+	}
+
+	public void setupObservable() {
 		dynaClassManager.loadJarSubject
 			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
 			.subscribe(jarInfo -> {
-				dynaClassManager.getClassInstance(jarInfo.getSecond()).ifPresent(clazz -> {
-					if(clazz instanceof BusinessBehavior) {
-						businessLogic.setBusinessBehavior((BusinessBehavior)clazz);
-						System.out.println("load jar:" + jarInfo.getSecond()); 
-					}
-				});
+				Object clazz = dynaClassManager.getClassInstance(jarInfo.getSecond());
+				if(clazz != null && BusinessBehavior.class.isInstance(clazz)) {
+					businessLogic.setBusinessBehavior((BusinessBehavior)clazz);
+					System.out.println("load jar:" + jarInfo.getSecond()); 
+				}
 			});
 
 		dynaClassManager.unloadJarSubject
@@ -42,7 +42,7 @@ public class BusinessManager extends BaseManager {
 	@Override
 	public String getDomain() {
 		// TODO Auto-generated method stub
-		return "business";
+		return "business:logic";
 	}
 
 	@Override
