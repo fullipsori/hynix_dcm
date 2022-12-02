@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<msv:DocumentRoot xmlns:msv="http://tns.tibco.com/bw/model/core/moduleSV">
-  <moduleSharedVariables>
-    <moduleSharedVariable name="CONVERT_LIB_NAME" type="{http://www.w3.org/2001/XMLSchema}string" initialValueMode="literal" initialValue="com.example.App"/>
-    <moduleSharedVariable name="CONVERT_LIB_PATH" type="{http://www.w3.org/2001/XMLSchema}string" initialValueMode="literal" initialValue="/Users/fullipsori/projects/tibco/hynix/DynamicJar_0805/dynJar/target/test-0.0.1.jar"/>
-  </moduleSharedVariables>
-</msv:DocumentRoot>

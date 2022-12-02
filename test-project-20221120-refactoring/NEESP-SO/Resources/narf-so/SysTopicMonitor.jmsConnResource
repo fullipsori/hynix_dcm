@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jndi:namedResource xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jms="http://xsd.tns.tibco.com/bw/models/sharedresource/jms" xmlns:jndi="http://xsd.tns.tibco.com/amf/models/sharedresource/jndi" xmi:id="_1qeZYVGNEe21JKJ09Gk6VQ" name="narf-so.SysTopicMonitor" type="jms:JMSConnectionFactory">
-  <jndi:description>EMS 시스템 큐 모니터링: $sys.monior.queue.create</jndi:description>
-  <jndi:configuration xsi:type="jms:DirectConnectionFactory" xmi:id="_2oSFcFGNEe21JKJ09Gk6VQ" factoryType="Queue/Topic">
-    <substitutionBindings xmi:id="_OzU2QGMrEe2_UINjVrQ1lg" template="providerURL" propName="EMS_SERVER_ECM"/>
-    <userCredentials xmi:id="_9p9_gFGNEe21JKJ09Gk6VQ" username="admin" password=""/>
-  </jndi:configuration>
-</jndi:namedResource>
