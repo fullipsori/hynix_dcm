@@ -1,7 +1,0 @@
-grid create copyset_size=1
-copyset create my_copyset
-node create -cs my_copyset my_node
-keeper create my_keeper
-proxy create my_proxy
-table create t1 key long
-column create t1 value string
