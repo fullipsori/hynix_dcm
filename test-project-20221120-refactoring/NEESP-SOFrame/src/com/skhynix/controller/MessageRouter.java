@@ -58,16 +58,16 @@ public class MessageRouter {
 		return instance;
 	}
 
-	public void registerClient(String attendType, Object object) {
-		messageManager.register(attendType, object);
+	public void registerClient(String jointype, Object object) {
+		messageManager.register(jointype, object);
 	}
 	
-	public void unregisterClient(String attendType) {
-		messageManager.unregister(attendType);
+	public void unregisterClient(String jointype) {
+		messageManager.unregister(jointype);
 	}
 	
-	public String openSession(String attendType, String jsonParams) {
-		return messageManager.openSession(attendType, jsonParams);
+	public String openSession(String jointype, String jsonParams) {
+		return messageManager.openSession(jointype, jsonParams);
 	}
 	
 	public void closeSession(String handle) {

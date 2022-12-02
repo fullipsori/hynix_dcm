@@ -3,7 +3,7 @@ package com.skhynix.manager;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import com.skhynix.decl.Attendable;
+import com.skhynix.decl.Joinable;
 import com.skhynix.decl.BaseManager;
 import com.skhynix.repository.ASRepository;
 import com.skhynix.repository.DBRepository;
@@ -60,9 +60,9 @@ public class ResourceManager extends BaseManager {
 		return "resource";
 	}
 	@Override
-	public Attendable createAttendee(String attendType) {
+	public Joinable createMember(String jointype) {
 		// TODO Auto-generated method stub
-		switch(attendType)  {
+		switch(jointype)  {
 			case "resource:as" : return new ASRepository();
 			default: break;
 		}

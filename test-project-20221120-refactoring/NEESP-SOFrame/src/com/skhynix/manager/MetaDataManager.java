@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.skhynix.decl.Attendable;
+import com.skhynix.decl.Joinable;
 import com.skhynix.decl.BaseManager;
 
 public class MetaDataManager extends BaseManager {
@@ -46,7 +46,7 @@ public class MetaDataManager extends BaseManager {
 	}
 
 	@Override
-	public Attendable createAttendee(String attendType) {
+	public Joinable createMember(String jointype) {
 		// TODO Auto-generated method stub
 		return null;
 	}

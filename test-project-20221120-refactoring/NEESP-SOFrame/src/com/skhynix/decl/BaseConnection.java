@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.hynix.common.StringUtil;
 import com.skhynix.model.BaseSessModel;
 
-abstract public class BaseConnection implements Sessionable, Attendable {
+abstract public class BaseConnection implements Sessionable, Joinable {
 
 	protected Runnable unregister = null;
 
@@ -34,6 +34,7 @@ abstract public class BaseConnection implements Sessionable, Attendable {
 	}
 	
 	protected void deInitConnectable() {
+		
 		disconnectServer();
 		serverModel = null;
 	}
@@ -88,13 +89,13 @@ abstract public class BaseConnection implements Sessionable, Attendable {
 	}
 	
 	@Override
-	public void attached(Runnable unregister) {
+	public void joined(Runnable unregister) {
 		// TODO Auto-generated method stub
 		this.unregister = unregister;
 	}
 
 	@Override
-	public void detached() {
+	public void disjoined() {
 		// TODO Auto-generated method stub
 		disconnectServer();
 	}

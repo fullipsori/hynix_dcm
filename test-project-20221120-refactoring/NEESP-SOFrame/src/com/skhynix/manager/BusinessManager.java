@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.skhynix.controller.BusinessLogic;
-import com.skhynix.decl.Attendable;
+import com.skhynix.decl.Joinable;
 import com.skhynix.decl.BaseManager;
 import com.skhynix.decl.BusinessBehavior;
 import com.skhynix.neesp.log.LogManager;
@@ -46,7 +46,7 @@ public class BusinessManager extends BaseManager {
 	}
 
 	@Override
-	public Attendable createAttendee(String attendType) {
+	public Joinable createMember(String jointype) {
 		// TODO Auto-generated method stub
 		return null;
 	}

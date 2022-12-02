@@ -2,7 +2,7 @@ package com.skhynix.manager;
 
 import java.util.Optional;
 
-import com.skhynix.decl.Attendable;
+import com.skhynix.decl.Joinable;
 import com.skhynix.decl.BaseManager;
 import com.skhynix.decl.DynaLoadable;
 import com.skhynix.decl.Messageable;
@@ -45,17 +45,17 @@ public class MessageManager extends BaseManager {
 		return instance;
 	}
 	
-	public String openSession(String attendType, String jsonParams) {
+	public String openSession(String jointype, String jsonParams) {
 		
-		return getAttendee(attendType).or(() -> {
-			Optional<Attendable> client = Optional.ofNullable(createAttendee(attendType));
-			client.ifPresent(c -> register(attendType, c));
+		return getMember(jointype).or(() -> {
+			Optional<Joinable> client = Optional.ofNullable(createMember(jointype));
+			client.ifPresent(c -> register(jointype, c));
 			return client;
-		}).filter(Sessionable.class::isInstance).map(client -> ((Sessionable)client).openSession(attendType, jsonParams)).get();
+		}).filter(Sessionable.class::isInstance).map(client -> ((Sessionable)client).openSession(jointype, jsonParams)).get();
 	}
 
 	public boolean closeSession(String handle) {
-		return getAttendee(handle).map(client -> {
+		return getMember(handle).map(client -> {
 			if(client != null && Sessionable.class.isInstance(client))
 				return ((Sessionable)client).closeSession(handle);
 			else return false;
@@ -63,7 +63,7 @@ public class MessageManager extends BaseManager {
 	}
 	
 	public boolean sendMessage(String handle, String message) {
-		return getAttendee(handle).map(client -> {
+		return getMember(handle).map(client -> {
 			if(client != null && Messageable.class.isInstance(client))
 				return ((Messageable)client).sendMessage(handle, message);
 			else return false;
@@ -71,7 +71,7 @@ public class MessageManager extends BaseManager {
 	}
 	
 	public String receiveMessage(String handle) {
-		return getAttendee(handle).map(client -> {
+		return getMember(handle).map(client -> {
 			if(client != null && Messageable.class.isInstance(client))
 				return ((Messageable)client).receivedMessage(handle);
 			else return "error";
@@ -85,8 +85,8 @@ public class MessageManager extends BaseManager {
 	}
 
 	@Override
-	public Attendable createAttendee(String attendType) {
-		switch(attendType) {
+	public Joinable createMember(String jointype) {
+		switch(jointype) {
 			case "message:ems" : return new EmsMessage(); 
 			case "message:ftl" : return new FtlMessage(); 
 			case "message:kafka" : return new KafkaMessage(); 
