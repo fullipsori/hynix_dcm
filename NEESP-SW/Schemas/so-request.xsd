@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/so-request" xmlns:tns="http://www.example.org/so-request" elementFormDefault="qualified">
+
+
+
+
+
+
+    <complexType name="so-request">
+    	<sequence>
+    		<element name="eqp_id" type="string"></element>
+    		<element name="swnode_id" type="string"></element>
+    		<element name="msg" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="so-request-json" type="tns:so-request"></element>
+</schema>

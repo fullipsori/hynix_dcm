@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/FTLMessage" xmlns:tns="http://www.example.org/FTLMessage" elementFormDefault="qualified">
+
+    <complexType name="message">
+    	<sequence>
+    		<element name="type" type="string"></element>
+    		<element name="message" type="string"></element>
+    	</sequence>
+    </complexType>
+</schema>
