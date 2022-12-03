@@ -1,16 +1,14 @@
 package com.skhynix.manager;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 import com.skhynix.base.BaseManager;
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
 
 public class MetaDataManager extends BaseManager {
 	private static final MetaDataManager instance = new MetaDataManager();
-	private Map<String, String> serverInfo = new HashMap<>();
-	private Map<String, String> resourceInfo = new HashMap<>();
+	private final ResourceManager resourceManager = ResourceManager.getInstance();
 	
 	public MetaDataManager() {
 		// TODO Auto-generated constructor stub
@@ -18,18 +16,6 @@ public class MetaDataManager extends BaseManager {
 	
 	public static MetaDataManager getInstance() {
 		return instance;
-	}
-
-	public void setServerInfo(String serverKey, String info) {
-		serverInfo.put(serverKey, info);
-	}
-
-	public String getServerInfo(String serverKey) {
-		return serverInfo.getOrDefault(serverKey, "");
-	}
-	
-	public String getMetaInfo(String resourceKey) {
-		return resourceInfo.computeIfAbsent(resourceKey, resource -> "initial");
 	}
 
 	@Override
@@ -45,10 +31,16 @@ public class MetaDataManager extends BaseManager {
 	}
 	
 	public Function<Object,Object> defaultDataSourcer = request -> {
-		switch((String)request) {
-			case "1" : return "supply 1";
-			case "2" : return "supply_2;";
-			default : return "supply_unknown";
+		System.out.println("request:" + request);
+		String res = resourceManager.getMetaData("resource:as","my_grid", "key", (Long)request);
+		if(StringUtil.isEmpty(res)) {
+			resourceManager.putMetaData("resource:as", "my_grid", "key", (Long)request, "value", "stored activespace data");
 		}
+		res = resourceManager.getMetaData("resource:as","my_grid", "key", (Long)request);
+		if(StringUtil.isEmpty(res)) {
+			System.out.println("operation failed");
+			return "failed:as";
+		}
+		return res;
 	};
 }

@@ -1,6 +1,6 @@
 package com.skhynix.extern;
 
-import com.skhynix.model.BaseSessModel;
+import com.skhynix.model.session.BaseSessModel;
 
 public interface Sessionable {
 

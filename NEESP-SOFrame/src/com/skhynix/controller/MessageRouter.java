@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.skhynix.extern.Messageable;
 import com.skhynix.extern.Sessionable;
 import com.skhynix.manager.MessageManager;
-import com.skhynix.model.BaseSessModel;
+import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
 import io.reactivex.rxjava3.core.Observable;

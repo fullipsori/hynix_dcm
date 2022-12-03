@@ -15,9 +15,9 @@ import java.util.function.Predicate;
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.Pair;
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
-import com.skhynix.model.ASSessModel;
-import com.skhynix.model.BaseSessModel;
+import com.skhynix.extern.Resourceable;
+import com.skhynix.model.session.ASSessModel;
+import com.skhynix.model.session.BaseSessModel;
 import com.tibco.datagrid.BatchResult;
 import com.tibco.datagrid.ColumnType;
 import com.tibco.datagrid.Connection;
@@ -48,7 +48,7 @@ import com.tibco.datagrid.TableMetadata;
  * If the data grid is created by running the as-start (or as-start.bat) script that is provided with the installation
  * then the required table will be defined.
  */
-public class ASRepository extends BaseConnection {
+public class ASRepository extends BaseConnection implements Resourceable {
 
 	private static final ASRepository instance = new ASRepository();
 	
@@ -128,18 +128,24 @@ public class ASRepository extends BaseConnection {
     	
     	abstract Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties);
     	
-    	public static Object applyOperation(String operation, Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
-    		return getType(operation).apply(table, keyName, key, valueName, value, defaultProperties);
+    	public static Object applyOperation(OPERATION operation, Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
+    		return operation.apply(table, keyName, key, valueName, value, defaultProperties);
     	}
     }
     	
+    /** get/put/delete/update 함수를 수행하는 메인 함수 **/
     public Object runCommand(ASSessModel asClient, String tableName, String op, String keyName, Object key, String valueName, String value)
+    {
+    	return runCommand(asClient, tableName, OPERATION.getType(op), keyName, key, valueName, value);
+    }
+
+    public Object runCommand(ASSessModel asClient, String tableName, OPERATION operation, String keyName, Object key, String valueName, String value)
     {
         if(serverModel == null || serverModel.serverHandle == null || asClient.session == null) return null;
         if(tableName == null || tableName.isEmpty())  return null;
 
         try( Table table = ((Session)asClient.session).openTable(tableName, asClient.properties) ) {
-        	return OPERATION.applyOperation(op, table, keyName, key, valueName, value, asClient.properties);
+        	return OPERATION.applyOperation(operation, table, keyName, key, valueName, value, asClient.properties);
 
         }catch(DataGridException dataGridException) {
             dataGridException.printStackTrace(System.err);
@@ -230,6 +236,75 @@ public class ASRepository extends BaseConnection {
 			asClient.session = null;
 		}
 	}
+
+	@Override
+	public boolean create(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
+		// TODO Auto-generated method stub
+		Object client = clientMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public Object retrieve(String handle, String table, Pair<String,? extends Object> key) {
+		// TODO Auto-generated method stub
+		Object client = clientMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), null, null);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean update(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
+		// TODO Auto-generated method stub
+		Object client = clientMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean delete(String handle, String table, Pair<String,? extends Object> key) {
+		// TODO Auto-generated method stub
+		Object client = clientMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), null, null);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
 
     /**********************************************************************************************
      *
@@ -1196,5 +1271,6 @@ public class ASRepository extends BaseConnection {
             exception.printStackTrace();
         }
     }
+
 }
 

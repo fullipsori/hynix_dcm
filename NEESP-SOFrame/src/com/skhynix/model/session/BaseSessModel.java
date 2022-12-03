@@ -1,4 +1,4 @@
-package com.skhynix.model;
+package com.skhynix.model.session;
 
 import java.io.Serializable;
 

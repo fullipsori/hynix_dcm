@@ -11,13 +11,14 @@ Export-Package: com.skhynix.base,
  com.skhynix.extern,
  com.skhynix.manager,
  com.skhynix.messaging,
- com.skhynix.model,
+ com.skhynix.model.factory,
+ com.skhynix.model.session,
  com.skhynix.neesp,
  com.skhynix.neesp.log,
  com.skhynix.neesp.util,
  com.skhynix.repository
-Require-Bundle: com.tibco.extlib;bundle-version="1.0.0"
 Provide-Capability: com.tibco.bw.module; name="NEESP-SOFrame"; version:Version="1.0.0"
+TIBCO-BW-Version: 6.8.1 V21 2022-05-12
 Import-Package: com.fasterxml.jackson.core;version="2.11.600",
  com.fasterxml.jackson.databind;version="2.11.600",
  com.tibco.bw.jms.shared;version="6.5.1600",
@@ -28,11 +29,11 @@ Import-Package: com.fasterxml.jackson.core;version="2.11.600",
  javax.jms;version="2.0.0",
  org.apache.kafka.clients.producer;version="1.1.0",
  org.apache.kafka.common.serialization;version="1.1.0"
+TIBCO-BW-SharedModule: META-INF/module.bwm
 TIBCO-BW-JobSharedVariables: META-INF/module.jsv
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 TIBCO-BW-ConfigProfile: META-INF/default.substvar
 TIBCO-BW-ModuleSharedVariables: META-INF/module.msv
 TIBCO-BW-Edition: bwe
-Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Capability: com.tibco.bw.model; filter:="(name=bwext)"
-TIBCO-BW-Version: 6.8.1 V21 2022-05-12
-TIBCO-BW-SharedModule: META-INF/module.bwm
+Require-Bundle: com.tibco.extlib;bundle-version="1.0.0"

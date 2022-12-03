@@ -11,8 +11,8 @@ import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
-import com.skhynix.model.BaseSessModel;
-import com.skhynix.model.KafkaSessModel;
+import com.skhynix.model.session.BaseSessModel;
+import com.skhynix.model.session.KafkaSessModel;
 
 public class KafkaMessage extends BaseConnection implements DynaLoadable, Messageable {
 	

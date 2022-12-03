@@ -9,14 +9,11 @@ import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
 import com.skhynix.manager.BusinessManager;
 import com.skhynix.manager.DynaClassManager;
-import com.skhynix.manager.MessageManager;
-import com.skhynix.model.EmsSessModel;
+import com.skhynix.manager.ResourceManager;
 import com.skhynix.neesp.log.LogManager;
 import com.skhynix.neesp.log.NEESPLogger;
 import com.skhynix.neesp.util.Counter;
 import com.skhynix.neesp.util.RandomCollection;
-
-import io.reactivex.rxjava3.core.Single;
 
 
 public class BaseProxy {
@@ -31,6 +28,7 @@ public class BaseProxy {
 	private final MessageRouter messageRouter = MessageRouter.getInstance();
 	private final BusinessManager businessManager = BusinessManager.getInstance();
 	private final BusinessLogic businessLogic = BusinessLogic.getInstance();
+	private final ResourceManager resourceManager = ResourceManager.getInstance();
 
 	public BaseProxy() {
 		// 생성자
@@ -47,11 +45,42 @@ public class BaseProxy {
 	public String openSession(String domain, String jsonString) {
 		if(StringUtil.isEmpty(domain) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		return messageRouter.openSession(domain, (String)params.get("serverUrl"), jsonString);
+		String[] tokens = domain.split(":");
+		if(StringUtil.isEmpty(tokens[0])) {
+			return "error:" + domain;
+		}
+		String serverUrl = (String)params.get("serverUrl");
+		if(tokens[0].equals("message")) {
+			return messageRouter.openSession(domain, serverUrl, jsonString);
+		}else if(tokens[0].equals("resource")) {
+			return resourceManager.openSession(domain, serverUrl, jsonString);
+		}else {
+			return "error:" + tokens[0];
+		}
 	}
 	
 	public void closeSession(String handle) {
-		messageRouter.closeSession(handle);
+		String[] tokens = handle.split(":");
+		if(StringUtil.isEmpty(tokens[0])) {
+			return;
+		}
+		if(tokens[0].equals("message")) {
+			messageRouter.closeSession(handle);
+		}else if(tokens[0].equals("resource")) {
+			resourceManager.closeSession(handle);
+		}else {
+		}
+	}
+	
+	public void testAS(String loadType) {
+		boolean res = resourceManager.putMetaData(loadType, "my_grid", "key", 100, "value", "test result");
+		if(res) {
+			System.out.println("ok");
+			String data = resourceManager.getMetaData(loadType, "my_grid", "key", 100);
+			System.out.println("result: " + data);
+		}else {
+			System.out.println("failed");
+		}
 	}
 	
 	public void sendMessage(String handle, String data) {
@@ -61,7 +90,13 @@ public class BaseProxy {
 				messageRouter.sendMessage(handle, data);
 			});
 			**/
-		messageRouter.sendMessage(handle, data);
+		String[] tokens = handle.split(":");
+		if(StringUtil.isEmpty(tokens[0])) {
+			return;
+		}
+		if(tokens[0].equals("message")) {
+			messageRouter.sendMessage(handle, data);
+		}else { }
 	}
 	
 	public String receiveMessage(String handle) {
@@ -71,11 +106,26 @@ public class BaseProxy {
 				System.out.println("result:" + messageRouter.receiveMessage(handle));
 			});
 			**/
-		return messageRouter.receiveMessage(handle);
+		String[] tokens = handle.split(":");
+		if(StringUtil.isEmpty(tokens[0])) {
+			return "error:" + handle;
+		}
+		if(tokens[0].equals("message")) {
+			return messageRouter.receiveMessage(handle);
+		}else {
+			return "error:" + tokens[0];
+		}
 	}
 	
 	public void confirmMessage(String handle) {
-		messageRouter.confirmMessage(handle);
+		String[] tokens = handle.split(":");
+		if(StringUtil.isEmpty(tokens[0])) {
+			return;
+		}
+		if(tokens[0].equals("message")) {
+			messageRouter.confirmMessage(handle);
+		}else {
+		}
 	}
 	
 	public String doBusiness(String eventType, String message) {

@@ -3,14 +3,11 @@ package com.skhynix.controller;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.skhynix.common.StringUtil;
 import com.skhynix.extern.BusinessBehavior;
 import com.skhynix.manager.MetaDataManager;
+import com.skhynix.model.factory.WaferData;
 
-/**
- * Proxy 에서 콜하는 Logic Class 이다.
- * @author fullipsori
- *
- */
 public class BusinessLogic implements BusinessBehavior {
 
 	private static final BusinessLogic instance = new BusinessLogic();
@@ -27,15 +24,18 @@ public class BusinessLogic implements BusinessBehavior {
 		this.businessBehavior = businessBehavior;
 	}
 
-	public Consumer<Object> resultConsumer = result -> {
-		System.out.println("result:" + (String)result);
+	public Consumer<Object> resultConsumer = response -> {
+		System.out.println("doBusiness Callback:" + (String)response);
 	};
 
 	@Override
 	public String doBusiness(String eventType, String message, Function<Object, Object> metaSource, Consumer<Object> resultConsumer) throws Exception {
 		// TODO Auto-generated method stub
 		if(businessBehavior != null) {
-			return businessBehavior.doBusiness(eventType, message, 
+			/* 테스트를 위해 WaferModel json 데이터로 변환하여 보낸다. */
+			WaferData waferData = new WaferData().setWaferId("wafer-1919").setMessage(message).setMetadataKey(1).setSensorData("090909");
+			String jsonString = StringUtil.objectToJson(waferData);
+			return businessBehavior.doBusiness(eventType, jsonString, 
 					(metaSource == null)? metaDataManager.defaultDataSourcer : metaSource, 
 					(resultConsumer == null)? this.resultConsumer : resultConsumer);
 		} else {

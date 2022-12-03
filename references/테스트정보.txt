@@ -1,3 +1,36 @@
+[실행]
+/projects/tibco/hynix/ecm_dcm/ems_folder/ems_1/tibemsd
+/projects/tibco/hynix/ecm_dcm/ems_folder/ems_2/tibemsd
+
+~/tibco/gems/rungems.sh
+
+ --- tibemsd -config tibemsd_1.conf
+/projects/tibco/hynix/ecm_dcm/ems_folder/tea
+/projects/tibco/hynix/ecm_dcm/ems_folder/bwagent
+~/tibco/bw/6.9/domains/DOMAIN/appnodes/SPACE1/NODE1/log - tail -f bwappnode.log
+localhost:8777
+
+/DevTools/kafka_2.13-3.3.1/ -- zookeeper-server-start.sh ./config/zookeeper.properties
+/DevTools/kafka_2.13-3.3.1/ -- kafka-server-start.sh ./config/server.properties
+
+[AS]
+soft file limit 변경 : 256 -> 30000
+ - ulimit -n 30000
+1. ftl 실행 폴더로 이동
+    ~/projects/tibco/hynix/ecm_dcm/workspace/datagrid
+2. ftl server 실행
+  - tibftlserver -n asftl@localhost:8585
+3. copyset/keeper/proxy/table 을 생성한다.
+  - tibdg -r http://localhost:8585 -s my_grid.tibdg
+4. keeper 시작
+  - tibdgkeeper -r http://localhost:8585 -name my_keeper
+5. node 시작
+  - tibdgnode -r http://localhost:8585 -name my_node
+6. proxy 시작
+  - tibdgproxy -r http://localhost:8585 -n my_proxy
+
+table (my_grid, key long, value string)
+
 [EMS 테스트]
     {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q"}
     {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q", "role": "receiver"}
@@ -6,7 +39,11 @@
     {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"test.kafka.topic"}
 
 [AS]
+    {"command":"init-as","parameter":"resource:as", "parameter2":"", "parameter3":"", "parameter4":""}
 
 
 [load jar] ctrl.q
    {"command":"load-jar", "parameter":"com.hynix.logic.BusinessLogic","parameter2":"business","parameter3":"/Users/fullipsori/projects/tibco/hynix/ecm_dcm/workspace/BusinessLogic/target/BusinessLogic-0.0.1.jar","parameter4":""}
+
+/lib, /lib/64, /lib, ., /Users/fullipsori/Library/Java/Extensions, /Library/Java/Extensions, /Network/Library/Java/Extensions, /System/Library/Java/Extensions, /usr/lib/java, .]].-{ActivityName=loadAS, Pro
+

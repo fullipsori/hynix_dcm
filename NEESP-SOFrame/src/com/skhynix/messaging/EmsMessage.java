@@ -14,9 +14,9 @@ import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
-import com.skhynix.model.BaseSessModel;
-import com.skhynix.model.EmsSessModel;
-import com.skhynix.model.EmsSessModel.SESS_MODE;
+import com.skhynix.model.session.BaseSessModel;
+import com.skhynix.model.session.EmsSessModel;
+import com.skhynix.model.session.EmsSessModel.SESS_MODE;
 
 public class EmsMessage extends BaseConnection implements DynaLoadable, Messageable {
 	

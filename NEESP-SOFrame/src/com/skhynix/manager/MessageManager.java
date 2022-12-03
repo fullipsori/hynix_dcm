@@ -9,7 +9,7 @@ import com.skhynix.extern.Sessionable;
 import com.skhynix.messaging.EmsMessage;
 import com.skhynix.messaging.FtlMessage;
 import com.skhynix.messaging.KafkaMessage;
-import com.skhynix.model.BaseSessModel;
+import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
 public class MessageManager extends BaseManager implements Messageable, Sessionable {
