@@ -36,6 +36,11 @@ public class StringUtil {
 		return false;
 	}
 	
+	public static boolean isNotEmpty(String data) {
+		if(data == null || data.isEmpty()) return false;
+		return true;
+	}
+	
 	public static boolean contains(String[] dataSet, String data) {
 		if(dataSet == null) return false;
 		return Arrays.stream(dataSet).anyMatch(data::equals);

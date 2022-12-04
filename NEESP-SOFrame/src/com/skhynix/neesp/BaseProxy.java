@@ -42,18 +42,18 @@ public class BaseProxy {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public String openSession(String domain, String jsonString) {
-		if(StringUtil.isEmpty(domain) || StringUtil.isEmpty(jsonString)) return "";
+	public String openSession(String joinType, String jsonString) {
+		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		String[] tokens = domain.split(":");
+		String[] tokens = joinType.split(":");
 		if(StringUtil.isEmpty(tokens[0])) {
-			return "error:" + domain;
+			return "error:" + joinType;
 		}
 		String serverUrl = (String)params.get("serverUrl");
 		if(tokens[0].equals("message")) {
-			return messageRouter.openSession(domain, serverUrl, jsonString);
+			return messageRouter.openSession(joinType, serverUrl, jsonString);
 		}else if(tokens[0].equals("resource")) {
-			String res = resourceManager.openSession(domain, serverUrl, jsonString);
+			String res = resourceManager.openSession(joinType, serverUrl, jsonString);
 			return res;
 		}else {
 			return "error:" + tokens[0];
@@ -129,6 +129,11 @@ public class BaseProxy {
 		}
 	}
 	
+	public void sendMessageToTargets(String handles, String message) {
+		String[] targets = handles.split(",");
+		messageRouter.sendAsyncTo(targets, message);
+	}
+
 	public String doBusiness(String eventType, String message) {
 		try {
 			return businessLogic.doBusiness(eventType, message, null, null);

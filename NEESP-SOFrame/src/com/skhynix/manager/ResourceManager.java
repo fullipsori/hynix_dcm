@@ -78,7 +78,7 @@ public class ResourceManager extends BaseManager implements Sessionable {
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
-				register(jointype, c);
+				register(domain, c);
 				return c;
 			}).orElse(null);
 		}

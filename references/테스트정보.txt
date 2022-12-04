@@ -36,7 +36,7 @@ table (my_grid, key long, value string)
     {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q", "role": "receiver"}
 
 [KAFKA]
-    {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"test.kafka.topic"}
+    {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"skhynix.message"}
 
 [Running]
 [AS] ctrl.q

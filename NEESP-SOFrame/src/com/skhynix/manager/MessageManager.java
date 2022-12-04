@@ -91,7 +91,7 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
-				register(jointype, c);
+				register(domain, c);
 				return c;
 			}).orElse(null);
 		}
