@@ -87,8 +87,8 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String handle = String.format("%s:%s", jointype, serverUrl);
-		Object client = getMember(handle);
+		String domain = String.format("%s:%s", jointype, serverUrl);
+		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
 				register(jointype, c);
@@ -96,7 +96,7 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 			}).orElse(null);
 		}
 		return (client != null && Sessionable.class.isInstance(client)) ? 
-				((Sessionable)client).openSession(jointype, serverUrl, jsonParams) : "";
+				((Sessionable)client).openSession(domain, serverUrl, jsonParams) : "";
 	}
 
 	@Override

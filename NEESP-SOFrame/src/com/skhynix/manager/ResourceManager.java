@@ -74,16 +74,19 @@ public class ResourceManager extends BaseManager implements Sessionable {
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String handle = String.format("%s:%s", jointype, serverUrl);
-		Object client = getMember(handle);
+		String domain = String.format("%s:%s", jointype, serverUrl);
+		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
 				register(jointype, c);
 				return c;
 			}).orElse(null);
 		}
-		return (client != null && Sessionable.class.isInstance(client)) ? 
-				((Sessionable)client).openSession(jointype, serverUrl, jsonParams) : "";
+		String handle = (client != null && Sessionable.class.isInstance(client)) ? 
+				((Sessionable)client).openSession(domain, serverUrl, jsonParams) : "";
+
+		if(!StringUtil.isEmpty(handle)) resourceMap.put(jointype, handle);
+		return handle;
 	}
 
 	@Override

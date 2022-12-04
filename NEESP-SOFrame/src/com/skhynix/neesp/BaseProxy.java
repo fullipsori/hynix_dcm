@@ -53,7 +53,8 @@ public class BaseProxy {
 		if(tokens[0].equals("message")) {
 			return messageRouter.openSession(domain, serverUrl, jsonString);
 		}else if(tokens[0].equals("resource")) {
-			return resourceManager.openSession(domain, serverUrl, jsonString);
+			String res = resourceManager.openSession(domain, serverUrl, jsonString);
+			return res;
 		}else {
 			return "error:" + tokens[0];
 		}

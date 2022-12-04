@@ -38,12 +38,14 @@ table (my_grid, key long, value string)
 [KAFKA]
     {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"test.kafka.topic"}
 
-[AS]
+[Running]
+[AS] ctrl.q
     {"command":"init-as","parameter":"resource:as", "parameter2":"", "parameter3":"", "parameter4":""}
 
 
 [load jar] ctrl.q
-   {"command":"load-jar", "parameter":"com.hynix.logic.BusinessLogic","parameter2":"business","parameter3":"/Users/fullipsori/projects/tibco/hynix/ecm_dcm/workspace/BusinessLogic/target/BusinessLogic-0.0.1.jar","parameter4":""}
+   {"command":"load-jar", "parameter":"com.skhynix.logic.BusinessLogic","parameter2":"business","parameter3":"/Users/fullipsori/projects/tibco/hynix/ecm_dcm/hynix_dcm/BusinessLogic/target/BusinessLogic-0.0.1.jar","parameter4":""}
 
-/lib, /lib/64, /lib, ., /Users/fullipsori/Library/Java/Extensions, /Library/Java/Extensions, /Network/Library/Java/Extensions, /System/Library/Java/Extensions, /usr/lib/java, .]].-{ActivityName=loadAS, Pro
 
+[Test] q.eqp.each.test
+    {"command":"sim-test-each", "parameter":"queueName|EQP","parameter2":"loopcount|100", "parameter3":"sleeptime|100","parameter4":"테스트용 메시지 생성하기"}

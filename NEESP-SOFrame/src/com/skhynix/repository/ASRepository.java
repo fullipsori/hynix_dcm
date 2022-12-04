@@ -144,8 +144,8 @@ public class ASRepository extends BaseConnection implements Resourceable {
         if(serverModel == null || serverModel.serverHandle == null || asClient.session == null) return null;
         if(tableName == null || tableName.isEmpty())  return null;
 
-        try( Table table = ((Session)asClient.session).openTable(tableName, asClient.properties) ) {
-        	return OPERATION.applyOperation(operation, table, keyName, key, valueName, value, asClient.properties);
+        try( Table table = ((Session)asClient.session).openTable(tableName, ((ASSessModel)serverModel).properties) ) {
+        	return OPERATION.applyOperation(operation, table, keyName, key, valueName, value, ((ASSessModel)asClient).properties);
 
         }catch(DataGridException dataGridException) {
             dataGridException.printStackTrace(System.err);
@@ -164,16 +164,16 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	public boolean connectServer(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return false;
-		ASSessModel asClient = (ASSessModel) client;
+		ASSessModel serverModel = (ASSessModel) client;
 
 		if(StringUtil.isEmpty(client.serverUrl)) {
-			client.serverUrl = defaultServerUrl;
+			serverModel.serverUrl = defaultServerUrl;
 		}
 
 		try {
-			String gridName = asClient.gridName;
-			asClient.properties = createDefaultProperties(asClient);
-			serverModel.serverHandle = DataGrid.connect(asClient.serverUrl, gridName, asClient.properties);
+			String gridName = serverModel.gridName;
+			serverModel.properties = createDefaultProperties(serverModel);
+			serverModel.serverHandle = DataGrid.connect(serverModel.serverUrl, gridName, serverModel.properties);
 		} catch (DataGridException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -209,10 +209,9 @@ public class ASRepository extends BaseConnection implements Resourceable {
 		// TODO Auto-generated method stub
 		if(!ASSessModel.class.isInstance(client)) return null;
 		ASSessModel asClient = (ASSessModel) client;
-		
-		if(serverModel == null || serverModel.serverHandle == null || asClient.properties == null) return null;
+		if(serverModel == null || serverModel.serverHandle == null || ((ASSessModel)serverModel).properties == null) return null;
 		try {
-			asClient.session = ((Connection)serverModel.serverHandle).createSession(asClient.properties);
+			asClient.session = ((Connection)serverModel.serverHandle).createSession(((ASSessModel)serverModel).properties);
 			return asClient;
 		} catch (DataGridException e) {
 			// TODO Auto-generated catch block
@@ -240,6 +239,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	@Override
 	public boolean create(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
 		// TODO Auto-generated method stub
+
 		Object client = clientMap.get(handle);
 		if(client != null && ASSessModel.class.isInstance(client)) {
 			ASSessModel asSessModel = (ASSessModel) client;
@@ -262,7 +262,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), null, null);
+					return runCommand(asSessModel, table, OPERATION.GET, key.getFirst(), key.getSecond(), null, null);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -279,7 +279,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
+					return (Boolean)runCommand(asSessModel, table, OPERATION.UPDATE, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -296,7 +296,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), null, null);
+					return (Boolean)runCommand(asSessModel, table, OPERATION.DELETE, key.getFirst(), key.getSecond(), null, null);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
