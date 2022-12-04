@@ -162,7 +162,7 @@
       <packaging:technologyVersion>1.0.0.qualifier</packaging:technologyVersion>
     </packaging:module>
     <packaging:module>
-      <packaging:symbolicName>com.tibco.extlib</packaging:symbolicName>
+      <packaging:symbolicName>com.shhynix.extlib</packaging:symbolicName>
       <packaging:technologyType>osgi-bundle</packaging:technologyType>
       <packaging:technologyVersion>1.0.0</packaging:technologyVersion>
     </packaging:module>
