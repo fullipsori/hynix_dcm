@@ -4,6 +4,5 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="reactive-streams-1.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="rxjava-3.1.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="tibdg.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

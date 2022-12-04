@@ -3,7 +3,7 @@
 	<name>NEESP-SOFrame</name>
 	<comment></comment>
 	<projects>
-		<project>com.tibco.extlib</project>
+		<project>com.shhynix.extlib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
