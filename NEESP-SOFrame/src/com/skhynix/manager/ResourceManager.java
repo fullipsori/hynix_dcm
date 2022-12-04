@@ -1,21 +1,20 @@
 package com.skhynix.manager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.skhynix.base.BaseManager;
-import com.skhynix.common.Pair;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
+import com.skhynix.extern.Pair;
 import com.skhynix.extern.Resourceable;
-import com.skhynix.extern.Sessionable;
+import com.skhynix.extern.SessionBehavior;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.repository.ASRepository;
 
-public class ResourceManager extends BaseManager implements Sessionable {
+public class ResourceManager extends BaseManager implements SessionBehavior, Resourceable {
 	private static final ResourceManager instance = new ResourceManager();
 //	private final ASRepository asRepository = ASRepository.getInstance();
 //	private final DBRepository dbRepository = DBRepository.getInstance();
@@ -33,29 +32,6 @@ public class ResourceManager extends BaseManager implements Sessionable {
 	}
 	
 	public void initRepos() {
-	}
-	
-	public String getMetaData(String joinType, String table, String keyname, long key) {
-		String handle = resourceMap.get(joinType);
-		if(StringUtil.isEmpty(handle)) return "unknown joinType :" + joinType;
-		Object client = getMember(handle);
-		if(Resourceable.class.isInstance(client)) {
-			return (String)((Resourceable)client).retrieve(handle, table, new Pair<String, Long>(keyname, key));
-		}
-		return "";
-	}
-	
-	public boolean putMetaData(String joinType, String table, String keyname,long key, String colname, String colvalue) {
-		String handle = resourceMap.get(joinType);
-		if(StringUtil.isEmpty(handle)) return false;
-		Object client = getMember(handle);
-		if(Resourceable.class.isInstance(client)) {
-			List<Pair<String,? extends Object>> columns = new ArrayList<>();
-			Pair<String, String>  column = new Pair<>(colname, colvalue);
-			columns.add(column);
-			return ((Resourceable)client).create(handle, table, new Pair<String, Long>(keyname, key), columns);
-		}
-		return false;
 	}
 	
 	@Override
@@ -82,8 +58,8 @@ public class ResourceManager extends BaseManager implements Sessionable {
 				return c;
 			}).orElse(null);
 		}
-		String handle = (client != null && Sessionable.class.isInstance(client)) ? 
-				((Sessionable)client).openSession(domain, serverUrl, jsonParams) : "";
+		String handle = (client != null && SessionBehavior.class.isInstance(client)) ? 
+				((SessionBehavior)client).openSession(domain, serverUrl, jsonParams) : "";
 
 		if(!StringUtil.isEmpty(handle)) resourceMap.put(jointype, handle);
 		return handle;
@@ -92,8 +68,8 @@ public class ResourceManager extends BaseManager implements Sessionable {
 	@Override
 	public boolean closeSession(String handle) {
 		Object client = getMember(handle);
-		if(client != null && Sessionable.class.isInstance(client))
-			return ((Sessionable)client).closeSession(handle);
+		if(client != null && SessionBehavior.class.isInstance(client))
+			return ((SessionBehavior)client).closeSession(handle);
 		else return false;
 	}
 	
@@ -137,5 +113,39 @@ public class ResourceManager extends BaseManager implements Sessionable {
 	public void closeAllSession() {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public boolean create(String joinType, String table, Pair<String, ? extends Object> key,
+			List<Pair<String, ? extends Object>> params) {
+		// TODO Auto-generated method stub
+		String handle = resourceMap.get(joinType);
+		if(StringUtil.isEmpty(handle)) return false;
+		Object client = getMember(handle);
+		if(Resourceable.class.isInstance(client)) {
+			return ((Resourceable)client).create(handle, table, key,  params);
+		}
+		return false;
+	}
+	@Override
+	public Object retrieve(String joinType, String table, Pair<String, ? extends Object> key) {
+		// TODO Auto-generated method stub
+		String handle = resourceMap.get(joinType);
+		if(StringUtil.isEmpty(handle)) return "unknown joinType :" + joinType;
+		Object client = getMember(handle);
+		if(Resourceable.class.isInstance(client)) {
+			return (String)((Resourceable)client).retrieve(handle, table, key);
+		}
+		return "";
+	}
+	@Override
+	public boolean update(String handle, String table, Pair<String, ? extends Object> key,
+			List<Pair<String, ? extends Object>> params) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean delete(String handle, String table, Pair<String, ? extends Object> key) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

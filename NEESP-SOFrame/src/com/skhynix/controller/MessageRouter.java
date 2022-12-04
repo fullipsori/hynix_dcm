@@ -9,10 +9,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.skhynix.common.Pair;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Messageable;
-import com.skhynix.extern.Sessionable;
+import com.skhynix.extern.Pair;
+import com.skhynix.extern.SessionBehavior;
 import com.skhynix.manager.MessageManager;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 
-public class MessageRouter implements Sessionable, Messageable {
+public class MessageRouter implements SessionBehavior, Messageable {
 	private static final MessageRouter instance = new MessageRouter();
 	
 	private final LogManager logger = LogManager.getInstance();

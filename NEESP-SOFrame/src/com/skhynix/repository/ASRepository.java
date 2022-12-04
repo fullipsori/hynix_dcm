@@ -13,8 +13,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 import com.skhynix.base.BaseConnection;
-import com.skhynix.common.Pair;
 import com.skhynix.common.StringUtil;
+import com.skhynix.extern.Pair;
 import com.skhynix.extern.Resourceable;
 import com.skhynix.model.session.ASSessModel;
 import com.skhynix.model.session.BaseSessModel;

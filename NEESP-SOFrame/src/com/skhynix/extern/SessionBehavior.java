@@ -2,7 +2,7 @@ package com.skhynix.extern;
 
 import com.skhynix.model.session.BaseSessModel;
 
-public interface Sessionable {
+public interface SessionBehavior {
 
 	public BaseSessModel makeSessModel(String domain, String jsonParams);
 

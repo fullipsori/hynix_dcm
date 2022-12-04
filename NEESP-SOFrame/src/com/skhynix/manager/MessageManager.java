@@ -5,14 +5,14 @@ import java.util.Optional;
 import com.skhynix.base.BaseManager;
 import com.skhynix.extern.Joinable;
 import com.skhynix.extern.Messageable;
-import com.skhynix.extern.Sessionable;
+import com.skhynix.extern.SessionBehavior;
 import com.skhynix.messaging.EmsMessage;
 import com.skhynix.messaging.FtlMessage;
 import com.skhynix.messaging.KafkaMessage;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
-public class MessageManager extends BaseManager implements Messageable, Sessionable {
+public class MessageManager extends BaseManager implements Messageable, SessionBehavior {
 	private static final MessageManager instance = new MessageManager();
 	private final DynaClassManager dynaClassManager = DynaClassManager.getInstance();
 	private final LogManager logManager = LogManager.getInstance();
@@ -95,15 +95,15 @@ public class MessageManager extends BaseManager implements Messageable, Sessiona
 				return c;
 			}).orElse(null);
 		}
-		return (client != null && Sessionable.class.isInstance(client)) ? 
-				((Sessionable)client).openSession(domain, serverUrl, jsonParams) : "";
+		return (client != null && SessionBehavior.class.isInstance(client)) ? 
+				((SessionBehavior)client).openSession(domain, serverUrl, jsonParams) : "";
 	}
 
 	@Override
 	public boolean closeSession(String handle) {
 		Object client = getMember(handle);
-		if(client != null && Sessionable.class.isInstance(client))
-			return ((Sessionable)client).closeSession(handle);
+		if(client != null && SessionBehavior.class.isInstance(client))
+			return ((SessionBehavior)client).closeSession(handle);
 		else return false;
 	}
 	

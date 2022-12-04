@@ -4087,14 +4087,6 @@
             name="doBusiness" sca-bpel:internal="true"/>
         <bpws:variable element="ns7:ActivityErrorData"
             name="_error_doBusiness" sca-bpel:internal="true"/>
-        <bpws:variable name="DynamicLoadingInstance"
-            sca-bpel:hotUpdate="false" sca-bpel:privateProperty="true"
-            sca-bpel:property="yes"
-            sca-bpel:sharedResourceType="{http://ns.tibco.com/bw/palette/javasharedresource}JavaGlobalInstanceResource" type="xsd:string">
-            <bpws:from>
-                <bpws:literal>narf-sw.DynamicLoading</bpws:literal>
-            </bpws:from>
-        </bpws:variable>
         <bpws:variable name="jmsConnForFDC" sca-bpel:hotUpdate="false"
             sca-bpel:privateProperty="true" sca-bpel:property="yes"
             sca-bpel:sharedResourceType="{http://xsd.tns.tibco.com/bw/models/sharedresource/jms}JMSConnectionFactory" type="xsd:string">

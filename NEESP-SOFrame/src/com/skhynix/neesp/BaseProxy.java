@@ -9,6 +9,7 @@ import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
 import com.skhynix.manager.BusinessManager;
 import com.skhynix.manager.DynaClassManager;
+import com.skhynix.manager.MetaDataManager;
 import com.skhynix.manager.ResourceManager;
 import com.skhynix.neesp.log.LogManager;
 import com.skhynix.neesp.log.NEESPLogger;
@@ -29,6 +30,7 @@ public class BaseProxy {
 	private final BusinessManager businessManager = BusinessManager.getInstance();
 	private final BusinessLogic businessLogic = BusinessLogic.getInstance();
 	private final ResourceManager resourceManager = ResourceManager.getInstance();
+	private final MetaDataManager metaDataManager = MetaDataManager.getInstance();
 
 	public BaseProxy() {
 		// 생성자
@@ -74,10 +76,10 @@ public class BaseProxy {
 	}
 	
 	public void testAS(String loadType) {
-		boolean res = resourceManager.putMetaData(loadType, "my_grid", "key", 100, "value", "test result");
+		boolean res = metaDataManager.putMetaData(loadType, "my_grid", "key", 100, "value", "test result");
 		if(res) {
 			System.out.println("ok");
-			String data = resourceManager.getMetaData(loadType, "my_grid", "key", 100);
+			String data = metaDataManager.getMetaData(loadType, "my_grid", "key", 100);
 			System.out.println("result: " + data);
 		}else {
 			System.out.println("failed");

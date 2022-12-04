@@ -18,9 +18,6 @@
   <sca:component xmi:id="_pnd6gFGNEe21JKJ09Gk6VQ" name="ComponentProcess" compositeext:version="1.0.0.qualifier">
     <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_pnd6gVGNEe21JKJ09Gk6VQ" processName="neesp-sw.SW-Init"/>
   </sca:component>
-  <sca:component xmi:id="_ZLhG0FHMEe21JKJ09Gk6VQ" name="ComponentEMS_CTRL_INVOKE" compositeext:version="1.0.0.qualifier">
-    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ZLhG0VHMEe21JKJ09Gk6VQ" processName="admin.EMS_CTRL_INVOKE"/>
-  </sca:component>
   <sca:component xmi:id="_ZWj5MFHMEe21JKJ09Gk6VQ" name="ComponentEMS_CTRL_LOAD" compositeext:version="1.0.0.qualifier">
     <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ZWj5MVHMEe21JKJ09Gk6VQ" processName="admin.EMS_CTRL_LOAD"/>
   </sca:component>

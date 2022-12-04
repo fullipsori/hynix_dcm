@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.skhynix.extern.Joinable;
-import com.skhynix.extern.Sessionable;
+import com.skhynix.extern.SessionBehavior;
 import com.skhynix.model.session.BaseSessModel;
 
-abstract public class BaseConnection implements Sessionable, Joinable {
+abstract public class BaseConnection implements SessionBehavior, Joinable {
 
 	protected Runnable unregister = null;
 
