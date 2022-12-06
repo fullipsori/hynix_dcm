@@ -1,5 +1,6 @@
 package com.skhynix.neesp;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -136,9 +137,19 @@ public class BaseProxy {
 		messageRouter.sendAsyncTo(targets, message);
 	}
 
-	public String doBusiness(String eventType, String message) {
+	/** 
+	 * Message route handle 들을 Map type 으로 전달하도록 하고, 나중에 다시 변경하도록 한다.
+	 * @param eventType
+	 * @param message
+	 * @return
+	 */
+	public String doBusiness(String eventType, String message, String emsHandle, String kafkaHandle, String ftlHandle) {
 		try {
-			return businessLogic.doBusiness(eventType, message, null, null);
+			Map<String,String> handles = new HashMap<>();
+			if(StringUtil.isNotEmpty(emsHandle)) handles.put("ems", emsHandle);
+			if(StringUtil.isNotEmpty(kafkaHandle)) handles.put("kafka", kafkaHandle);
+			if(StringUtil.isNotEmpty(ftlHandle)) handles.put("ftl", ftlHandle);
+			return businessLogic.doBusiness(eventType, message, handles, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "error";
@@ -422,7 +433,7 @@ public class BaseProxy {
         return retVals;
     }
     
-     public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge) {
+     public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge, String emsHandle, String kafkaHandle, String ftlHandle) {
         String[] retVals = {"",""}; 
         
         System.out.println("doBusiness");
@@ -452,7 +463,7 @@ public class BaseProxy {
         SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).increaseEventCount(eventType);
         
         // fullipsori
-        doBusiness(eventType, messge);
+        doBusiness(eventType, messge, emsHandle, kafkaHandle, ftlHandle);
         return retVals;
     }
      

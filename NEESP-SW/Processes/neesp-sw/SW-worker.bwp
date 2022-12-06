@@ -66,6 +66,7 @@
     xmlns:ns61="www.tibco.com/plugin/java/JavaInvokeActivityInput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityInput"
     xmlns:ns62="www.tibco.com/plugin/java/JavaInvokeActivityOutput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityOutput"
     xmlns:ns63="http://tns.tibco.com/bw/palette/internal/activityerror+e80f7208-110f-46cc-8301-318bd5e76d78"
+    xmlns:ns64="http://www.tibco.com/namespaces/tnt/plugins/jms+ace233de-431d-4ede-9f5b-88b24708777e+input"
     xmlns:ns7="http://tns.tibco.com/bw/palette/internal/activityerror+a2199e7c-b6f2-4d82-802d-59972308e24b"
     xmlns:ns8="http://www.tibco.com/namespaces/tnt/plugins/jms+a1fbddd5-c0a6-4e8e-a977-a58ba3422804+input"
     xmlns:ns9="http://tns.tibco.com/bw/palette/internal/activityerror+bw.jms.send"
@@ -91,9 +92,9 @@
         </task>
         <task name="OuterWhile">
             <endingVariables>
-                <variable>OpenEMS</variable>
-                <variable>EMS_RECEIVER</variable>
-                <variable>KAFKA_RECEIVER</variable>
+                <variable>MR_EMS</variable>
+                <variable>MR_KAFKA</variable>
+                <variable>OPEN_RECV_EMS</variable>
                 <variable>outerIndex</variable>
             </endingVariables>
         </task>
@@ -160,10 +161,10 @@
                 <variable>Received-input</variable>
             </endingVariables>
         </task>
-        <task name="msgRoute">
+        <task name="SendToFDC">
             <endingVariables>
-                <variable>msgRoute-input</variable>
-                <variable>msgRoute</variable>
+                <variable>SendToFDC-input</variable>
+                <variable>SendToFDC</variable>
                 <variable>doBusiness</variable>
             </endingVariables>
         </task>
@@ -207,19 +208,19 @@
                 <variable>SendErrorMsg</variable>
             </endingVariables>
         </task>
-        <task name="OpenEMS">
+        <task name="OPEN_RECV_EMS">
             <endingVariables>
-                <variable>OpenEMS-input</variable>
+                <variable>OPEN_RECV_EMS-input</variable>
             </endingVariables>
         </task>
-        <task name="EMS_RECEIVER">
+        <task name="MR_EMS">
             <endingVariables>
-                <variable>EMS_RECEIVER-input</variable>
+                <variable>MR_EMS-input</variable>
             </endingVariables>
         </task>
-        <task name="KAFKA_RECEIVER">
+        <task name="MR_KAFKA">
             <endingVariables>
-                <variable>KAFKA_RECEIVER-input</variable>
+                <variable>MR_KAFKA-input</variable>
             </endingVariables>
         </task>
     </tibex:VariableDescriptor>
@@ -656,6 +657,12 @@
                         minOccurs="1" name="eventType" type="string"/>
                     <element form="unqualified" maxOccurs="1"
                         minOccurs="1" name="messge" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="emsHandle" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="kafkaHandle" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="ftlHandle" type="string"/>
                 </sequence>
             </complexType>
             <element name="JavaInvokeActivityInput" type="tns:MutTypeMethodInputRoot"/>
@@ -1939,47 +1946,190 @@
                 </choice>
             </complexType>
         </schema>
-        <schema attributeFormDefault="unqualified"
+        <xsd:schema attributeFormDefault="unqualified"
             elementFormDefault="qualified"
-            targetNamespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityInput"
-            xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="www.tibco.com/plugin/java/JavaInvokeActivityInput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityInput">
-            <complexType name="MutTypeMethodParameters">
-                <sequence>
-                    <element form="unqualified" maxOccurs="1"
-                        minOccurs="1" name="handles" type="string"/>
-                    <element form="unqualified" maxOccurs="1"
-                        minOccurs="1" name="message" type="string"/>
-                </sequence>
-            </complexType>
-            <element name="JavaInvokeActivityInput" type="tns:MutTypeMethodInputRoot"/>
-            <complexType name="MutTypeMethodInputRoot">
-                <sequence>
-                    <element form="unqualified" maxOccurs="1"
-                        minOccurs="1" name="MethodParameters" type="tns:MutTypeMethodParameters"/>
-                </sequence>
-            </complexType>
-        </schema>
-        <schema attributeFormDefault="unqualified"
-            elementFormDefault="qualified"
-            targetNamespace="www.tibco.com/plugin/java/JavaInvokeActivityOutput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityOutput"
-            xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="www.tibco.com/plugin/java/JavaInvokeActivityOutput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityOutput">
-            <element name="JavaInvokeActivityOutput" type="tns:MutTypeMethodOutputRoot"/>
-            <complexType name="MutTypeMethodOutputRoot">
-                <sequence/>
-            </complexType>
-        </schema>
-        <schema elementFormDefault="unqualified"
-            targetNamespace="http://tns.tibco.com/bw/palette/internal/activityerror+e80f7208-110f-46cc-8301-318bd5e76d78"
-            xmlns="http://www.w3.org/2001/XMLSchema"
-            xmlns:Q1="http://www.example.org/JavaExceptions" xmlns:tns="http://tns.tibco.com/bw/palette/internal/activityerror+e80f7208-110f-46cc-8301-318bd5e76d78">
-            <import namespace="http://www.example.org/JavaExceptions"/>
-            <element name="ActivityErrorData" type="tns:ActivityErrorDataType"/>
-            <complexType name="ActivityErrorDataType">
-                <choice>
-                    <element maxOccurs="1" minOccurs="0" ref="Q1:InvocationException"/>
-                </choice>
-            </complexType>
-        </schema>
+            targetNamespace="http://www.tibco.com/namespaces/tnt/plugins/jms+ace233de-431d-4ede-9f5b-88b24708777e+input"
+            version="0.1"
+            xmlns="http://www.tibco.com/namespaces/tnt/plugins/jms+ace233de-431d-4ede-9f5b-88b24708777e+input" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:complexType name="ActivityOutput">
+                <xsd:sequence>
+                    <xsd:element name="MessageID" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <!-- awagle addition -->
+            <xsd:complexType name="JMSTransmitInputSchemaType">
+                <xsd:sequence>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="destination" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="replyTo" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSExpiration" type="xsd:int"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSPriority" type="xsd:int"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSDeliveryMode" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSCorrelationID" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSType" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="JMSProperties" type="JmsTransmitProperties"/>
+                    <xsd:element form="unqualified" minOccurs="1"
+                        name="Body" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="DynamicProperties" type="JmsDynamicProperties"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsTransmitProperties">
+                <xsd:sequence>
+                    <!-- these two are actually useful and used (but group seq can't be set) -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXGroupID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXGroupSeq" type="xsd:int"/>
+                    <!-- tibco specific
+      <xsd:element name="JMS_TIBCO_MSG_EXT" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+      <xsd:element name="JMS_TIBCO_COMPRESS" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+      <! these two are TNT-specific, supporting the XML decoding
+      <xsd:element name="TIBCO_TNT_schema_reference" type="xsd:string" minOccurs="0" maxOccurs="1" />
+      <xsd:element name="TIBCO_TNT_root_element" type="xsd:string" minOccurs="0" maxOccurs="1" />
+      -->
+                    <!-- all other properties, vendor or application defined, in a standard format -->
+                    <!-- <xsd:element name="JMS_VendorDefined" type="typed-name-value-pair" minOccurs="0" maxOccurs="unbounded" />  -->
+                    <!-- <xsd:element name="JMS_ApplicationDefined" type="typed-name-value-pair" minOccurs="0" maxOccurs="unbounded" />  -->
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsHeaders">
+                <xsd:sequence>
+                    <!-- NOTE: a destination is actually an object.  We are able to treat is as a string
+           because the other items that define a destination (topic vs queue, server/connection)
+           are already defined in the config element.  We do the same for the ReplyTo -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSDestination" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSReplyTo" type="xsd:string"/>
+                    <!-- PROBLEM: this is actually an int, but we're representing it here as a string enumeration,
+  meaning that the app must then translate from the constants in JMS to the 'constants' in the enumeration -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSDeliveryMode" type="JmsDeliveryMode"/>
+                    <!-- actually an int ... -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSMessageID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSTimestamp" type="xsd:long"/>
+                    <!-- Java timestamp, millis from era -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSExpiration" type="xsd:long"/>
+                    <!-- Java timestamp, millis from era -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSRedelivered" type="xsd:boolean"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSPriority" type="JmsPriority"/>
+                    <!-- PROBLEM: correlation id can also be retrieved as a stream of bytes -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSCorrelationID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSType" type="xsd:string"/>
+                    <!-- <xsd:element name="EventSource" type="xsd:string" minOccurs="0" maxOccurs="1" /> -->
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsProperties">
+                <xsd:sequence>
+                    <!-- most of these are not really accessible, easily, but appear on incoming messages -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXUserID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXAppID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXProducerTXID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXConsumerTXID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXRcvTimestamp" type="xsd:long"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXDeliveryCount" type="xsd:int"/>
+                    <!-- these two are actually useful and used (but group seq can't be set) -->
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXGroupID" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="JMSXGroupSeq" type="xsd:int"/>
+                    <!-- tibco specific -->
+                    <!--<xsd:element name="JMS_TIBCO_MSG_EXT" type="xsd:boolean" minOccurs="0" maxOccurs="1" /> -->
+                    <!--<xsd:element name="JMS_TIBCO_COMPRESS" type="xsd:boolean" minOccurs="0" maxOccurs="1" /> -->
+                    <!-- these two are TNT-specific, supporting the XML decoding -->
+                    <!--<xsd:element name="TIBCO_TNT_schema_reference" type="xsd:string" minOccurs="0" maxOccurs="1" /> -->
+                    <!--<xsd:element name="TIBCO_TNT_root_element" type="xsd:string" minOccurs="0" maxOccurs="1" /> -->
+                    <!-- all other properties, vendor or application defined, in a standard format -->
+                    <!-- <xsd:element name="JMS_VendorDefined" type="typed-name-value-pair" minOccurs="0" maxOccurs="unbounded" />  -->
+                    <!-- <xsd:element name="JMS_ApplicationDefined" type="typed-name-value-pair" minOccurs="0" maxOccurs="unbounded" />  -->
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsDynamicProperties">
+                <xsd:sequence>
+                    <xsd:element maxOccurs="unbounded" minOccurs="0"
+                        name="property" type="JmsDynamicProperty"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsDynamicProperty">
+                <xsd:sequence>
+                    <xsd:element maxOccurs="1" minOccurs="1" name="name"
+                        nillable="true" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="1"
+                        name="value" nillable="true" type="xsd:string"/>
+                    <xsd:element maxOccurs="1" minOccurs="0" name="type"
+                        nillable="true" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JmsMessage">
+                <xsd:sequence>
+                    <xsd:element maxOccurs="1" minOccurs="1"
+                        name="MessageHeaders" type="JmsHeaders"/>
+                    <xsd:element maxOccurs="1" minOccurs="0"
+                        name="MessageProperties" type="JmsProperties"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="JMSReceiveSchema">
+                <xsd:sequence>
+                    <xsd:element form="unqualified" name="JMSHeaders" type="JmsHeaders"/>
+                    <xsd:element form="unqualified" name="JMSProperties" type="JmsProperties"/>
+                    <!-- <xsd:element name="OtherProperties" form="unqualified" type="tns:OtherProperties" minOccurs="0"/>-->
+                    <xsd:element form="unqualified" name="Body" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="DynamicProperties" type="JmsDynamicProperties"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:element name="ActivityOutput" type="JMSReceiveSchema"/>
+            <!-- enumerations for various constants -->
+            <xsd:simpleType name="JmsDeliveryMode">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="PERSISTENT"/>
+                    <xsd:enumeration value="NON_PERSISTENT"/>
+                    <xsd:enumeration value="RELIABLE_DELIVERY"/>
+                    <!-- Tibco Enterprise for JMS defined (TibjmsxConst) -->
+                    <!-- <xsd:enumeration value="NO_ACKNOWLEDGE" /> -->
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:simpleType name="JmsPriority">
+                <xsd:restriction base="xsd:int">
+                    <xsd:minInclusive value="0"/>
+                    <xsd:maxInclusive value="9"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            <xsd:element name="aEmptyOutputClass" type="ActivityOutput"/>
+            <xsd:element name="ActivityInput" type="JMSTransmitInputSchemaType"/>
+            <xsd:complexType name="JMSQueueGetMessageInputSchema">
+                <xsd:sequence>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="destinationQueue" type="xsd:string"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="timeout" type="xsd:long"/>
+                    <xsd:element form="unqualified" minOccurs="0"
+                        name="selector" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:element name="GetJMSActivityInput" type="JMSQueueGetMessageInputSchema"/>
+        </xsd:schema>
     </tibex:Types>
     <tibex:ProcessInfo callable="true" createdBy="tenye"
         createdOn="Sat Oct 22 11:12:34 KST 2022" description=""
@@ -2811,7 +2961,7 @@
                                     xsi:type="notation:Bounds" y="38"/>
                                     </children>
 
-                                    <children type="4002 bw.java.javamethod">
+                                    <children type="4002 bw.jms.send">
 
                                     <children type="4017">
 
@@ -2863,7 +3013,7 @@
                                     <layoutConstraint
                                     height="40"
                                     width="40"
-                                    x="668"
+                                    x="666"
                                     xsi:type="notation:Bounds" y="34"/>
                                     </children>
 
@@ -4062,6 +4212,8 @@
             namespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+ea85fe22-5b55-451c-acbf-7eccc5242304+JavaInvokeActivityInput" prefix="tns25"/>
         <tibex:namespaceItem
             namespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityInput" prefix="tns26"/>
+        <tibex:namespaceItem
+            namespace="http://www.tibco.com/namespaces/tnt/plugins/jms+ace233de-431d-4ede-9f5b-88b24708777e+input" prefix="tns27"/>
     </tibex:NamespaceRegistry>
     <bpws:import importType="http://www.w3.org/2001/XMLSchema" namespace="http://www.example.org/so-request"/>
     <bpws:import importType="http://www.w3.org/2001/XMLSchema" namespace="http://www.example.org/ControlMessage"/>
@@ -4208,29 +4360,28 @@
         <bpws:variable element="ns51:ActivityErrorData"
             name="_error_Received" sca-bpel:internal="true"/>
         <bpws:variable element="ns52:JavaInvokeActivityInput"
-            name="OpenEMS-input" sca-bpel:internal="true"/>
+            name="OPEN_RECV_EMS-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns53:JavaInvokeActivityOutput"
-            name="OpenEMS" sca-bpel:internal="true"/>
+            name="OPEN_RECV_EMS" sca-bpel:internal="true"/>
         <bpws:variable element="ns54:ActivityErrorData"
-            name="_error_OpenEMS" sca-bpel:internal="true"/>
+            name="_error_OPEN_RECV_EMS" sca-bpel:internal="true"/>
         <bpws:variable element="ns55:JavaInvokeActivityInput"
-            name="EMS_RECEIVER-input" sca-bpel:internal="true"/>
+            name="MR_EMS-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns56:JavaInvokeActivityOutput"
-            name="EMS_RECEIVER" sca-bpel:internal="true"/>
+            name="MR_EMS" sca-bpel:internal="true"/>
         <bpws:variable element="ns57:ActivityErrorData"
             name="_error_FDC_" sca-bpel:internal="true"/>
         <bpws:variable element="ns58:JavaInvokeActivityInput"
-            name="KAFKA_RECEIVER-input" sca-bpel:internal="true"/>
+            name="MR_KAFKA-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns59:JavaInvokeActivityOutput"
-            name="KAFKA_RECEIVER" sca-bpel:internal="true"/>
+            name="MR_KAFKA" sca-bpel:internal="true"/>
         <bpws:variable element="ns60:ActivityErrorData"
-            name="_error_KAFKA_RECEIVER" sca-bpel:internal="true"/>
-        <bpws:variable element="ns61:JavaInvokeActivityInput"
-            name="msgRoute-input" sca-bpel:internal="true"/>
-        <bpws:variable element="ns62:JavaInvokeActivityOutput"
-            name="msgRoute" sca-bpel:internal="true"/>
-        <bpws:variable element="ns63:ActivityErrorData"
-            name="_error_msgRoute" sca-bpel:internal="true"/>
+            name="_error_MR_KAFKA" sca-bpel:internal="true"/>
+        <bpws:variable element="ns64:ActivityInput"
+            name="SendToFDC-input" sca-bpel:internal="true"/>
+        <bpws:variable element="ns2:aEmptyOutputClass" name="SendToFDC" sca-bpel:internal="true"/>
+        <bpws:variable element="ns9:ActivityErrorData"
+            name="_error_SendToFDC" sca-bpel:internal="true"/>
     </bpws:variables>
     <bpws:extensions>
         <bpws:extension mustUnderstand="no" namespace="http://www.eclipse.org/gmf/runtime/1.0.2/notation"/>
@@ -4454,7 +4605,7 @@
                                     <bpws:link
                                     name="JavaInvokeToParseJSON" tibex:linkType="SUCCESS"/>
                                     <bpws:link
-                                    name="JavaInvokeTosendLog" tibex:linkType="SUCCESS"/>
+                                    name="JMSSendMessageTosendLog" tibex:linkType="SUCCESS"/>
                                     </bpws:links>
                                     <bpws:empty name="GroupStart"
                                     tibex:group="groupStart" tibex:xpdlId="ce26307b-6cde-4b72-8d2f-feedfa348c5b">
@@ -4482,7 +4633,7 @@
                                     </bpws:sources>
                                     <tibex:inputBindings>
                                     <tibex:inputBinding
-                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+a2199e7c-b6f2-4d82-802d-59972308e24b+JavaInvokeActivityInput&quot; xmlns:tns17=&quot;http://www.example.org/EventMessage&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&#xa;    &lt;xsl:param name=&quot;ParseJSON&quot;/>&#xa;    &lt;xsl:template name=&quot;doBusiness-input&quot; match=&quot;/&quot;>&#xa;        &lt;tns3:JavaInvokeActivityInput>&#xa;            &lt;MethodParameters>&#xa;                &lt;eqpId>&#xa;                    &lt;xsl:value-of select=&quot;$ParseJSON/tns17:eqpId&quot;/>&#xa;                &lt;/eqpId>&#xa;                &lt;appNodeName>&#xa;                    &lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&#xa;                &lt;/appNodeName>&#xa;                &lt;eventType>&#xa;                    &lt;xsl:value-of select=&quot;$ParseJSON/tns17:eventType&quot;/>&#xa;                &lt;/eventType>&#xa;                &lt;messge>&#xa;                    &lt;xsl:value-of select=&quot;$ParseJSON/tns17:messageBody&quot;/>&#xa;                &lt;/messge>&#xa;            &lt;/MethodParameters>&#xa;        &lt;/tns3:JavaInvokeActivityInput>&#xa;    &lt;/xsl:template>&#xa;&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+a2199e7c-b6f2-4d82-802d-59972308e24b+JavaInvokeActivityInput&quot; xmlns:tns17=&quot;http://www.example.org/EventMessage&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:param name=&quot;MR_EMS&quot;/>&lt;xsl:param name=&quot;MR_KAFKA&quot;/>&lt;xsl:template name=&quot;doBusiness-input&quot; match=&quot;/&quot;>&lt;tns3:JavaInvokeActivityInput>&lt;MethodParameters>&lt;eqpId>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eqpId&quot;/>&lt;/eqpId>&lt;appNodeName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&lt;/appNodeName>&lt;eventType>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eventType&quot;/>&lt;/eventType>&lt;messge>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:messageBody&quot;/>&lt;/messge>&lt;emsHandle>&lt;xsl:value-of select=&quot;$MR_EMS/MethodReturnValue&quot;/>&lt;/emsHandle>&lt;kafkaHandle>&lt;xsl:value-of select=&quot;$MR_KAFKA/MethodReturnValue&quot;/>&lt;/kafkaHandle>&lt;ftlHandle>&lt;xsl:value-of select=&quot;&amp;quot;&amp;quot;&quot;/>&lt;/ftlHandle>&lt;/MethodParameters>&lt;/tns3:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                                     </tibex:inputBindings>
                                     <tibex:config>
                                     <bwext:BWActivity
@@ -4513,6 +4664,15 @@
 
                                     <methodParameter
                                     paramName="messge" paramType="string"/>
+
+                                    <methodParameter
+                                    paramName="emsHandle" paramType="string"/>
+
+                                    <methodParameter
+                                    paramName="kafkaHandle" paramType="string"/>
+
+                                    <methodParameter
+                                    paramName="ftlHandle" paramType="string"/>
                                     </value>
                                     </properties>
                                     </activityConfig>
@@ -4900,7 +5060,7 @@
                                     outputVariable="sendLog"
                                     tibex:xpdlId="3d5d087a-a674-4905-8434-d712b692ec41" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                                     <bpws:targets>
-                                    <bpws:target linkName="JavaInvokeTosendLog"/>
+                                    <bpws:target linkName="JMSSendMessageTosendLog"/>
                                     </bpws:targets>
                                     <bpws:sources>
                                     <bpws:source linkName="JavaInvokeToReadyToNext"/>
@@ -4953,7 +5113,7 @@
                                     </bpws:sources>
                                     <tibex:inputBindings>
                                     <tibex:inputBinding
-                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns22=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+7ea02475-5dab-4cc3-9e66-1dd61a3b2fe2+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;OpenEMS&quot;/>&lt;xsl:template name=&quot;Received-input&quot; match=&quot;/&quot;>&lt;tns22:JavaInvokeActivityInput>&lt;MethodParameters>&lt;handle>&lt;xsl:value-of select=&quot;$OpenEMS/MethodReturnValue&quot;/>&lt;/handle>&lt;/MethodParameters>&lt;/tns22:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns22=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+7ea02475-5dab-4cc3-9e66-1dd61a3b2fe2+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&#xa;    &lt;xsl:param name=&quot;OPEN_RECV_EMS&quot;/>&#xa;    &lt;xsl:template name=&quot;Received-input&quot; match=&quot;/&quot;>&#xa;        &lt;tns22:JavaInvokeActivityInput>&#xa;            &lt;MethodParameters>&#xa;                &lt;handle>&#xa;                    &lt;xsl:value-of select=&quot;$OPEN_RECV_EMS/MethodReturnValue&quot;/>&#xa;                &lt;/handle>&#xa;            &lt;/MethodParameters>&#xa;        &lt;/tns22:JavaInvokeActivityInput>&#xa;    &lt;/xsl:template>&#xa;&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                                     </tibex:inputBindings>
                                     <tibex:config>
                                     <bwext:BWActivity
@@ -4984,44 +5144,35 @@
                                     </bpws:extensionActivity>
                                     <bpws:extensionActivity>
                                     <tibex:activityExtension
-                                    inputVariable="msgRoute-input"
-                                    name="msgRoute"
-                                    outputVariable="msgRoute"
-                                    tibex:xpdlId="e80f7208-110f-46cc-8301-318bd5e76d78" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
+                                    inputVariable="SendToFDC-input"
+                                    name="SendToFDC"
+                                    outputVariable="SendToFDC"
+                                    tibex:xpdlId="ace233de-431d-4ede-9f5b-88b24708777e" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                                     <bpws:targets>
                                     <bpws:target linkName="trxProcLogTosendLog"/>
                                     </bpws:targets>
                                     <bpws:sources>
-                                    <bpws:source linkName="JavaInvokeTosendLog"/>
+                                    <bpws:source linkName="JMSSendMessageTosendLog"/>
                                     </bpws:sources>
                                     <tibex:inputBindings>
                                     <tibex:inputBinding
-                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns26=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+e80f7208-110f-46cc-8301-318bd5e76d78+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;EMS_RECEIVER&quot;/>&lt;xsl:param name=&quot;KAFKA_RECEIVER&quot;/>&lt;xsl:param name=&quot;doBusiness&quot;/>&lt;xsl:template name=&quot;msgRoute-input&quot; match=&quot;/&quot;>&lt;tns26:JavaInvokeActivityInput>&lt;MethodParameters>&lt;handles>&lt;xsl:value-of select=&quot;concat($EMS_RECEIVER/MethodReturnValue, &amp;quot;,&amp;quot;, $KAFKA_RECEIVER/MethodReturnValue)&quot;/>&lt;/handles>&lt;message>&lt;xsl:value-of select=&quot;$doBusiness/MethodReturnValue[2]&quot;/>&lt;/message>&lt;/MethodParameters>&lt;/tns26:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns27=&quot;http://www.tibco.com/namespaces/tnt/plugins/jms+ace233de-431d-4ede-9f5b-88b24708777e+input&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;doBusiness&quot;/>&lt;xsl:template name=&quot;JMSSendMessage-input&quot; match=&quot;/&quot;>&lt;tns27:ActivityInput>&lt;xsl:if test=&quot;$doBusiness/MethodReturnValue[1]&quot;>&lt;destination>&lt;xsl:value-of select=&quot;$doBusiness/MethodReturnValue[1]&quot;/>&lt;/destination>&lt;/xsl:if>&lt;Body>&lt;xsl:value-of select=&quot;$doBusiness/MethodReturnValue[2]&quot;/>&lt;/Body>&lt;/tns27:ActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                                     </tibex:inputBindings>
                                     <tibex:config>
                                     <bwext:BWActivity
-                                    activityTypeID="bw.java.javamethod"
+                                    activityTypeID="bw.jms.send"
+                                    version="6.0.0.20132205"
                                     xmlns:activityconfig="http://tns.tibco.com/bw/model/activityconfig"
                                     xmlns:bwext="http://tns.tibco.com/bw/model/core/bwext"
-                                    xmlns:java="http://ns.tibco.com/bw/palette/java" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    xmlns:jms="http://ns.tibco.com/bw/palette/jms" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                                     <activityConfig>
                                     <properties
                                     name="config" xsi:type="activityconfig:EMFProperty">
-                                    <type href="http://ns.tibco.com/bw/palette/java#//JavaMethod"/>
+                                    <type href="http://ns.tibco.com/bw/palette/jms#//JMSSenderActivityConfiguration"/>
                                     <value
-                                    className="com.skhynix.neesp.BaseProxy"
-                                    isNew="true"
-                                    isNewActivity="true"
-                                    javaGlobalInstance="BaseProxyInstance"
-                                    methodName="sendMessageToTargets"
-                                    methodReturn="void" xsi:type="java:JavaMethod">
-
-                                    <methodParameter
-                                    paramName="handles" paramType="string"/>
-
-                                    <methodParameter
-                                    paramName="message" paramType="string"/>
-                                    </value>
+                                    connectionReference="jmsConnForFDC"
+                                    messagingStyle="Queue"
+                                    priority="4" xsi:type="jms:JMSSenderActivityConfiguration"/>
                                     </properties>
                                     </activityConfig>
                                     </bwext:BWActivity>
@@ -5356,8 +5507,9 @@
                 </tibex:activityExtension>
             </bpws:extensionActivity>
             <bpws:extensionActivity>
-                <tibex:activityExtension inputVariable="OpenEMS-input"
-                    name="OpenEMS" outputVariable="OpenEMS"
+                <tibex:activityExtension
+                    inputVariable="OPEN_RECV_EMS-input"
+                    name="OPEN_RECV_EMS" outputVariable="OPEN_RECV_EMS"
                     tibex:xpdlId="9dec5297-ffc1-41fb-9bbf-7b9f5049a1c3" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                     <bpws:targets>
                         <bpws:target linkName="AssignToOuterWhile"/>
@@ -5397,9 +5549,8 @@
                 </tibex:activityExtension>
             </bpws:extensionActivity>
             <bpws:extensionActivity>
-                <tibex:activityExtension
-                    inputVariable="EMS_RECEIVER-input"
-                    name="EMS_RECEIVER" outputVariable="EMS_RECEIVER"
+                <tibex:activityExtension inputVariable="MR_EMS-input"
+                    name="MR_EMS" outputVariable="MR_EMS"
                     tibex:xpdlId="b0d9722f-d13e-4048-9dc9-2cf740375e7e" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                     <bpws:targets>
                         <bpws:target linkName="OpenEMSToJavaInvoke"/>
@@ -5439,10 +5590,8 @@
                 </tibex:activityExtension>
             </bpws:extensionActivity>
             <bpws:extensionActivity>
-                <tibex:activityExtension
-                    inputVariable="KAFKA_RECEIVER-input"
-                    name="KAFKA_RECEIVER"
-                    outputVariable="KAFKA_RECEIVER"
+                <tibex:activityExtension inputVariable="MR_KAFKA-input"
+                    name="MR_KAFKA" outputVariable="MR_KAFKA"
                     tibex:xpdlId="ea85fe22-5b55-451c-acbf-7eccc5242304" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                     <bpws:targets>
                         <bpws:target linkName="JavaInvokeToOuterWhile1"/>

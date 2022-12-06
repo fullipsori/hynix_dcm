@@ -1,4 +1,4 @@
-package com.skhynix.model.factory;
+package com.skhynix.extern;
 
 import java.io.Serializable;
 
