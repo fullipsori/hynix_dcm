@@ -19,6 +19,12 @@ public interface BusinessSupplier {
 	void sendSyncMessage(String[] handles, String message);
 	void sendAsyncMessage(String[] handles, String message);
 	
-	/* 메세지를 전송하고 응답을 받아야 하는 경우에 사용한다. 현재는 미구현 상태로 향후 개발예정 */
-	String sendAndReceive(String handle, String message);
+	/** 메세지를 전송하고 응답을 받아야 하는 경우에 사용한다. 현재는 미구현 상태로 향후 개발예정 
+	 * 
+	 * @param handle send 용 handle
+	 * @param param receive 용 parameter (queue name)
+	 * @param message send message
+	 * @return json String
+	 */
+	String sendAndReceive(String handle, String replyQueue, String selector, String message);
 }

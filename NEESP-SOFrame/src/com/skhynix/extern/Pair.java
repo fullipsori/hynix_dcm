@@ -8,18 +8,11 @@ package com.skhynix.extern;
  * @param <S>
  */
 public class Pair<F, S> {
-	private F first;
-	private S second;
+	private final F first;
+	private final S second;
 	
 	public Pair(F first, S second) {
 		this.first = first;
-		this.second = second;
-	}
-	
-	public void setFirst(F first) {
-		this.first = first;
-	}
-	public void setSecond(S second) {
 		this.second = second;
 	}
 	
@@ -30,4 +23,44 @@ public class Pair<F, S> {
 		return second;
 	}
 
+    @Override
+    // Checks specified object is "equal to" the current object or not
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+ 
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+ 
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+ 
+        // call `equals()` method of the underlying objects
+        if (!first.equals(pair.first)) {
+            return false;
+        }
+        return second.equals(pair.second);
+    }
+ 
+    @Override
+    // Computes hash code for an object to support hash tables
+    public int hashCode()
+    {
+        // use hash codes of the underlying objects
+        return 31 * first.hashCode() + second.hashCode();
+    }
+ 
+    @Override
+    public String toString() {
+        return "(" + first + ", " + second + ")";
+    }
+ 
+    // Factory method for creating a typed Pair immutable instance
+    public static <F, S> Pair <F, S> of(F f, S s)
+    {
+        // calls private constructor
+        return new Pair<>(f, s);
+    }
 }

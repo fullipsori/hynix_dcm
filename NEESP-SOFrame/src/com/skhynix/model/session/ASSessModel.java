@@ -15,6 +15,7 @@ public class ASSessModel extends BaseSessModel implements Serializable {
     public String trustFileName = null;
     public boolean trustAll = false;
     
-    public transient Properties properties;
-    public transient Object session;
+    public transient Properties properties = null;
+    public transient Object session = null;
+
 }

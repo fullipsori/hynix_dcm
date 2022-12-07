@@ -3,6 +3,7 @@ package com.skhynix.model.session;
 import java.io.Serializable;
 
 import javax.jms.Session;
+
 import com.tibco.tibjms.Tibjms;
 
 public class EmsSessModel extends BaseSessModel implements Serializable {
@@ -61,6 +62,7 @@ public class EmsSessModel extends BaseSessModel implements Serializable {
 	public String topicName = null;
 	public String deliveryMode = DELIVERY_MODE.NON_PERSISTENT.modeType;
 	public String sessionMode = SESS_MODE.AUTO.modeType;
+	public String selector = "";
 	
 
 	public transient Object session = null;

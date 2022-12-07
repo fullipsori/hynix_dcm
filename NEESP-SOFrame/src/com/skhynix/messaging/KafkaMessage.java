@@ -11,6 +11,7 @@ import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.KafkaSessModel;
 
@@ -24,7 +25,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 	
 	public KafkaMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 	
 	@Override
@@ -57,7 +58,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean sendMessage(String handle, String msg) {
-		Object client = clientMap.get(handle);
+		Object client = sessionMap.get(handle);
 		if(client != null  && KafkaSessModel.class.isInstance(client)) {
 			KafkaSessModel kafkaSessModel = (KafkaSessModel)client;
 			if(kafkaSessModel.msgClient != null && !StringUtil.isEmpty(kafkaSessModel.topic)) {
@@ -69,8 +70,13 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	public String receiveMessage(String handle) {
+	public MessageModel receiveMessage(String handle) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
 		return null;
 	}
 
@@ -83,9 +89,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	@Override
 	public BaseSessModel makeSessModel(String domain, String jsonParams) {
 		// TODO Auto-generated method stub
-		KafkaSessModel model = StringUtil.jsonToObject(jsonParams, KafkaSessModel.class);
-		if( model != null) model.serverDomain = domain;
-		return model;
+		return StringUtil.jsonToObject(jsonParams, KafkaSessModel.class);
 	}
 
 	@Override
@@ -108,7 +112,16 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 		// TODO Auto-generated method stub
 		if(!KafkaSessModel.class.isInstance(client)) return null;
 		KafkaSessModel kafkaSessModel = (KafkaSessModel) client;
-		return String.format("%s:%s", Optional.ofNullable(kafkaSessModel.topic).orElse(""), kafkaSessModel.role);
+		return String.format("%s%s%s", Optional.ofNullable(kafkaSessModel.topic).orElse(""), defaultDelimiter, kafkaSessModel.role);
+	}
+
+	@Override
+	public String tokenizeSessionName(String prefixHandle) {
+		// TODO Auto-generated method stub
+		String[] tokens = prefixHandle.split(defaultDelimiter, -1);
+		/* prefix,%s,%s,%s*/
+		int size = tokens.length;
+		return String.format("%s%s%s", tokens[size-2], defaultDelimiter, tokens[size-1]);
 	}
 
 	@Override

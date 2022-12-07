@@ -43,14 +43,14 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 	public Joinable createMember(String jointype, String serverUrl) {
 		// TODO Auto-generated method stub
 		switch(jointype) {
-			case "resource:as" : return ASRepository.getInstance(); 
+			case "resource,as" : return ASRepository.getInstance(); 
 		}
 		return null;
 	}
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String domain = String.format("%s:%s", jointype, serverUrl);
+		String domain = String.format("%s%s%s", jointype, defaultDelimiter, serverUrl);
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {

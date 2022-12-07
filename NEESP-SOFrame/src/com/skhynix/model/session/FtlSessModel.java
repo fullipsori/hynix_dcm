@@ -12,4 +12,5 @@ public class FtlSessModel extends BaseSessModel implements Serializable {
 
 	public transient Object publisher = null;
 	public transient Object msgObject = null;
+
 }

@@ -15,4 +15,5 @@ public class KafkaSessModel extends BaseSessModel implements Serializable {
 	public String topic = null;
 	
 	public transient Object msgClient;
+
 }

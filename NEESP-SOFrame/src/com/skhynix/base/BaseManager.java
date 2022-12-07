@@ -8,12 +8,13 @@ import com.skhynix.extern.Joinable;
 
 public abstract class BaseManager {
 	private final Map<String, Joinable> members = new ConcurrentHashMap<>();
+	public static final String defaultDelimiter = ",";
 	
 	abstract public String getDomain();
 	abstract public Joinable createMember(String jointype, String serverUrl);
 
 	private boolean isJoinable(String key) {
-		return StringUtil.contains(key, getDomain(), ":");
+		return StringUtil.contains(key, getDomain(), defaultDelimiter);
 	}
 	
 	/** 모듈이 등록이 않된 경우에만 할당 한다. */
@@ -38,5 +39,5 @@ public abstract class BaseManager {
 				.filter(entry -> handle.startsWith(entry.getKey()))
 				.map(entry -> (Object)entry.getValue()).findFirst().orElse(null);
 	}
-
+	
 }

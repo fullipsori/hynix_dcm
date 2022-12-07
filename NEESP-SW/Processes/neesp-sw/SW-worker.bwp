@@ -74,156 +74,6 @@
     xmlns:sca-bpel="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
     xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"
     xmlns:tibprop="http://ns.tibco.com/bw/property" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <tibex:VariableDescriptor type="MemorySaving">
-        <task name="flow">
-            <endingVariables>
-                <variable>IniSWtWorker</variable>
-            </endingVariables>
-        </task>
-        <task name="SWstartLog">
-            <endingVariables>
-                <variable>SWstartLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="FinalEndLog">
-            <endingVariables>
-                <variable>FinalEndLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="OuterWhile">
-            <endingVariables>
-                <variable>MR_EMS</variable>
-                <variable>MR_KAFKA</variable>
-                <variable>OPEN_RECV_EMS</variable>
-                <variable>outerIndex</variable>
-            </endingVariables>
-        </task>
-        <task name="doBusiness">
-            <endingVariables>
-                <variable>doBusiness-input</variable>
-            </endingVariables>
-        </task>
-        <task name="WatiMsgLog">
-            <endingVariables>
-                <variable>WatiMsgLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="ReadyToNext">
-            <endingVariables>
-                <variable>ReadyToNext-input</variable>
-                <variable>ReadyToNext</variable>
-                <variable>prepareAndCheckDup</variable>
-            </endingVariables>
-        </task>
-        <task name="prepareAndCheckDup">
-            <endingVariables>
-                <variable>prepareAndCheckDup-input</variable>
-            </endingVariables>
-        </task>
-        <task name="DupMsgLog">
-            <endingVariables>
-                <variable>DupMsgLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="ParseJSON">
-            <endingVariables>
-                <variable>ParseJSON-input</variable>
-                <variable>Received</variable>
-            </endingVariables>
-        </task>
-        <task name="trxStartLog">
-            <endingVariables>
-                <variable>trxStartLog-input</variable>
-                <variable>trxStartLog</variable>
-            </endingVariables>
-        </task>
-        <task name="trxEndLog">
-            <endingVariables>
-                <variable>trxEndLog-input</variable>
-                <variable>trxEndLog</variable>
-                <variable>ParseJSON</variable>
-            </endingVariables>
-        </task>
-        <task name="trxProcLog">
-            <endingVariables>
-                <variable>trxProcLog-input</variable>
-                <variable>trxProcLog</variable>
-            </endingVariables>
-        </task>
-        <task name="sendLog">
-            <endingVariables>
-                <variable>sendLog-input</variable>
-                <variable>sendLog</variable>
-            </endingVariables>
-        </task>
-        <task name="Received">
-            <endingVariables>
-                <variable>Received-input</variable>
-            </endingVariables>
-        </task>
-        <task name="SendToFDC">
-            <endingVariables>
-                <variable>SendToFDC-input</variable>
-                <variable>SendToFDC</variable>
-                <variable>doBusiness</variable>
-            </endingVariables>
-        </task>
-        <task name="TimeOutAndEtcLog">
-            <endingVariables>
-                <variable>TimeOutAndEtcLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="IniSWtWorker">
-            <endingVariables>
-                <variable>IniSWtWorker-input</variable>
-            </endingVariables>
-        </task>
-        <task name="SendWorkMsg">
-            <endingVariables>
-                <variable>SendWorkMsg-input</variable>
-                <variable>SendWorkMsg</variable>
-            </endingVariables>
-        </task>
-        <task name="ReleaseAllResource">
-            <endingVariables>
-                <variable>ReleaseAllResource-input</variable>
-                <variable>Start</variable>
-            </endingVariables>
-        </task>
-        <task name="SendReleasedWorker">
-            <endingVariables>
-                <variable>SendReleasedWorker-input</variable>
-                <variable>SendReleasedWorker</variable>
-                <variable>ReleaseAllResource</variable>
-            </endingVariables>
-        </task>
-        <task name="FaiiLog">
-            <endingVariables>
-                <variable>FaiiLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="SendErrorMsg">
-            <endingVariables>
-                <variable>SendErrorMsg-input</variable>
-                <variable>SendErrorMsg</variable>
-            </endingVariables>
-        </task>
-        <task name="OPEN_RECV_EMS">
-            <endingVariables>
-                <variable>OPEN_RECV_EMS-input</variable>
-            </endingVariables>
-        </task>
-        <task name="MR_EMS">
-            <endingVariables>
-                <variable>MR_EMS-input</variable>
-            </endingVariables>
-        </task>
-        <task name="MR_KAFKA">
-            <endingVariables>
-                <variable>MR_KAFKA-input</variable>
-            </endingVariables>
-        </task>
-    </tibex:VariableDescriptor>
     <tibex:Types>
         <xs:schema attributeFormDefault="unqualified"
             elementFormDefault="qualified"
@@ -4551,7 +4401,8 @@
                                 <bpws:target linkName="LogToGroupEnd11"/>
                             </bpws:targets>
                         </bpws:empty>
-                        <bpws:scope name="While" tibex:group="while" tibex:xpdlId="fefbd3f2-39bd-45f8-b3bd-bde2440450db">
+                        <bpws:scope name="While" tibex:group="while"
+                            tibex:indexToGlobal="false" tibex:xpdlId="fefbd3f2-39bd-45f8-b3bd-bde2440450db">
                             <bpws:targets>
                                 <bpws:target linkName="GroupStart1ToWhile"/>
                             </bpws:targets>
@@ -4633,7 +4484,7 @@
                                     </bpws:sources>
                                     <tibex:inputBindings>
                                     <tibex:inputBinding
-                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+a2199e7c-b6f2-4d82-802d-59972308e24b+JavaInvokeActivityInput&quot; xmlns:tns17=&quot;http://www.example.org/EventMessage&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:param name=&quot;MR_EMS&quot;/>&lt;xsl:param name=&quot;MR_KAFKA&quot;/>&lt;xsl:template name=&quot;doBusiness-input&quot; match=&quot;/&quot;>&lt;tns3:JavaInvokeActivityInput>&lt;MethodParameters>&lt;eqpId>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eqpId&quot;/>&lt;/eqpId>&lt;appNodeName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&lt;/appNodeName>&lt;eventType>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eventType&quot;/>&lt;/eventType>&lt;messge>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:messageBody&quot;/>&lt;/messge>&lt;emsHandle>&lt;xsl:value-of select=&quot;$MR_EMS/MethodReturnValue&quot;/>&lt;/emsHandle>&lt;kafkaHandle>&lt;xsl:value-of select=&quot;$MR_KAFKA/MethodReturnValue&quot;/>&lt;/kafkaHandle>&lt;ftlHandle>&lt;xsl:value-of select=&quot;&amp;quot;&amp;quot;&quot;/>&lt;/ftlHandle>&lt;/MethodParameters>&lt;/tns3:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+a2199e7c-b6f2-4d82-802d-59972308e24b+JavaInvokeActivityInput&quot; xmlns:tns17=&quot;http://www.example.org/EventMessage&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:param name=&quot;MR_EMS&quot;/>&lt;xsl:template name=&quot;doBusiness-input&quot; match=&quot;/&quot;>&lt;tns3:JavaInvokeActivityInput>&lt;MethodParameters>&lt;eqpId>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eqpId&quot;/>&lt;/eqpId>&lt;appNodeName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&lt;/appNodeName>&lt;eventType>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:eventType&quot;/>&lt;/eventType>&lt;messge>&lt;xsl:value-of select=&quot;$ParseJSON/tns17:messageBody&quot;/>&lt;/messge>&lt;emsHandle>&lt;xsl:value-of select=&quot;$MR_EMS/MethodReturnValue&quot;/>&lt;/emsHandle>&lt;kafkaHandle>&lt;xsl:value-of select=&quot;&amp;quot;&amp;quot;&quot;/>&lt;/kafkaHandle>&lt;ftlHandle>&lt;xsl:value-of select=&quot;&amp;quot;&amp;quot;&quot;/>&lt;/ftlHandle>&lt;/MethodParameters>&lt;/tns3:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                                     </tibex:inputBindings>
                                     <tibex:config>
                                     <bwext:BWActivity
@@ -5519,7 +5370,7 @@
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
-                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns23=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+9dec5297-ffc1-41fb-9bbf-7b9f5049a1c3+JavaInvokeActivityInput&quot; xmlns:tns11=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;Start&quot;/>&lt;xsl:template name=&quot;OpenEMS-input&quot; match=&quot;/&quot;>&lt;tns23:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message:ems&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;concat('{&amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:7222&amp;quot;, &amp;quot;role&amp;quot;:&amp;quot;receiver&amp;quot;, &amp;quot;queueName&amp;quot;:&amp;quot;' , $Start/tns11:parameter, '&amp;quot;}')&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns23:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns23=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+9dec5297-ffc1-41fb-9bbf-7b9f5049a1c3+JavaInvokeActivityInput&quot; xmlns:tns11=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;Start&quot;/>&lt;xsl:template name=&quot;OPEN_RECV_EMS-input&quot; match=&quot;/&quot;>&lt;tns23:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message,ems&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;concat('{&amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:7222&amp;quot;, &amp;quot;role&amp;quot;:&amp;quot;receiver&amp;quot;, &amp;quot;queueName&amp;quot;:&amp;quot;' , $Start/tns11:parameter, '&amp;quot;}')&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns23:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:config>
                         <bwext:BWActivity
@@ -5560,7 +5411,7 @@
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
-                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns24=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+b0d9722f-d13e-4048-9dc9-2cf740375e7e+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:template name=&quot;FDC_-input&quot; match=&quot;/&quot;>&lt;tns24:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message:ems&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;'{&amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:7223&amp;quot;, &amp;quot;queueName&amp;quot;:&amp;quot;succeed-do-business&amp;quot;}'&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns24:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns24=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+b0d9722f-d13e-4048-9dc9-2cf740375e7e+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:template name=&quot;MR_EMS-input&quot; match=&quot;/&quot;>&lt;tns24:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message,ems&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;'{&amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:7222&amp;quot;, &amp;quot;queueName&amp;quot;:&amp;quot;succeed-do-business&amp;quot;}'&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns24:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:config>
                         <bwext:BWActivity
@@ -5603,7 +5454,7 @@
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
-                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns25=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+ea85fe22-5b55-451c-acbf-7eccc5242304+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:template name=&quot;KAFKA_RECEIVER-input&quot; match=&quot;/&quot;>&lt;tns25:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message:kafka&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;'{&amp;quot;type&amp;quot;:&amp;quot;message:kafka&amp;quot;, &amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:9192&amp;quot;,&amp;quot;topic&amp;quot;:&amp;quot;skhynix.message&amp;quot;}'&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns25:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns25=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+ea85fe22-5b55-451c-acbf-7eccc5242304+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:template name=&quot;MR_KAFKA-input&quot; match=&quot;/&quot;>&lt;tns25:JavaInvokeActivityInput>&lt;MethodParameters>&lt;domain>&lt;xsl:value-of select=&quot;&amp;quot;message,kafka&amp;quot;&quot;/>&lt;/domain>&lt;jsonString>&lt;xsl:value-of select=&quot;'{&amp;quot;type&amp;quot;:&amp;quot;message:kafka&amp;quot;, &amp;quot;serverUrl&amp;quot;:&amp;quot;localhost:9192&amp;quot;,&amp;quot;topic&amp;quot;:&amp;quot;skhynix.message&amp;quot;}'&quot;/>&lt;/jsonString>&lt;/MethodParameters>&lt;/tns25:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:config>
                         <bwext:BWActivity

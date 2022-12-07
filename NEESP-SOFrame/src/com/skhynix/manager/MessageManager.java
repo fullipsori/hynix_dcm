@@ -9,6 +9,7 @@ import com.skhynix.extern.SessionBehavior;
 import com.skhynix.messaging.EmsMessage;
 import com.skhynix.messaging.FtlMessage;
 import com.skhynix.messaging.KafkaMessage;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
@@ -54,9 +55,9 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
 		switch(jointype) {
-			case "message:ems" : return new EmsMessage(jointype, serverUrl); 
-			case "message:ftl" : return new FtlMessage(jointype, serverUrl); 
-			case "message:kafka" : return new KafkaMessage(jointype, serverUrl); 
+			case "message,ems" : return new EmsMessage(jointype, serverUrl); 
+			case "message,ftl" : return new FtlMessage(jointype, serverUrl); 
+			case "message,kafka" : return new KafkaMessage(jointype, serverUrl); 
 		}
 		return null;
 	}
@@ -70,11 +71,11 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	}
 	
 	@Override
-	public String receiveMessage(String handle) {
+	public MessageModel receiveMessage(String handle) {
 		Object client = getMember(handle);
 		if(client != null && Messageable.class.isInstance(client))
 			return ((Messageable)client).receiveMessage(handle);
-		else return "";
+		else return null;
 	}
 	
 	@Override
@@ -84,10 +85,20 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 		if(client != null && Messageable.class.isInstance(client))
 			((Messageable)client).confirmMessage(handle);
 	}
+	
+	@Override
+	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+		// TODO Auto-generated method stub
+		Object client = getMember(handle);
+		if(client != null && Messageable.class.isInstance(client)) {
+			return ((Messageable)client).sendAndReceive(handle, replyQueue, selector, msg);
+		}
+		return null;
+	}
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String domain = String.format("%s:%s", jointype, serverUrl);
+		String domain = String.format("%s%s%s", jointype, defaultDelimiter, serverUrl);
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {

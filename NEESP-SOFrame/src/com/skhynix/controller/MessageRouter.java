@@ -14,6 +14,7 @@ import com.skhynix.extern.Messageable;
 import com.skhynix.extern.Pair;
 import com.skhynix.extern.SessionBehavior;
 import com.skhynix.manager.MessageManager;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
@@ -88,7 +89,7 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	
 	public void sendAsyncTo(String[] handles, String message) {
 		Arrays.stream(handles).filter(StringUtil::isNotEmpty)
-			.map(handle -> new Pair<String, String>(handle, message))
+			.map(handle -> Pair.of(handle, message))
 			.forEach(messageSubject::onNext);
 
 		/**
@@ -121,9 +122,15 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	}
 	
 	@Override
-	public String receiveMessage(String sessionKey) {
+	public MessageModel receiveMessage(String sessionKey) {
 		// TODO Auto-generated method stub
 		return messageManager.receiveMessage(sessionKey);
+	}
+	
+	@Override
+	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+		// TODO Auto-generated method stub
+		return messageManager.sendAndReceive(handle, replyQueue, selector, msg);
 	}
 
 	@Override

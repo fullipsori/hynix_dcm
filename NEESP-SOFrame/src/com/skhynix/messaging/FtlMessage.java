@@ -2,10 +2,12 @@ package com.skhynix.messaging;
 
 import java.time.Instant;
 
+
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.FtlSessModel;
 import com.skhynix.neesp.log.LogManager;
@@ -22,7 +24,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	private final String defaultServerUrl = "localhost:8585";
 
 	public FtlMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 
 	@Override
@@ -34,7 +36,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	@Override
 	public boolean sendMessage(String handle, String msg) {
 		// TODO Auto-generated method stub
-		Object client =  clientMap.get(handle);
+		Object client =  sessionMap.get(handle);
 		if(client != null && FtlSessModel.class.isInstance(client)) {
 			FtlSessModel ftlSessModel = (FtlSessModel) client;
 			if(ftlSessModel.publisher != null && ftlSessModel.msgObject != null) {
@@ -55,11 +57,17 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	public String receiveMessage(String handle) {
+	public MessageModel receiveMessage(String handle) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
+	@Override
+	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	@Override
 	public void confirmMessage(String handle) {
 		// TODO Auto-generated method stub
@@ -69,9 +77,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	@Override
 	public BaseSessModel makeSessModel(String domain, String jsonParams) {
 		// TODO Auto-generated method stub
-		FtlSessModel model = StringUtil.jsonToObject(jsonParams, FtlSessModel.class);
-		if( model != null) model.serverDomain = domain;
-		return model;
+		return StringUtil.jsonToObject(jsonParams, FtlSessModel.class);
 	}
 
 	@Override
@@ -112,7 +118,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 			 * provided automatically by the realm service. It could also be specified as null - it mean the same thing,
 			 * the default application. 
 			 */
-			serverModel.serverHandle = FTL.connectToRealmServer(serverUrl, applicationName, props);
+			serverModel.serverConnection = FTL.connectToRealmServer(serverUrl, applicationName, props);
 
 			/* 
 			 * It is good practice to clean up objects when they are no longer needed. Since the realm properties object is no
@@ -131,8 +137,8 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	@Override
 	public void disconnectServer() {
 		try {
-			if(serverModel.serverHandle != null) {
-				((Realm)serverModel.serverHandle).close();
+			if(serverModel.serverConnection != null) {
+				((Realm)serverModel.serverConnection).close();
 			}
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -148,14 +154,21 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
+	public String tokenizeSessionName(String prefixHandle) {
+		// TODO Auto-generated method stub
+		int lastidx = prefixHandle.lastIndexOf(defaultDelimiter);
+		return prefixHandle.substring(lastidx + 1);
+	}
+
+	@Override
 	public BaseSessModel connectSession(BaseSessModel client) {
 		// TODO Auto-generated method stub
 		if(!FtlSessModel.class.isInstance(client)) return null; 
 		FtlSessModel ftlSessModel = (FtlSessModel) client;
 
 		String endpointName    = (StringUtil.isEmpty(ftlSessModel.endpointName))? "default" : ftlSessModel.endpointName;
-		if(serverModel.serverHandle != null) {
-			Realm realm = (Realm) serverModel.serverHandle;
+		if(serverModel.serverConnection != null) {
+			Realm realm = (Realm) serverModel.serverConnection;
 			try {
 				ftlSessModel.publisher = realm.createPublisher(endpointName);
 				ftlSessModel.msgObject = realm.createMessage("helloworld");

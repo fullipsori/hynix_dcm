@@ -57,7 +57,7 @@ public class DynaClassManager {
 					instanceMap.put(className, classInstance);
 					if(DynaLoadable.class.isInstance(classInstance)) {
 						((DynaLoadable) classInstance).loadClass();
-						loadJarSubject.onNext(new Pair<>(classDomain, className));
+						loadJarSubject.onNext(Pair.of(classDomain, className));
 					}
 				}
 			} catch (Exception e) {
@@ -90,7 +90,7 @@ public class DynaClassManager {
 			e.printStackTrace();
 			return false;
 		}finally {
-			unloadJarSubject.onNext(new Pair<>(classDomain, className));
+			unloadJarSubject.onNext(Pair.of(classDomain, className));
 		}
 	}
 

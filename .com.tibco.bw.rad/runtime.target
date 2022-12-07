@@ -4,23 +4,23 @@
 <target name="bw-runtime">
 <locations>
 
-<location path="/Users/fullipsori/tibco/bw/6.9/config/drivers/shells/jdbc.oracle.runtime//hotfix/runtime/plugins" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/6.9/config/drivers/shells/jdbc.oracle.runtime//runtime/plugins" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/config/drivers/shells/jdbc.oracle.runtime//hotfix/runtime/plugins" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/config/drivers/shells/jdbc.oracle.runtime//runtime/plugins" type="Directory"/>
 <location path="/Users/fullipsori/tibco/bw/palettes/kafka/6.6//hotfix/runtime/plugins" type="Directory"/>
 <location path="/Users/fullipsori/tibco/bw/palettes/kafka/6.6//runtime/plugins" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/palettes/ftl/6.7//hotfix/runtime/plugins" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/palettes/ftl/6.7//runtime/plugins" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/palettes/ftl/6.6//hotfix/runtime/plugins" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/palettes/ftl/6.6//runtime/plugins" type="Directory"/>
 <location path="/Users/fullipsori/tibco/bw/palettes/as/8.0//hotfix/runtime/plugins" type="Directory"/>
 <location path="/Users/fullipsori/tibco/bw/palettes/as/8.0//runtime/plugins" type="Directory"/>
 
 
-<location path="/Users/fullipsori/tibco/bw/6.9/system/hotfix/lib/common" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/6.9/system/lib/common" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/hotfix/lib/common" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/lib/common" type="Directory"/>
 
-<location path="/Users/fullipsori/tibco/bw/6.9/system/hotfix/palettes" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/6.9/system/palettes" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/hotfix/palettes" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/palettes" type="Directory"/>
 
-<location path="/Users/fullipsori/tibco/bw/6.9/system/hotfix/shared" type="Directory"/>
-<location path="/Users/fullipsori/tibco/bw/6.9/system/shared" type="Profile"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/hotfix/shared" type="Directory"/>
+<location path="/Users/fullipsori/tibco/bw/6.8/system/shared" type="Profile"/>
 </locations>
 </target>

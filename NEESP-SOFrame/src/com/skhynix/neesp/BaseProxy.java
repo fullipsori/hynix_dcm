@@ -2,6 +2,7 @@ package com.skhynix.neesp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,8 +11,10 @@ import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
 import com.skhynix.manager.BusinessManager;
 import com.skhynix.manager.DynaClassManager;
+import com.skhynix.manager.MessageManager;
 import com.skhynix.manager.MetaDataManager;
 import com.skhynix.manager.ResourceManager;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.neesp.log.LogManager;
 import com.skhynix.neesp.log.NEESPLogger;
 import com.skhynix.neesp.util.Counter;
@@ -48,7 +51,7 @@ public class BaseProxy {
 	public String openSession(String joinType, String jsonString) {
 		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		String[] tokens = joinType.split(":");
+		String[] tokens = joinType.split(MessageManager.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return "error:" + joinType;
 		}
@@ -64,7 +67,7 @@ public class BaseProxy {
 	}
 	
 	public void closeSession(String handle) {
-		String[] tokens = handle.split(":");
+		String[] tokens = handle.split(MessageManager.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
@@ -77,10 +80,9 @@ public class BaseProxy {
 	}
 	
 	public void testAS(String loadType) {
-		boolean res = metaDataManager.putMetaData(loadType, "my_grid", "key", 100, "value", "test result");
+		boolean res = metaDataManager.putMetaData(loadType, "my_table", "key", 100, "value", "test result");
 		if(res) {
-			System.out.println("ok");
-			String data = metaDataManager.getMetaData(loadType, "my_grid", "key", 100);
+			String data = metaDataManager.getMetaData(loadType, "my_table", "key", 100);
 			System.out.println("result: " + data);
 		}else {
 			System.out.println("failed");
@@ -94,7 +96,7 @@ public class BaseProxy {
 				messageRouter.sendMessage(handle, data);
 			});
 			**/
-		String[] tokens = handle.split(":");
+		String[] tokens = handle.split(MessageManager.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
@@ -104,25 +106,19 @@ public class BaseProxy {
 	}
 	
 	public String receiveMessage(String handle) {
-		/**
-		Observable.intervalRange(1, 20, 100L, 100L, TimeUnit.MILLISECONDS)
-			.subscribe(Void -> {
-				System.out.println("result:" + messageRouter.receiveMessage(handle));
-			});
-			**/
-		String[] tokens = handle.split(":");
+		String[] tokens = handle.split(MessageManager.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
-			return "error:" + handle;
+			return "";
 		}
 		if(tokens[0].equals("message")) {
-			return messageRouter.receiveMessage(handle);
+			return Optional.ofNullable(messageRouter.receiveMessage(handle)).map(MessageModel::getMessage).orElse("");
 		}else {
-			return "error:" + tokens[0];
+			return "";
 		}
 	}
 	
 	public void confirmMessage(String handle) {
-		String[] tokens = handle.split(":");
+		String[] tokens = handle.split(MessageManager.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
@@ -133,7 +129,7 @@ public class BaseProxy {
 	}
 	
 	public void sendMessageToTargets(String handles, String message) {
-		String[] targets = handles.split(",");
+		String[] targets = handles.split(MessageManager.defaultDelimiter);
 		messageRouter.sendAsyncTo(targets, message);
 	}
 
@@ -436,7 +432,6 @@ public class BaseProxy {
      public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge, String emsHandle, String kafkaHandle, String ftlHandle) {
         String[] retVals = {"",""}; 
         
-        System.out.println("doBusiness");
         retVals[0] = "succeed-do-business";
         retVals[1] = String.format("[%s][%s] 메시지 작업을 수행합니다.", eqpId, eventType);
 

@@ -1,5 +1,6 @@
 package com.skhynix.base;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,10 +12,12 @@ import com.skhynix.model.session.BaseSessModel;
 
 abstract public class BaseConnection implements SessionBehavior, Joinable {
 
+	public static final String defaultDelimiter = ",";
+
 	protected Runnable unregister = null;
 
 	protected BaseSessModel serverModel = null;
-	protected Map<String, BaseSessModel> clientMap = new ConcurrentHashMap<>();
+	protected Map<String, BaseSessModel> sessionMap = new ConcurrentHashMap<>();
 	protected String connectionInfo;
 	
 	abstract public String getDefaultServerUrl();
@@ -38,8 +41,19 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 		return String.valueOf(ThreadLocalRandom.current().nextInt(100000));
 	}
 	
+	public abstract String tokenizeSessionName(String prefixHandle);
+
+	protected Map<String,String> tokenizeSessionKey(String handle) {
+		Map<String,String> tokenMap = new HashMap<>();
+		int lastidx = handle.lastIndexOf(defaultDelimiter);
+		tokenMap.put("randomKey", handle.substring(lastidx + 1));
+		String sessionName = tokenMap.put("sessionName", tokenizeSessionName(handle.substring(0, lastidx)));
+		tokenMap.put("domain", handle.substring(0, handle.indexOf(sessionName)-1));
+		return tokenMap;
+	}
+
 	private String getSessionKey(String domain, String sessionName) {
-		return String.format("%s:%s:%s", domain, sessionName, getRandomKey());
+		return String.format("%s%s%s%s%s", domain, defaultDelimiter, sessionName, defaultDelimiter, getRandomKey());
 	}
 	
 	@Override
@@ -53,13 +67,17 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 
 		try {
 			client = connectSession(client);
-			String sessionKey = getSessionKey(domain, getSessionName(client));
 			if(client != null) {
-				clientMap.put(sessionKey, client);
+				String sessionName = getSessionName(client);
+				String sessionKey = getSessionKey(domain, sessionName);
+				client.handle = sessionKey;
+				client.sessionName = sessionName;
+				client.serverDomain = domain;
+				sessionMap.put(sessionKey, client);
+				return sessionKey;
 			} else {
 				return null;
 			}
-			return sessionKey;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -69,7 +87,7 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 	@Override
 	public boolean closeSession(String handle) {
 		try {
-			Optional.ofNullable(clientMap.remove(handle)).ifPresent(elem -> disconnectSession(elem));
+			Optional.ofNullable(sessionMap.remove(handle)).ifPresent(elem -> disconnectSession(elem));
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -79,8 +97,8 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 	
 	@Override
 	public void closeAllSession() {
-		clientMap.values().forEach(client -> disconnectSession(client));
-		clientMap.clear();
+		sessionMap.values().forEach(client -> disconnectSession(client));
+		sessionMap.clear();
 	}
 	
 	@Override

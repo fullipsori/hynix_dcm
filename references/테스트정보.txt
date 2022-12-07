@@ -32,15 +32,15 @@ soft file limit 변경 : 256 -> 30000
 table (my_grid, key long, value string)
 
 [EMS 테스트]
-    {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q"}
-    {"type":"message:ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q", "role": "receiver"}
+    {"type":"message,ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q"}
+    {"type":"message,ems", "serverUrl":"localhost:7222","queueName":"test.message.ems.q", "role": "receiver"}
 
 [KAFKA]
-    {"type":"message:kafka", "serverUrl":"localhost:9192","topic":"skhynix.message"}
+    {"type":"message,kafka", "serverUrl":"localhost:9192","topic":"skhynix.message"}
 
 [Running]
 [AS] ctrl.q
-    {"command":"init-as","parameter":"resource:as", "parameter2":"", "parameter3":"", "parameter4":""}
+    {"command":"init-as","parameter":"resource,as", "parameter2":"", "parameter3":"", "parameter4":""}
 
 
 [load jar] ctrl.q

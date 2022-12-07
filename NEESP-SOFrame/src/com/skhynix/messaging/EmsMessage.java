@@ -1,5 +1,10 @@
 package com.skhynix.messaging;
 
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -9,11 +14,12 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import com.tibco.tibjms.Tibjms;
+
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
+import com.skhynix.model.message.MessageModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.EmsSessModel;
 import com.skhynix.model.session.EmsSessModel.SESS_MODE;
@@ -23,8 +29,9 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	private final String defaultServerUrl = "localhost:7222";
 	
 	public EmsMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s:%s", connectionInfo, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
+	
 
 	@Override
 	public String getDefaultServerUrl() {
@@ -34,9 +41,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 	@Override
 	public BaseSessModel makeSessModel(String domain, String jsonParams) {
-		EmsSessModel model = StringUtil.jsonToObject(jsonParams, EmsSessModel.class);
-		if( model != null) model.serverDomain = domain;
-		return model;
+		return StringUtil.jsonToObject(jsonParams, EmsSessModel.class);
 	}
 
 	@Override
@@ -44,7 +49,20 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		// TODO Auto-generated method stub
 		if(!EmsSessModel.class.isInstance(client)) return "";
 		EmsSessModel emsSessModel = (EmsSessModel) client;
-		return String.format("%s:%s", (emsSessModel.topicName != null) ? emsSessModel.topicName : emsSessModel.queueName, emsSessModel.role);
+		return String.format("%s%s%s%s%s", (emsSessModel.topicName != null) ? emsSessModel.topicName : emsSessModel.queueName, 
+				defaultDelimiter,
+				StringUtil.isEmpty(emsSessModel.selector)? "" : emsSessModel.selector, 
+				defaultDelimiter,
+				emsSessModel.role);
+	}
+	
+	@Override
+	public String tokenizeSessionName(String prefixHandle) {
+		// TODO Auto-generated method stub
+		String[] tokens = prefixHandle.split(defaultDelimiter);
+		/* prefix,%s,%s,%s*/
+		int size = tokens.length;
+		return String.format("%s%s%s%s%s", tokens[size-3], defaultDelimiter, tokens[size-2], defaultDelimiter, tokens[size-1]);
 	}
 
 	@Override
@@ -52,14 +70,14 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		if(!EmsSessModel.class.isInstance(client)) return null;
 		EmsSessModel emsSessModel = (EmsSessModel) client;
 		
-		if(serverModel == null || serverModel.serverHandle == null || 
+		if(serverModel == null || serverModel.serverConnection == null || 
 				(StringUtil.isEmpty(emsSessModel.queueName) && StringUtil.isEmpty(emsSessModel.topicName))) return null;
 
-		Connection connection = (Connection)serverModel.serverHandle;
+		Connection connection = (Connection)serverModel.serverConnection;
 		boolean sendMode = emsSessModel.role.equals("sender")? true : false;
 		String queueName = emsSessModel.queueName;
 		String topicName = emsSessModel.topicName;
-
+		
 		Session session = null;
 		Object msgClient = null;
 		Destination destination = null;
@@ -73,9 +91,9 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					destination = session.createTopic(topicName);
 				}
 				if(destination != null) {
-					msgClient = sendMode ? session.createProducer(destination) : session.createConsumer(destination);
-//					msgObject = session.createTextMessage();
-
+					emsSessModel.destination = destination;
+					msgClient = sendMode ? session.createProducer(destination) 
+							: (StringUtil.isEmpty(emsSessModel.selector)? session.createConsumer(destination) : session.createConsumer(destination, emsSessModel.selector));
 					if(msgClient != null) {
 						if(MessageProducer.class.isInstance(msgClient)) {
 							MessageProducer msgProducer = (MessageProducer)msgClient;
@@ -138,7 +156,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 			ConnectionFactory factory = new com.tibco.tibjms.TibjmsConnectionFactory(serverUrl);
 			Connection connection = factory.createConnection(username, password);
 			connection.start();
-			serverModel.serverHandle = connection;
+			serverModel.serverConnection = connection;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -153,16 +171,16 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		
 		closeAllSession();
 		
-		if(serverModel.serverHandle != null) {
+		if(serverModel.serverConnection != null) {
 			try {
-				Connection conn = (Connection) serverModel.serverHandle;
+				Connection conn = (Connection) serverModel.serverConnection;
 				conn.stop();
 				conn.close();
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			serverModel.serverHandle = null;
+			serverModel.serverConnection = null;
 		}
 		
 	}
@@ -175,7 +193,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 	@Override
 	public boolean sendMessage(String handle, String msg) {
-		Object client = clientMap.get(handle);
+		Object client = sessionMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
@@ -194,10 +212,11 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public String receiveMessage(String handle) {
+	public MessageModel receiveMessage(String handle) {
 		// TODO Auto-generated method stub
-		Object client = clientMap.get(handle);
+		Object client = sessionMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
@@ -205,19 +224,81 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					Message message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive();
 					if(emsSessModel.getSessMode() == SESS_MODE.CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT_DUPS_OK)
 						emsSessModel.message = message;
-					if(message != null) return ((TextMessage)message).getText();
+					if(message != null) {
+						MessageModel msgModel = new MessageModel();
+						msgModel.message = ((TextMessage)message).getText();
+						Enumeration<String> enumeration = message.getPropertyNames();
+						while(enumeration.hasMoreElements()) {
+							String name = (String)enumeration.nextElement();
+							msgModel.applyProperty(name, message.getObjectProperty(name));
+						}
+						return msgModel;
+					}
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return "";
+		return null;
+	}
+	
+	/* fullip: refactoring */
+	@Override
+	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+		// TODO Auto-generated method stub
+		Object client = sessionMap.get(handle);
+		if(client == null || !EmsSessModel.class.isInstance(client)) return null;
+		EmsSessModel emsSendModel = (EmsSessModel) client;
+		
+		EmsSessModel recvModel = new EmsSessModel();
+		recvModel.queueName = replyQueue;
+		recvModel.serverDomain = emsSendModel.serverDomain;
+		recvModel.role = "receiver";
+		recvModel.selector = selector;
+
+		String recvSessionName = getSessionName(recvModel);
+		String receivePrefixKey= String.format("%s%s%s", recvModel.serverDomain, defaultDelimiter, recvSessionName);
+		
+		Optional<Entry<String,BaseSessModel>> elem = sessionMap.entrySet().stream()
+				.filter(entry -> entry.getKey().startsWith(receivePrefixKey)).findAny();
+		String recvOpenHandle = "";
+		if(elem.isEmpty()) {
+			recvOpenHandle = openSession(recvModel.serverDomain, null, StringUtil.objectToJson(recvModel));
+			if(StringUtil.isEmpty(recvOpenHandle)) {
+				return null;
+			}else {
+				recvModel = (EmsSessModel)sessionMap.get(recvOpenHandle);
+			}
+		}else {
+			recvModel = (EmsSessModel)elem.get().getValue();
+		}
+
+		if(recvModel != null) {
+			if(emsSendModel.session != null && emsSendModel.msgClient != null && recvModel.destination != null) {
+				Session session = (Session)emsSendModel.session;
+				try {
+					TextMessage message = session.createTextMessage();
+					message.setJMSReplyTo((Destination)recvModel.destination);
+					message.setText(msg);
+					MessageProducer msgProducer = (MessageProducer)emsSendModel.msgClient;
+					msgProducer.send(message);
+					return receiveMessage(recvOpenHandle);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}finally {
+					if(elem.isEmpty() && StringUtil.isNotEmpty(recvOpenHandle)) {
+						closeSession(recvOpenHandle);
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	@Override
 	public void confirmMessage(String handle) {
 		// TODO Auto-generated method stub
-		Object client = clientMap.get(handle);
+		Object client = sessionMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.message != null && 

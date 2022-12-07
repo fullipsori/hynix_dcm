@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.skhynix.common.StringUtil;
@@ -12,6 +13,7 @@ import com.skhynix.extern.BusinessSupplier;
 import com.skhynix.extern.Pair;
 import com.skhynix.extern.WaferData;
 import com.skhynix.manager.MetaDataManager;
+import com.skhynix.model.message.MessageModel;
 
 
 public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
@@ -50,19 +52,19 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 		} else {
 			// default logic
 			List<Pair<String, String>> params = new ArrayList<>();
-			params.add(new Pair<String, String>("key", String.valueOf(waferData.metadataKey)));
-			String meta = (String)requestMeta("resource:as", "my_grid", params);
+			params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
+			String meta = (String)requestMeta("resource,as", "my_table", params);
 			if(StringUtil.isEmpty(meta)) {
 				params.clear();
-				params.add(new Pair<String, String>("key", String.valueOf(waferData.metadataKey)));
-				params.add(new Pair<String, String>("value", "initial"));
-				meta = (String)requestMeta("resource:as", "my_grid", params);
+				params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
+				params.add(Pair.of("value", "initial"));
+				meta = (String)requestMeta("resource,as", "my_table", params);
 			} else {
 				meta = Instant.now().toString();
 				params.clear();
-				params.add(new Pair<String, String>("key", String.valueOf(waferData.metadataKey)));
-				params.add(new Pair<String, String>("value", meta));
-				boolean res = storeMeta("resource:as", "my_grid", params);
+				params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
+				params.add(Pair.of("value", meta));
+				boolean res = storeMeta("resource,as", "my_table", params);
 				if(!res) return "fail store";
 			}
 			return (StringUtil.isEmpty(meta)) ? "fail meta" : meta;
@@ -104,9 +106,9 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 	}
 
 	@Override
-	public String sendAndReceive(String handle, String message) {
+	public String sendAndReceive(String handle, String replyQueue, String selector, String message) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return Optional.ofNullable(messageRouter.sendAndReceive(handle, replyQueue, selector, message)).map(MessageModel::toString).orElse("");
 	}
 
 }

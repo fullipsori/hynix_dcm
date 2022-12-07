@@ -20,5 +20,5 @@ public interface BusinessSupplier {
 	void sendAsyncMessage(String[] handles, String message);
 	
 	/* 메세지를 전송하고 응답을 받아야 하는 경우에 사용한다. 현재는 미구현 상태로 향후 개발예정 */
-	String sendAndReceive(String handle, String message);
+	String sendAndReceive(String handle, String replyQueue, String selector, String message);
 }

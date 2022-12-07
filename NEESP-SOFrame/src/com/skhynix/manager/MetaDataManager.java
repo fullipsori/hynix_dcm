@@ -35,13 +35,13 @@ public class MetaDataManager extends BaseManager {
 	
 	public String getMetaData(String joinType, String table, String keyname, long key) {
 		
-		return (String)resourceManager.retrieve(joinType, table, new Pair<String, Long>(keyname, key));
+		return (String)resourceManager.retrieve(joinType, table, Pair.of(keyname, key));
 	}
 	
 	public boolean putMetaData(String joinType, String table, String keyname,long key, String colname, String colvalue) {
 		List<Pair<String,? extends Object>> columns = new ArrayList<>();
-		Pair<String, String>  column = new Pair<>(colname, colvalue);
+		Pair<String, String>  column = Pair.of(colname, colvalue);
 		columns.add(column);
-		return resourceManager.create(joinType, table, new Pair<String, Long>(keyname, key), columns);
+		return resourceManager.create(joinType, table, Pair.of(keyname, key), columns);
 	}
 }
