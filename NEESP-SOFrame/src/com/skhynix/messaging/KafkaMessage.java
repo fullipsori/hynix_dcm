@@ -12,7 +12,7 @@ import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.KafkaSessModel;
 
@@ -71,13 +71,13 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	public MessageModel receiveMessage(String handle) {
+	public BaseMsgModel receiveMessage(String handle, long waitTimeInMillis) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
+	public BaseMsgModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis) {
 		return null;
 	}
 

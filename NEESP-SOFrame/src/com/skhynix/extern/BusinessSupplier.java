@@ -37,6 +37,8 @@ public interface BusinessSupplier {
 	 * @return json String
 	 */
 	public boolean sendMessage(String handle, String message, Map<String,String> properties);
-	public String sendAndReceive(String handle, String message, Map<String,String> properties, String replyQueue, String selector);
+	/** 결과값은 json String 값입니다. **/
+	public String receiveMessage(String handle, long waitTimeInMillis) throws Exception;
+	public String sendAndReceive(String handle, String message, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis);
 	
 }

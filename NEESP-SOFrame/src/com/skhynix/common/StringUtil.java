@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +16,9 @@ public class StringUtil {
 
 	public static <T> String objectToJson(T object) {
 		try {
-			ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			ObjectMapper mapper = new ObjectMapper()
+					.setSerializationInclusion(Include.NON_NULL)
+					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.writeValueAsString(object);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
@@ -26,7 +29,9 @@ public class StringUtil {
 	
 	public static <T> T jsonToObject(String jsonString, Class<T> clazzType) {
 		try {
-			ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			ObjectMapper mapper = new ObjectMapper()
+					.setSerializationInclusion(Include.NON_NULL)
+					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			return mapper.readValue(jsonString, clazzType);
 		} catch (Exception e) {
 			e.printStackTrace();

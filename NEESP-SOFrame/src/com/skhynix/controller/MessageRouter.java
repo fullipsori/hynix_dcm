@@ -15,7 +15,7 @@ import com.skhynix.extern.Messageable;
 import com.skhynix.extern.Pair;
 import com.skhynix.extern.SessionBehavior;
 import com.skhynix.manager.MessageManager;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
@@ -123,15 +123,15 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	}
 	
 	@Override
-	public MessageModel receiveMessage(String sessionKey) {
+	public BaseMsgModel receiveMessage(String sessionKey, long waitTimeInMillis) throws Exception {
 		// TODO Auto-generated method stub
-		return messageManager.receiveMessage(sessionKey);
+		return messageManager.receiveMessage(sessionKey, waitTimeInMillis);
 	}
 	
 	@Override
-	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
+	public BaseMsgModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis) {
 		// TODO Auto-generated method stub
-		return messageManager.sendAndReceive(handle, msg, properties, replyQueue, selector);
+		return messageManager.sendAndReceive(handle, msg, properties, replyQueue, selector, waitTimeInMillis);
 	}
 
 	@Override

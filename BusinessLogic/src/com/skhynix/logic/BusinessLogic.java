@@ -23,7 +23,6 @@ import com.skhynix.extern.WaferData;
  */
 public class BusinessLogic implements BusinessBehavior, DynaLoadable {
 
-	public static  final String defaultDelimiter = "-";
 	public static final String asResourceType = "resource-as";
 
 	@Override
@@ -62,10 +61,12 @@ public class BusinessLogic implements BusinessBehavior, DynaLoadable {
 		 *  */
 
 		String[] handleArray = handles.entrySet().stream().map(entry -> entry.getValue()).toArray(String[]::new);
-		System.out.println("calling sendAndReceive");
 		Map<String,String> properties = new HashMap<>();
 		properties.put("testProperty", "abcdef");
-		String jsonRes = supplier.sendAndReceive(handleArray[0], message, properties,  "test.reply", null);
+
+		if(handleArray[0].startsWith("message-ems")) {
+			String jsonRes = supplier.sendAndReceive(handleArray[0], message, properties,  "test.reply", null, 60000);
+		}
 //		supplier.sendSyncMessage(handleArray, message);
 		
 		return processResult;

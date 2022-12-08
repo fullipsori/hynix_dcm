@@ -9,14 +9,14 @@ import java.util.logging.Logger;
 import com.skhynix.common.StringUtil;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
-import com.skhynix.extern.Pair;
 import com.skhynix.manager.BusinessManager;
 import com.skhynix.manager.DynaClassManager;
-import com.skhynix.manager.MessageManager;
 import com.skhynix.manager.MetaDataManager;
 import com.skhynix.manager.ResourceManager;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
+import com.skhynix.model.session.EmsSessModel;
+import com.skhynix.model.session.EmsSessModel.SESS_MODE;
 /*
  * Refactoring을 통해서 정리할 내용들 - 초기 개발 시 기능 점검용 (원재일)
  */
@@ -52,22 +52,49 @@ public class BaseProxy {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public String openSession(String joinType, String jsonString) {
-		System.out.println("join:" + joinType +  " jsonString:" + jsonString);
-		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(jsonString)) return "";
-		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		String[] tokens = joinType.split(BaseSessModel.defaultDelimiter);
-		if(StringUtil.isEmpty(tokens[0])) {
-			return "error:" + joinType;
-		}
-		String serverUrl = (String)params.get("serverUrl");
-		if(tokens[0].equals("message")) {
-			return messageRouter.openSession(joinType, serverUrl, jsonString);
-		}else if(tokens[0].equals("resource")) {
-			String res = resourceManager.openSession(joinType, serverUrl, jsonString);
-			return res;
+	public String openSession(String joinType, String param) {
+		/**  channelInfo format
+		 * [INBOUND,EMS,ems#01,tcp://192.168.232.142:7222,QUEUE.FAB1.AREA1.PHOTO.EQP1,AUTO_ACK
+		 * |OUTBOUND,EMS,ems@02,tcp://192.168.232.142:7223,QUEUE.FAB1.AREA1.PHOTO.EQP1,AUTO_ACK]
+		 */
+		
+		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(param)) return "";
+		
+		String serverUrl;
+		String jsonString;
+
+		if(joinType.equals("message-ems")) {
+			String[] tokens = param.split(",");
+			EmsSessModel sessModel = new EmsSessModel();
+			sessModel.role = (tokens[0].equalsIgnoreCase("OUTBOUND"))?  "sender" : "receiver"; 
+			// fullip : ip가 fix 되어서 들어온다. 
+			if(sessModel.role.equals("receiver")) {
+				// sessModel.serverUrl = tokens[3];
+				sessModel.serverUrl = "localhost:7222";
+				sessModel.sessionMode = SESS_MODE.EXPLICIT_CLIENT.modeType;
+			}else {
+				// sessModel.serverUrl = tokens[3];
+				sessModel.serverUrl = "localhost:7223";
+				sessModel.sessionMode = SESS_MODE.AUTO.modeType;
+			}
+			sessModel.queueName = tokens[4];
+			serverUrl = sessModel.serverUrl;
+			jsonString = StringUtil.objectToJson(sessModel);
 		}else {
-			return "error:" + tokens[0];
+			Map<String, Object> params = null;
+			params = StringUtil.jsonToObject(param, Map.class);
+			serverUrl = (String)params.get("serverUrl");
+			jsonString = StringUtil.objectToJson(params);
+		}
+
+		System.out.println("join:" + joinType +  " jsonString:" + jsonString);
+		if(joinType.startsWith("message")) {
+			String handle = messageRouter.openSession(joinType, serverUrl, jsonString);
+			return handle;
+		}else if(joinType.startsWith("resource")) {
+			return resourceManager.openSession(joinType, serverUrl, jsonString);
+		}else {
+			return "error:" + joinType;
 		}
 	}
 	
@@ -116,29 +143,44 @@ public class BaseProxy {
 		}else { }
 	}
 	
-	public String receiveMessage(String handle) {
+	public String receiveBodyMessage(String handle, long waitTimeInMillis) throws Exception {
 		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return "";
 		}
 		if(tokens[0].equals("message")) {
-			return Optional.ofNullable(messageRouter.receiveMessage(handle)).map(MessageModel::getMessage).orElse("");
+			return Optional.ofNullable(messageRouter.receiveMessage(handle, waitTimeInMillis)).map(BaseMsgModel::getMessage).orElse("");
+		}else {
+			return "";
+		}
+	}
+
+	public String receiveMessageWithProperties(String handle, long waitTimeInMillis) throws Exception {
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
+		if(StringUtil.isEmpty(tokens[0])) {
+			return "";
+		}
+		if(tokens[0].equals("message")) {
+			return Optional.ofNullable(messageRouter.receiveMessage(handle, waitTimeInMillis)).map(BaseMsgModel::toJson).orElse("");
 		}else {
 			return "";
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void sendAndReceive(String handle, String data, String jsonProperties, String replyQueue, String selector) {
+	public String sendAndReceiveBody(String handle, String data, String jsonProperties, String replyQueue, String selector, long waitTimeInMillis) {
 		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
-		if(StringUtil.isEmpty(tokens[0])) return; 
+		if(StringUtil.isEmpty(tokens[0])) return ""; 
 		if(tokens[0].equals("message")) {
 			Map<String,String> properties = null;
 			if(StringUtil.isNotEmpty(jsonProperties)) {
 				properties = (Map<String,String>)StringUtil.jsonToObject(jsonProperties, Map.class);
 			}
-			messageRouter.sendAndReceive(handle, data, properties, replyQueue, selector);
-		}else { }
+			return Optional.ofNullable(messageRouter.sendAndReceive(handle, data, properties, replyQueue, selector, waitTimeInMillis)).map(BaseMsgModel::getMessage).orElse("");
+		}else {
+			return "";
+		}
+
 	}
 
 	public void confirmMessage(String handle) {

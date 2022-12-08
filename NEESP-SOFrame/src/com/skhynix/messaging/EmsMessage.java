@@ -19,7 +19,7 @@ import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.EmsSessModel;
 import com.skhynix.model.session.EmsSessModel.SESS_MODE;
@@ -222,28 +222,25 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public MessageModel receiveMessage(String handle) {
+	public BaseMsgModel receiveMessage(String handle, long waitTimeInMillis) throws Exception {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
 			if(emsSessModel.session != null && emsSessModel.msgClient != null) {
-				try {
-					Message message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive();
+				Message message = (TextMessage) ((MessageConsumer)emsSessModel.msgClient).receive(waitTimeInMillis);
+				if(message != null) {
+					BaseMsgModel msgModel = new BaseMsgModel();
+					msgModel.received.put("message", message.getBody(String.class));
 					if(emsSessModel.getSessMode() == SESS_MODE.CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT || emsSessModel.getSessMode() == SESS_MODE.EXPLICIT_CLIENT_DUPS_OK)
 						emsSessModel.message = message;
-					if(message != null) {
-						MessageModel msgModel = new MessageModel();
-						msgModel.message = ((TextMessage)message).getText();
-						Enumeration<String> enumeration = message.getPropertyNames();
-						while(enumeration.hasMoreElements()) {
-							String name = (String)enumeration.nextElement();
-							msgModel.applyProperty(name, message.getObjectProperty(name));
-						}
-						return msgModel;
+
+					Enumeration<String> enumeration = message.getPropertyNames();
+					while(enumeration.hasMoreElements()) {
+						String name = (String)enumeration.nextElement();
+						msgModel.received.put(name, message.getStringProperty(name));
 					}
-				}catch(Exception e) {
-					e.printStackTrace();
+					return msgModel;
 				}
 			}
 		}
@@ -252,7 +249,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	
 	/* fullip: refactoring */
 	@Override
-	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
+	public BaseMsgModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client == null || !EmsSessModel.class.isInstance(client)) return null;
@@ -298,7 +295,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					});
 					MessageProducer msgProducer = (MessageProducer)emsSendModel.msgClient;
 					msgProducer.send(message);
-					return receiveMessage(recvOpenHandle);
+					return receiveMessage(recvOpenHandle, waitTimeInMillis);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}finally {

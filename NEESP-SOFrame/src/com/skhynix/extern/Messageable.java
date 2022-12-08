@@ -2,7 +2,7 @@ package com.skhynix.extern;
 
 import java.util.Map;
 
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 
 /**
  * 외부에서 MessageManager 에게 Message 를 주고 받는 요청을 하는 경우에 MessageManager 는 등록된
@@ -13,7 +13,7 @@ import com.skhynix.model.message.MessageModel;
  */
 public interface Messageable {
 	public boolean sendMessage(String handle, String msg, Map<String,String> properties);
-	public MessageModel receiveMessage(String handle);
+	public BaseMsgModel receiveMessage(String handle, long waitTimeInMillis) throws Exception;
 	public void confirmMessage(String handle);
-	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector);
+	public BaseMsgModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis);
 }

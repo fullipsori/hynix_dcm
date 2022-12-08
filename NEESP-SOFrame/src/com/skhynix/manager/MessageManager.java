@@ -10,7 +10,7 @@ import com.skhynix.extern.SessionBehavior;
 import com.skhynix.messaging.EmsMessage;
 import com.skhynix.messaging.FtlMessage;
 import com.skhynix.messaging.KafkaMessage;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.neesp.log.LogManager;
 
@@ -74,10 +74,10 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	}
 	
 	@Override
-	public MessageModel receiveMessage(String handle) {
+	public BaseMsgModel receiveMessage(String handle, long waitTimeInMillis) throws Exception {
 		Object client = getMember(handle);
 		if(client != null && Messageable.class.isInstance(client))
-			return ((Messageable)client).receiveMessage(handle);
+			return ((Messageable)client).receiveMessage(handle, waitTimeInMillis);
 		else return null;
 	}
 	
@@ -90,11 +90,11 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	}
 	
 	@Override
-	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
+	public BaseMsgModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis) {
 		// TODO Auto-generated method stub
 		Object client = getMember(handle);
 		if(client != null && Messageable.class.isInstance(client)) {
-			return ((Messageable)client).sendAndReceive(handle, msg, properties, replyQueue, selector);
+			return ((Messageable)client).sendAndReceive(handle, msg, properties, replyQueue, selector, waitTimeInMillis);
 		}
 		return null;
 	}

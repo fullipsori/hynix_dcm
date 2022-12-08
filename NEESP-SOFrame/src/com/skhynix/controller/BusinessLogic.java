@@ -1,7 +1,5 @@
 package com.skhynix.controller;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +11,7 @@ import com.skhynix.extern.BusinessSupplier;
 import com.skhynix.extern.Pair;
 import com.skhynix.extern.WaferData;
 import com.skhynix.manager.MetaDataManager;
-import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 
 
@@ -70,15 +68,21 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 	}
 
 	@Override
-	public String sendAndReceive(String handle, String message, Map<String,String> properties, String replyQueue, String selector) {
+	public String sendAndReceive(String handle, String message, Map<String,String> properties, String replyQueue, String selector, long waitTimeInMillis) {
 		// TODO Auto-generated method stub
-		return Optional.ofNullable(messageRouter.sendAndReceive(handle, message, properties, replyQueue, selector)).map(MessageModel::toString).orElse("");
+		return Optional.ofNullable(messageRouter.sendAndReceive(handle, message, properties, replyQueue, selector, waitTimeInMillis)).map(BaseMsgModel::toJson).orElse("");
 	}
 	
 	@Override
 	public boolean sendMessage(String handle, String message, Map<String, String> properties) {
 		// TODO Auto-generated method stub
 		return messageRouter.sendMessage(handle, message, properties);
+	}
+
+	@Override
+	public String receiveMessage(String handle, long waitTimeInMillis) throws Exception {
+		// TODO Auto-generated method stub
+		return Optional.ofNullable(messageRouter.receiveMessage(handle, waitTimeInMillis)).map(BaseMsgModel::toJson).orElse("");
 	}
 
 	@Override
