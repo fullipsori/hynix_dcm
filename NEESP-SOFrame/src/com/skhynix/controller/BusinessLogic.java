@@ -14,6 +14,7 @@ import com.skhynix.extern.Pair;
 import com.skhynix.extern.WaferData;
 import com.skhynix.manager.MetaDataManager;
 import com.skhynix.model.message.MessageModel;
+import com.skhynix.model.session.BaseSessModel;
 
 
 public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
@@ -42,6 +43,7 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 		// TODO Auto-generated method stub
 		//fullip
 		WaferData waferData = new WaferData().setWaferId("wafer-1919").setMessage(message).setMetadataKey(1).setSensorData("090909");
+		String resourceType = String.format("resource%sas", BaseSessModel.defaultDelimiter);
 
 		if(businessBehavior != null) {
 			/* 테스트를 위해 WaferModel json 데이터로 변환하여 보낸다. */
@@ -51,46 +53,8 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 					(resultConsumer == null)? this.resultConsumer : resultConsumer);
 		} else {
 			// default logic
-			List<Pair<String, String>> params = new ArrayList<>();
-			params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
-			String meta = (String)requestMeta("resource,as", "my_table", params);
-			if(StringUtil.isEmpty(meta)) {
-				params.clear();
-				params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
-				params.add(Pair.of("value", "initial"));
-				meta = (String)requestMeta("resource,as", "my_table", params);
-			} else {
-				meta = Instant.now().toString();
-				params.clear();
-				params.add(Pair.of("key", String.valueOf(waferData.metadataKey)));
-				params.add(Pair.of("value", meta));
-				boolean res = storeMeta("resource,as", "my_table", params);
-				if(!res) return "fail store";
-			}
-			return (StringUtil.isEmpty(meta)) ? "fail meta" : meta;
+			return "no-default logic";
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Object requestMeta(String sourceType, String table, Object params) {
-		// TODO Auto-generated method stub
-		List<Pair<String, String>> paramList = (List<Pair<String, String>>) params;
-		return (String)metaDataManager.getMetaData(sourceType, (String)table, paramList.get(0).getFirst(), Long.valueOf(paramList.get(0).getSecond()));
-	}
-
-	@Override
-	public Object controlMeta(String sourceType, Object data, Object params) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean storeMeta(String sourceType, Object data, Object params) {
-		// TODO Auto-generated method stub
-		List<Pair<String, String>> paramList = (List<Pair<String, String>>) params;
-		return metaDataManager.putMetaData(sourceType, (String)data, paramList.get(0).getFirst(), Long.valueOf(paramList.get(0).getSecond()), paramList.get(1).getFirst(), paramList.get(1).getSecond());
 	}
 
 	@Override
@@ -106,9 +70,45 @@ public class BusinessLogic implements BusinessBehavior, BusinessSupplier {
 	}
 
 	@Override
-	public String sendAndReceive(String handle, String replyQueue, String selector, String message) {
+	public String sendAndReceive(String handle, String message, Map<String,String> properties, String replyQueue, String selector) {
 		// TODO Auto-generated method stub
-		return Optional.ofNullable(messageRouter.sendAndReceive(handle, replyQueue, selector, message)).map(MessageModel::toString).orElse("");
+		return Optional.ofNullable(messageRouter.sendAndReceive(handle, message, properties, replyQueue, selector)).map(MessageModel::toString).orElse("");
+	}
+	
+	@Override
+	public boolean sendMessage(String handle, String message, Map<String, String> properties) {
+		// TODO Auto-generated method stub
+		return messageRouter.sendMessage(handle, message, properties);
+	}
+
+	@Override
+	public boolean createMeta(String sourcetype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return metaDataManager.createMetaData(sourcetype, table, dtoObject);
+	}
+
+	@Override
+	public boolean retrieveMeta(String sourcetype, String table, Pair<String, String> key, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return metaDataManager.retrieveMeta(sourcetype, table, key, dtoObject);
+	}
+
+	@Override
+	public boolean updateMeta(String sourcetype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return metaDataManager.updateMeta(sourcetype, table, dtoObject);
+	}
+
+	@Override
+	public boolean deleteMeta(String sourcetype, String table, Pair<String, ? extends Object> key) {
+		// TODO Auto-generated method stub
+		return metaDataManager.deleteMeta(sourcetype, table, key);
+	}
+
+	@Override
+	public <E> List<E> executeSql(String sourcetype, Class<E> clazz, String sqlString) {
+		// TODO Auto-generated method stub
+		return executeSql(sourcetype, clazz, sqlString);
 	}
 
 }

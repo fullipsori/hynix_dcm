@@ -42,15 +42,17 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
 		// TODO Auto-generated method stub
-		switch(jointype) {
-			case "resource,as" : return ASRepository.getInstance(); 
+		String resourcePrefix = "resource" + BaseSessModel.defaultDelimiter;
+		String messageType = jointype.substring(resourcePrefix.length());
+		switch(messageType) {
+			case "as" : return ASRepository.getInstance(); 
 		}
 		return null;
 	}
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String domain = String.format("%s%s%s", jointype, defaultDelimiter, serverUrl);
+		String domain = String.format("%s%s%s", jointype, BaseSessModel.defaultDelimiter, serverUrl);
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {
@@ -114,38 +116,56 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@SuppressWarnings("unused")
+	private Optional<Pair<Resourceable,String>> getClient(String joinType) {
+		String handle = resourceMap.get(joinType);
+		if(StringUtil.isEmpty(handle)) return null;
+		Object client = getMember(handle);
+		if(Resourceable.class.isInstance(client)) {
+			return Optional.of(Pair.of((Resourceable)client, handle));
+		}
+		return Optional.empty();
+	}
+	
 	@Override
 	public boolean create(String joinType, String table, Pair<String, ? extends Object> key,
 			List<Pair<String, ? extends Object>> params) {
-		// TODO Auto-generated method stub
-		String handle = resourceMap.get(joinType);
-		if(StringUtil.isEmpty(handle)) return false;
-		Object client = getMember(handle);
-		if(Resourceable.class.isInstance(client)) {
-			return ((Resourceable)client).create(handle, table, key,  params);
-		}
-		return false;
+		return getClient(joinType).map(pair -> pair.getFirst().create(pair.getSecond(), table, key, params)).orElse(false);
 	}
 	@Override
 	public Object retrieve(String joinType, String table, Pair<String, ? extends Object> key) {
 		// TODO Auto-generated method stub
-		String handle = resourceMap.get(joinType);
-		if(StringUtil.isEmpty(handle)) return "unknown joinType :" + joinType;
-		Object client = getMember(handle);
-		if(Resourceable.class.isInstance(client)) {
-			return (String)((Resourceable)client).retrieve(handle, table, key);
-		}
-		return "";
+		return getClient(joinType).map(pair -> pair.getFirst().retrieve(pair.getSecond(), table, key)).orElse("");
 	}
 	@Override
-	public boolean update(String handle, String table, Pair<String, ? extends Object> key,
+	public boolean update(String jointype, String table, Pair<String, ? extends Object> key,
 			List<Pair<String, ? extends Object>> params) {
-		// TODO Auto-generated method stub
-		return false;
+		return getClient(jointype).map(pair -> pair.getFirst().update(pair.getSecond(), table, key, params)).orElse(false);
 	}
 	@Override
-	public boolean delete(String handle, String table, Pair<String, ? extends Object> key) {
+	public boolean delete(String jointype, String table, Pair<String, ? extends Object> key) {
 		// TODO Auto-generated method stub
-		return false;
+		return getClient(jointype).map(pair -> pair.getFirst().delete(pair.getSecond(), table, key)).orElse(false);
+	}
+	@Override
+	public boolean create(String jointype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return getClient(jointype).map(pair -> pair.getFirst().create(pair.getSecond(), table, dtoObject)).orElse(false);
+	}
+	@Override
+	public boolean retrieve(String jointype, String table, Pair<String, String> key, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return getClient(jointype).map(pair -> pair.getFirst().retrieve(pair.getSecond(), table, key, dtoObject)).orElse(false);
+	}
+	@Override
+	public boolean update(String jointype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return getClient(jointype).map(pair -> pair.getFirst().update(pair.getSecond(), table, dtoObject)).orElse(false);
+	}
+	@Override
+	public <E> List<E> executeSql(String jointype, Class<E> clazz, String sqlString) {
+		// TODO Auto-generated method stub
+		return getClient(jointype).map(pair -> pair.getFirst().executeSql(pair.getSecond(), clazz, sqlString)).orElse(null);
 	}
 }

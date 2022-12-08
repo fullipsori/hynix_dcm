@@ -1,7 +1,7 @@
 package com.skhynix.messaging;
 
 import java.time.Instant;
-
+import java.util.Map;
 
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
@@ -24,7 +24,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	private final String defaultServerUrl = "localhost:8585";
 
 	public FtlMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, BaseSessModel.defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 
 	@Override
@@ -34,8 +34,9 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 
 	@Override
-	public boolean sendMessage(String handle, String msg) {
+	public boolean sendMessage(String handle, String msg, Map<String,String> properties) {
 		// TODO Auto-generated method stub
+		// fullip : check support of properties
 		Object client =  sessionMap.get(handle);
 		if(client != null && FtlSessModel.class.isInstance(client)) {
 			FtlSessModel ftlSessModel = (FtlSessModel) client;
@@ -63,7 +64,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	}
 	
 	@Override
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -156,7 +157,7 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 	@Override
 	public String tokenizeSessionName(String prefixHandle) {
 		// TODO Auto-generated method stub
-		int lastidx = prefixHandle.lastIndexOf(defaultDelimiter);
+		int lastidx = prefixHandle.lastIndexOf(BaseSessModel.defaultDelimiter);
 		return prefixHandle.substring(lastidx + 1);
 	}
 

@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
+import javax.naming.OperationNotSupportedException;
+
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Pair;
@@ -86,12 +88,22 @@ public class ASRepository extends BaseConnection implements Resourceable {
 				// TODO Auto-generated method stub
 				return null;
 			}
+			@Override
+			Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties) {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		},
     	GET("get") {
 			@Override
 			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
 				return ASRepository.getInstance().getRow(table, keyName, key, defaultProperties);
+			}
+			@Override
+			Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties) {
+				// TODO Auto-generated method stub
+				return ASRepository.getInstance().getRow(table, param, dtoObject, defaultProperties);
 			}
 		},
     	PUT("put") {
@@ -100,12 +112,22 @@ public class ASRepository extends BaseConnection implements Resourceable {
 				// TODO Auto-generated method stub
 				return ASRepository.getInstance().putRow(table, keyName, key, valueName, value, defaultProperties);
 			}
+			@Override
+			Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties) {
+				// TODO Auto-generated method stub
+				return ASRepository.getInstance().putRow(table, dtoObject, defaultProperties);
+			}
 		},
     	DELETE("delete") {
 			@Override
 			Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
 				// TODO Auto-generated method stub
 				return ASRepository.getInstance().deleteRow(table, keyName, key, defaultProperties);
+			}
+			@Override
+			Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties) {
+				// TODO Auto-generated method stub
+				return ASRepository.getInstance().deleteRow(table, param, defaultProperties);
 			}
 		},
     	UPDATE("update") {
@@ -114,7 +136,13 @@ public class ASRepository extends BaseConnection implements Resourceable {
 				// TODO Auto-generated method stub
 				return ASRepository.getInstance().updateRow(table, keyName, key, valueName, value, defaultProperties);
 			}
-		};
+			@Override
+			Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties) {
+				// TODO Auto-generated method stub
+				return ASRepository.getInstance().updateRow(table, dtoObject, defaultProperties);
+			}
+		}
+		;
 
     	private final String op;
     	private OPERATION(String op) {
@@ -130,11 +158,17 @@ public class ASRepository extends BaseConnection implements Resourceable {
     	}
     	
     	abstract Object apply(Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties);
+    	abstract Object apply(Table table, Object param, Object dtoObject, Properties defaultProperties);
     	
     	public static Object applyOperation(OPERATION operation, Table table, String keyName, Object key, String valueName, String value, Properties defaultProperties) {
     		return operation.apply(table, keyName, key, valueName, value, defaultProperties);
     	}
+
+    	public static Object applyOperation(OPERATION operation, Table table, Object param, Object dtoObject, Properties defaultProperties) {
+    		return operation.apply(table, param, dtoObject, defaultProperties);
+    	}
     }
+    	
     	
     /** get/put/delete/update 함수를 수행하는 메인 함수 **/
     public Object runCommand(ASSessModel asClient, String tableName, String op, String keyName, Object key, String valueName, String value)
@@ -149,6 +183,20 @@ public class ASRepository extends BaseConnection implements Resourceable {
 
         try( Table table = ((Session)asClient.session).openTable(tableName, ((ASSessModel)serverModel).properties) ) {
         	return OPERATION.applyOperation(operation, table, keyName, key, valueName, value, ((ASSessModel)asClient).properties);
+
+        }catch(DataGridException dataGridException) {
+            dataGridException.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    public Object runCommand(ASSessModel asClient, String tableName, OPERATION operation, Object param, Object dtoObject)
+    {
+        if(serverModel == null || serverModel.serverConnection == null || asClient.session == null) return null;
+        if(tableName == null || tableName.isEmpty())  return null;
+
+        try( Table table = ((Session)asClient.session).openTable(tableName, ((ASSessModel)serverModel).properties) ) {
+        	return OPERATION.applyOperation(operation, table, param, dtoObject, ((ASSessModel)asClient).properties);
 
         }catch(DataGridException dataGridException) {
             dataGridException.printStackTrace(System.err);
@@ -208,7 +256,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	@Override
 	public String tokenizeSessionName(String prefixHandle) {
 		// TODO Auto-generated method stub
-		int lastidx = prefixHandle.lastIndexOf(defaultDelimiter);
+		int lastidx = prefixHandle.lastIndexOf(BaseSessModel.defaultDelimiter);
 		return prefixHandle.substring(lastidx + 1);
 	}
 
@@ -261,6 +309,23 @@ public class ASRepository extends BaseConnection implements Resourceable {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean create(String handle, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		Object client = sessionMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, null, dtoObject);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public Object retrieve(String handle, String table, Pair<String,? extends Object> key) {
@@ -278,6 +343,24 @@ public class ASRepository extends BaseConnection implements Resourceable {
 		}
 		return null;
 	}
+	
+	@Override
+	public boolean retrieve(String handle, String table, Pair<String, String> key, Object dtoObject) {
+		// TODO Auto-generated method stub
+		Object client = sessionMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.GET, key, dtoObject);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+	
 
 	@Override
 	public boolean update(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
@@ -288,6 +371,23 @@ public class ASRepository extends BaseConnection implements Resourceable {
 			if(asSessModel.session != null) {
 				try {
 					return (Boolean)runCommand(asSessModel, table, OPERATION.UPDATE, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean update(String handle, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		Object client = sessionMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(asSessModel.session != null) {
+				try {
+					return (Boolean)runCommand(asSessModel, table, OPERATION.UPDATE, null, dtoObject);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -314,6 +414,74 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	}
 
 
+    @Override
+    public <E> List<E> executeSql(String handle, Class<E> clazz, String sqlString) {
+
+    	List<E> dtoList =  new ArrayList<E>();	
+    	Statement statement = null;
+    	ResultSet resultSet = null;
+    	
+		Object client = sessionMap.get(handle);
+		if(client != null && ASSessModel.class.isInstance(client)) {
+			ASSessModel asSessModel = (ASSessModel) client;
+			if(serverModel == null || serverModel.serverConnection == null || asSessModel.session == null) return null;
+
+			try {    	
+				statement = ((Session)asSessModel.session).createStatement(sqlString, ((ASSessModel)serverModel).properties);
+				ResultSetMetadata rsm = statement.getResultSetMetadata();
+				
+				if(rsm != null) {
+					resultSet = statement.executeQuery(((ASSessModel)serverModel).properties);
+					resultSet.forEach(row -> {
+						if(row != null) {
+							try {
+								E tempDto = clazz.getDeclaredConstructor().newInstance();
+								 for(Field field : clazz.getClass().getDeclaredFields()) {    				 	
+									 field.setAccessible(true);
+									 String ColumnName = field.getName();
+									 if(row.isColumnSet(ColumnName)) {
+										 String rowValue = row.getString(ColumnName);
+										 field.set(tempDto, rowValue);
+									 } // if
+								 } // for 
+								 dtoList.add(tempDto);		
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								try { row.destroy(); }
+								catch (DataGridException e) { e.printStackTrace(System.err); }
+							}
+						}
+					});
+				}	
+			} catch(Exception e) {
+				e.printStackTrace(System.err);
+				
+			} finally {
+				
+				if(resultSet != null){
+				
+					try {				
+						resultSet.close();				
+					} catch(Exception e){
+						System.out.println("Failed to close ResultSet.");
+					}		
+				}		
+						
+				if(statement != null){
+				
+					try {				
+						statement.close();												
+					} catch(Exception e){
+						System.out.println("Failed to close ResultSet.");
+					}		
+				}	
+			}    			
+			return dtoList;
+		}
+		return null;
+    }
+    
     /**********************************************************************************************
      *
      * Beginning of methods to demonstrate ActiveSpaces "per-op" functionality.
@@ -324,10 +492,10 @@ public class ASRepository extends BaseConnection implements Resourceable {
 
     private boolean applyField(Row row, String name, Object value) {
     	try {
-			if(Long.class.isInstance(value) || Integer.class.isInstance(value)) {
-				row.setLong(name, (Long)value);
-			}else if(String.class.isInstance(value)) {
+			if(String.class.isInstance(value)) {
 				row.setString(name, (String)value);
+			}else if(Long.class.isInstance(value) || Integer.class.isInstance(value)) {
+				row.setLong(name, (Long)value);
 			}else return false;
     	} catch(Exception e) {
     		e.printStackTrace();
@@ -355,6 +523,46 @@ public class ASRepository extends BaseConnection implements Resourceable {
             	table.put(putRow);
             	return true;
         	}
+        }
+        catch (DataGridException dataGridException)
+        {
+            dataGridException.printStackTrace(System.err);
+        }
+        finally
+        {
+            if (putRow != null)
+            {
+                try
+                {
+                    putRow.destroy();
+                }
+                catch (DataGridException e)
+                {
+                    e.printStackTrace(System.err);
+                }
+            }
+        }
+        return false;
+    }
+
+    private Boolean putRow(Table table, Object dtoObject, Properties defaultProperties)
+    {
+    	if(dtoObject == null) return false;
+
+        Row putRow = null;
+        try
+        {
+            putRow = table.createRow();
+            for(Field field : dtoObject.getClass().getDeclaredFields()) {
+				try {
+					field.setAccessible(true);
+					putRow.setString(field.getName(), (String)field.get(dtoObject));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            };
+            table.put(putRow);
+            return true;
         }
         catch (DataGridException dataGridException)
         {
@@ -434,6 +642,11 @@ public class ASRepository extends BaseConnection implements Resourceable {
         }
     }
 
+    private boolean putRows(Session session, Table table, Object param, Properties defaultProperties)
+    { 
+    	return false;
+    }
+
 	/**
      * Get a single row from the table. The value of the row is printed, if it exists.
      *
@@ -484,6 +697,63 @@ public class ASRepository extends BaseConnection implements Resourceable {
         }
     }
 
+    @SuppressWarnings("unchecked")
+	private Boolean getRow(Table table, Object param, Object dtoObject, Properties defaultProperties)
+    {
+        // create a row and set the user supplied key and value in it
+    	if(param == null || dtoObject == null) return false;
+    	if(!Pair.class.isInstance(param)) return false;
+    	
+    	Pair<String,String> keyValue = (Pair<String,String>)param;
+        Row keyRow = null;
+        String result = null;
+        try
+        {
+            keyRow = table.createRow();
+            keyRow.setString(keyValue.getFirst(), keyValue.getSecond());
+            Row getRow = table.get(keyRow);
+            if (getRow != null)
+            {
+				for(Field field : dtoObject.getClass().getDeclaredFields()) {
+					try {
+                		field.setAccessible(true);
+                		String columnName = field.getName();
+                		if(getRow.isColumnSet(columnName)) {
+                			field.set(dtoObject, getRow.getString(columnName));
+                		}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+                getRow.destroy();
+                return true;
+            }
+            else
+            {
+            	return false; 
+            }
+        }
+        catch (DataGridException dataGridException)
+        {
+            dataGridException.printStackTrace(System.err);
+            return false;
+        }
+        finally
+        {
+            if (keyRow != null)
+            {
+                try
+                {
+                    keyRow.destroy();
+                }
+                catch (DataGridException e)
+                {
+                    e.printStackTrace(System.err);
+                }
+            }
+        }
+    }
     /**
      * Get multiple rows from the table.
      *
@@ -546,6 +816,11 @@ public class ASRepository extends BaseConnection implements Resourceable {
     	}
     }
 
+    private String[] getRows(Session session, Table table, Object key, Object dtoObject, Properties defaultProperties)
+    {
+    	return null;
+    }
+
      /**
       * Update a single row in the table. It is not necessary to update every column in the row
       *
@@ -587,6 +862,47 @@ public class ASRepository extends BaseConnection implements Resourceable {
          }
      }
 
+     private Boolean updateRow(Table table, Object dtoObject, Properties defaultProperties)
+     {
+    	 if(dtoObject == null) return false;
+
+         // create a row and set the user supplied key and value in it
+         Row updateRow = null;
+         try
+         {
+        	 updateRow = table.createRow();
+             for(Field field : dtoObject.getClass().getDeclaredFields()) {
+            	 try {
+            		field.setAccessible(true);
+            		updateRow.setString(field.getName(), (String)field.get(dtoObject));
+            	 }catch(Exception e) {
+            		 e.printStackTrace();
+            	 }
+
+             }
+			 table.update(updateRow);
+			 return true;
+         }
+         catch (DataGridException dataGridException)
+         {
+             dataGridException.printStackTrace(System.err);
+             return false;
+         }
+         finally
+         {
+             if (updateRow != null)
+             {
+                 try
+                 {
+                     updateRow.destroy();
+                 }
+                 catch (DataGridException e)
+                 {
+                     e.printStackTrace(System.err);
+                 }
+             }
+         }
+     }
     /**
      * Delete a single row from the table.
      *
@@ -613,6 +929,36 @@ public class ASRepository extends BaseConnection implements Resourceable {
         }
         finally
         {
+            if (keyRow != null)
+            {
+                try
+                {
+                    keyRow.destroy();
+                }
+                catch (DataGridException e)
+                {
+                    e.printStackTrace(System.err);
+                }
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+	private Boolean deleteRow(Table table, Object param, Properties defaultProperties) 
+    {
+    	if(param == null || !Pair.class.isInstance(param)) return false;
+    	Pair<String,String> keyValue = (Pair<String,String>)param;
+        Row keyRow = null;
+        String result = null;
+        try {
+            keyRow = table.createRow();
+            keyRow.setString(keyValue.getFirst(), keyValue.getSecond());
+            table.delete(keyRow);
+            return true;
+        } catch (DataGridException dataGridException) {
+            dataGridException.printStackTrace(System.err);
+            return false;
+        } finally {
             if (keyRow != null)
             {
                 try
@@ -1258,203 +1604,6 @@ public class ASRepository extends BaseConnection implements Resourceable {
 
 
 
-    /*
-     * Edward Won - 2022/12/07 - 추가하기는 했으나 제대로 했는지 확인 필요 
-     * 배재호 과장 소스 - 내용 추가 파트 - putDto, getDto, queryDtoGeneric
-     * getDto 안에서 사용하는 함수: putDto 
-     * requestMeta에서 Row를 가져올 때 키 값을 여러 개를 지정할 수 있어야 함 => getDto / getRow 함수 참조 - ASRepository에 참고하라고 마지막 부분에 추가해 놓았음 
-     */
-    
-    Properties defaultProperties = null;
-    Session session = null;
-    
-    public boolean putDto(Object dto, String tableName){
-    	Row putRow = null;
-    	Table table = null;
-    	Boolean result = false;
-    	
-    	try{
-    		table = session.openTable(tableName, defaultProperties);
-    		putRow = table.createRow();
-    		
-    		for(Field field: dto.getClass().getDeclaredFields()){
-    			field.setAccessible(true);
-    			try{
-    				putRow.setString(field.getName(), (String) field.get(dto));
-    			} catch (DataGridException e){
-    				// System.out.println(String.foramt("put row column[%s] set error: %s", field.getName(), e.toString()));
-    			}	
-    		}
-    			
-    		table.put(putRow);
-    		result = true;
-    	} catch (Exception e) {
-    		System.out.println(e.toString());
-    	} finally {
-    		if(putRow != null) {
-    			try {
-    				putRow.destroy();
-    			} catch (DataGridException e) {
-    				e.printStackTrace(System.err);
-    			}
-    		}			
-    	}
-    		
-    	return result;
-    }  
-    	
-    			
-    public boolean getDto(Object dto, String tableName, Map<String, String> keyValues) {
-
-    	Row row = getRow(tableName, keyValues);
-    	boolean result = false;
-    	
-    	// row를 DTO로 전환
-    	if(row != null) {
-    		for(Field field :dto.getClass().getDeclaredFields()) {
-    		
-    			field.setAccessible(true);
-    			String rowValue;
-    			
-    			try {
-    				String ColumnName = field.getName();
-    				if(row.isColumnSet(ColumnName)) {
-    					rowValue = row.getString(ColumnName);
-    					field.set(dto, rowValue);
-    				}
-    			} catch (Exception e) {
-    				e.printStackTrace(System.err);
-    			}
-    		}
-    		result = true;
-    	} else {
-    		result = false;
-    	}
-    		
-    	return result;
-    }
-
-    /*
-     * 종속성을 가지고 있다. - class에 대한 정보가 선언되어 있어야 한다. - 목록으로 가지고 온다. 
-     */
-
-    public <E> List<E> queryDtoGeneric(Class<E> clazz, String sqlString) {
-    	List<E> dtoList =  null;	
-    	Statement statement = null;
-    	ResultSet resultSet = null;
-    	
-    	try {    	
-    		statement = session.createStatement(sqlString, defaultProperties);
-    		ResultSetMetadata rsm = statement.getResultSetMetadata();
-    		
-    		if(rsm != null) {
-    			resultSet = statement.executeQuery(defaultProperties);
-    				
-    			for(Row row : resultSet) {
-
-    				E tempDto = clazz.getDeclaredConstructor().newInstance();
-    				
-    				if(row != null){
-    				 	
-    				 	for(Field field : clazz.getClass().getDeclaredFields()) {    				 	
-    				 		field.setAccessible(true);
-    			 			String ColumnName = field.getName();
-
-    			 			if(row.isColumnSet(ColumnName)) {
-    			 				String rowValue = row.getString(ColumnName);
-    				 			field.set(tempDto, rowValue);
-    				 		} // if
-    				 	} // for 
-    				} // if
-    									
-    				if(dtoList == null) 
-    				   dtoList = new ArrayList<E>();														
-    				dtoList.add(tempDto);					
-    			} // for
-    		}	
-    	} catch(Exception e) {
-    	
-    		System.out.println("Fialed to execute the statement.");
-    		e.printStackTrace(System.err);
-    		
-    	} finally {
-    		
-    		if(resultSet != null){
-    		
-    			try {				
-    				resultSet.close();				
-    			} catch(Exception e){
-    				System.out.println("Failed to close ResultSet.");
-    			}		
-    		}		
-    				
-    		if(statement != null){
-    		
-    			try {				
-    				statement.close();												
-    			} catch(Exception e){
-    				System.out.println("Failed to close ResultSet.");
-    			}		
-    		}	
-    	}    			
-    	return dtoList;
-    }
-    
-    /** 
-     * Get a single row from the table. The value of the row is printed, if it exists.
-     *
-     * @param table the table to get the row from
-     * @param key the key for the row
-     */
-    public Row getRow(String tableName, Map<String, String> keyValues)
-    {
-        // create a row and set the user supplied key and value in it
-        Row keyRow = null;
-        Table table = null; 
-        try
-        {
-        	table = session.openTable(tableName, defaultProperties);
-            keyRow = table.createRow();
-                        
-            Set<String> keySet = keyValues.keySet();
-	    	for(String key : keySet) {
-	    		keyRow.setString(key, keyValues.get(key));
-	    	}
-	    	
-            Row getRow = table.get(keyRow);
-            
-            if (getRow != null)
-            {
-                System.out.printf("Row retrieved from table: %s%n", getRow.toString());
-                return getRow;
-            }
-            else
-            {
-                System.out.println("Row does not exist");
-            }
-        }
-        catch (DataGridException dataGridException)
-        {
-            dataGridException.printStackTrace(System.err);
-        }
-        finally
-        {
-            if (keyRow != null)
-            {
-                try
-                {
-                    keyRow.destroy();
-                }
-                catch (DataGridException e)
-                {
-                    e.printStackTrace(System.err);
-                }
-            }
-        }
-        
-        return null;
-    }
-    	
 
     /** need algorithm */
     public static void main(String[] args)
@@ -1478,7 +1627,6 @@ public class ASRepository extends BaseConnection implements Resourceable {
             exception.printStackTrace();
         }
     }
- 
 
 	
 }

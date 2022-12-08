@@ -12,8 +12,6 @@ import com.skhynix.model.session.BaseSessModel;
 
 abstract public class BaseConnection implements SessionBehavior, Joinable {
 
-	public static final String defaultDelimiter = ",";
-
 	protected Runnable unregister = null;
 
 	protected BaseSessModel serverModel = null;
@@ -45,7 +43,7 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 
 	protected Map<String,String> tokenizeSessionKey(String handle) {
 		Map<String,String> tokenMap = new HashMap<>();
-		int lastidx = handle.lastIndexOf(defaultDelimiter);
+		int lastidx = handle.lastIndexOf(BaseSessModel.defaultDelimiter);
 		tokenMap.put("randomKey", handle.substring(lastidx + 1));
 		String sessionName = tokenMap.put("sessionName", tokenizeSessionName(handle.substring(0, lastidx)));
 		tokenMap.put("domain", handle.substring(0, handle.indexOf(sessionName)-1));
@@ -53,7 +51,7 @@ abstract public class BaseConnection implements SessionBehavior, Joinable {
 	}
 
 	private String getSessionKey(String domain, String sessionName) {
-		return String.format("%s%s%s%s%s", domain, defaultDelimiter, sessionName, defaultDelimiter, getRandomKey());
+		return String.format("%s%s%s%s%s", domain, BaseSessModel.defaultDelimiter, sessionName, BaseSessModel.defaultDelimiter, getRandomKey());
 	}
 	
 	@Override

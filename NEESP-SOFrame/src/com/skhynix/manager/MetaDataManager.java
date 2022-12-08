@@ -9,6 +9,12 @@ import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
 import com.skhynix.extern.Pair;
 
+/**
+ * 메타데이터 매니저는 데이터를 로컬로 관리하는 역할도 진행한다.  즉 데이터가 hit 되는 경우에는 Map에서 아닌경우에만 AS 를 접속한다.
+ * 이후 구현이 필요한 항목이다.
+ * @author fullipsori
+ *
+ */
 public class MetaDataManager extends BaseManager {
 	private static final MetaDataManager instance = new MetaDataManager();
 	private final ResourceManager resourceManager = ResourceManager.getInstance();
@@ -33,15 +39,28 @@ public class MetaDataManager extends BaseManager {
 		return null;
 	}
 	
-	public String getMetaData(String joinType, String table, String keyname, long key) {
-		
-		return (String)resourceManager.retrieve(joinType, table, Pair.of(keyname, key));
+	public boolean createMetaData(String sourcetype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return resourceManager.create(sourcetype, table, dtoObject);
 	}
-	
-	public boolean putMetaData(String joinType, String table, String keyname,long key, String colname, String colvalue) {
-		List<Pair<String,? extends Object>> columns = new ArrayList<>();
-		Pair<String, String>  column = Pair.of(colname, colvalue);
-		columns.add(column);
-		return resourceManager.create(joinType, table, Pair.of(keyname, key), columns);
+
+	public boolean retrieveMeta(String sourcetype, String table, Pair<String, String> key, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return resourceManager.retrieve(sourcetype, table, key, dtoObject);
+	}
+
+	public boolean updateMeta(String sourcetype, String table, Object dtoObject) {
+		// TODO Auto-generated method stub
+		return resourceManager.update(sourcetype, table, dtoObject);
+	}
+
+	public boolean deleteMeta(String sourcetype, String table, Pair<String, ? extends Object> key) {
+		// TODO Auto-generated method stub
+		return resourceManager.delete(sourcetype, table, key);
+	}
+
+	public <E> List<E> executeSql(String sourcetype, Class<E> clazz, String sqlString) {
+		// TODO Auto-generated method stub
+		return resourceManager.executeSql(sourcetype, clazz, sqlString);
 	}
 }

@@ -1,6 +1,7 @@
 package com.skhynix.controller;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -72,7 +73,7 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	private void initObservable() {
 		messageSubject.subscribeOn(Schedulers.from(executorService))
 			.filter(pair -> pair != null)
-			.subscribe(pair ->  messageManager.sendMessage(pair.getFirst(), pair.getSecond()));
+			.subscribe(pair ->  messageManager.sendMessage(pair.getFirst(), pair.getSecond(), null));
 	}
 
 	public static MessageRouter getInstance() {
@@ -102,7 +103,7 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	public void sendSyncTo(String[] handles, String message) {
 		Observable.fromArray(handles)
 			.subscribeOn(Schedulers.from(executorService))
-			.map(handle -> messageManager.sendMessage(handle, message))
+			.map(handle -> messageManager.sendMessage(handle, message, null))
 			.onErrorReturnItem(false)
 			.blockingSubscribe();
 			
@@ -117,8 +118,8 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	}
 
 	@Override
-	public boolean sendMessage(String handle, String message) {
-		return messageManager.sendMessage(handle, message);
+	public boolean sendMessage(String handle, String message, Map<String,String> properties) {
+		return messageManager.sendMessage(handle, message, properties);
 	}
 	
 	@Override
@@ -128,9 +129,9 @@ public class MessageRouter implements SessionBehavior, Messageable {
 	}
 	
 	@Override
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
 		// TODO Auto-generated method stub
-		return messageManager.sendAndReceive(handle, replyQueue, selector, msg);
+		return messageManager.sendAndReceive(handle, msg, properties, replyQueue, selector);
 	}
 
 	@Override

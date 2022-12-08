@@ -29,7 +29,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	private final String defaultServerUrl = "localhost:7222";
 	
 	public EmsMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, BaseSessModel.defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 	
 
@@ -50,19 +50,19 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		if(!EmsSessModel.class.isInstance(client)) return "";
 		EmsSessModel emsSessModel = (EmsSessModel) client;
 		return String.format("%s%s%s%s%s", (emsSessModel.topicName != null) ? emsSessModel.topicName : emsSessModel.queueName, 
-				defaultDelimiter,
+				BaseSessModel.defaultDelimiter,
 				StringUtil.isEmpty(emsSessModel.selector)? "" : emsSessModel.selector, 
-				defaultDelimiter,
+				BaseSessModel.defaultDelimiter,
 				emsSessModel.role);
 	}
 	
 	@Override
 	public String tokenizeSessionName(String prefixHandle) {
 		// TODO Auto-generated method stub
-		String[] tokens = prefixHandle.split(defaultDelimiter);
+		String[] tokens = prefixHandle.split(BaseSessModel.defaultDelimiter);
 		/* prefix,%s,%s,%s*/
 		int size = tokens.length;
-		return String.format("%s%s%s%s%s", tokens[size-3], defaultDelimiter, tokens[size-2], defaultDelimiter, tokens[size-1]);
+		return String.format("%s%s%s%s%s", tokens[size-3], BaseSessModel.defaultDelimiter, tokens[size-2], BaseSessModel.defaultDelimiter, tokens[size-1]);
 	}
 
 	@Override
@@ -192,7 +192,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 
 
 	@Override
-	public boolean sendMessage(String handle, String msg) {
+	public boolean sendMessage(String handle, String msg, Map<String,String> properties) {
 		Object client = sessionMap.get(handle);
 		if(client != null && EmsSessModel.class.isInstance(client)) {
 			EmsSessModel emsSessModel = (EmsSessModel) client;
@@ -201,6 +201,14 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 				try {
 					TextMessage message = session.createTextMessage();
 					message.setText(msg);
+					properties.entrySet().forEach(entry -> {
+						try {
+							message.setStringProperty(entry.getKey(), entry.getValue());
+						} catch (JMSException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 					MessageProducer msgProducer = (MessageProducer)emsSessModel.msgClient;
 					msgProducer.send(message);
 					return true;
@@ -244,7 +252,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 	
 	/* fullip: refactoring */
 	@Override
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client == null || !EmsSessModel.class.isInstance(client)) return null;
@@ -257,7 +265,7 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		recvModel.selector = selector;
 
 		String recvSessionName = getSessionName(recvModel);
-		String receivePrefixKey= String.format("%s%s%s", recvModel.serverDomain, defaultDelimiter, recvSessionName);
+		String receivePrefixKey= String.format("%s%s%s", recvModel.serverDomain, BaseSessModel.defaultDelimiter, recvSessionName);
 		
 		Optional<Entry<String,BaseSessModel>> elem = sessionMap.entrySet().stream()
 				.filter(entry -> entry.getKey().startsWith(receivePrefixKey)).findAny();
@@ -280,6 +288,14 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 					TextMessage message = session.createTextMessage();
 					message.setJMSReplyTo((Destination)recvModel.destination);
 					message.setText(msg);
+					properties.entrySet().forEach(entry -> {
+						try {
+							message.setStringProperty(entry.getKey(), entry.getValue());
+						} catch (JMSException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
 					MessageProducer msgProducer = (MessageProducer)emsSendModel.msgClient;
 					msgProducer.send(message);
 					return receiveMessage(recvOpenHandle);

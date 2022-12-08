@@ -5,7 +5,7 @@ import java.io.Serializable;
 abstract public class BaseSessModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	public static final String defaultDelimiter = ",";
+	public static final String defaultDelimiter = "-";
 	
 	public String handle = null;
 	public String serverDomain = null;

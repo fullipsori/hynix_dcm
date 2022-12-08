@@ -5,16 +5,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
+import com.skhynix.model.session.BaseSessModel;
 
 public abstract class BaseManager {
 	private final Map<String, Joinable> members = new ConcurrentHashMap<>();
-	public static final String defaultDelimiter = ",";
 	
 	abstract public String getDomain();
 	abstract public Joinable createMember(String jointype, String serverUrl);
 
 	private boolean isJoinable(String key) {
-		return StringUtil.contains(key, getDomain(), defaultDelimiter);
+		return StringUtil.contains(key, getDomain(), BaseSessModel.defaultDelimiter);
 	}
 	
 	/** 모듈이 등록이 않된 경우에만 할당 한다. */

@@ -1,5 +1,6 @@
 package com.skhynix.manager;
 
+import java.util.Map;
 import java.util.Optional;
 
 import com.skhynix.base.BaseManager;
@@ -54,19 +55,21 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
-		switch(jointype) {
-			case "message,ems" : return new EmsMessage(jointype, serverUrl); 
-			case "message,ftl" : return new FtlMessage(jointype, serverUrl); 
-			case "message,kafka" : return new KafkaMessage(jointype, serverUrl); 
+		String resourcePrefix = "message" + BaseSessModel.defaultDelimiter;
+		String messageType = jointype.substring(resourcePrefix.length());
+		switch(messageType) {
+			case "ems" : return new EmsMessage(jointype, serverUrl); 
+			case "ftl" : return new FtlMessage(jointype, serverUrl); 
+			case "kafka" : return new KafkaMessage(jointype, serverUrl); 
 		}
 		return null;
 	}
 
 	@Override
-	public boolean sendMessage(String handle, String message) {
+	public boolean sendMessage(String handle, String message, Map<String,String> properties) {
 		Object client = getMember(handle);
 		if(client != null && Messageable.class.isInstance(client))
-			return ((Messageable)client).sendMessage(handle, message);
+			return ((Messageable)client).sendMessage(handle, message, properties);
 		else return false;
 	}
 	
@@ -87,18 +90,18 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	}
 	
 	@Override
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
 		// TODO Auto-generated method stub
 		Object client = getMember(handle);
 		if(client != null && Messageable.class.isInstance(client)) {
-			return ((Messageable)client).sendAndReceive(handle, replyQueue, selector, msg);
+			return ((Messageable)client).sendAndReceive(handle, msg, properties, replyQueue, selector);
 		}
 		return null;
 	}
 
 	@Override
 	public String openSession(String jointype, String serverUrl, String jsonParams) {
-		String domain = String.format("%s%s%s", jointype, defaultDelimiter, serverUrl);
+		String domain = String.format("%s%s%s", jointype, BaseSessModel.defaultDelimiter, serverUrl);
 		Object client = getMember(domain);
 		if(client == null) {
 			client = Optional.ofNullable(createMember(jointype, serverUrl)).map(c -> {

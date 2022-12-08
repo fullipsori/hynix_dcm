@@ -9,14 +9,14 @@ import java.util.logging.Logger;
 import com.skhynix.common.StringUtil;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.controller.MessageRouter;
+import com.skhynix.extern.Pair;
 import com.skhynix.manager.BusinessManager;
 import com.skhynix.manager.DynaClassManager;
 import com.skhynix.manager.MessageManager;
 import com.skhynix.manager.MetaDataManager;
 import com.skhynix.manager.ResourceManager;
 import com.skhynix.model.message.MessageModel;
-
-
+import com.skhynix.model.session.BaseSessModel;
 /*
  * Refactoring을 통해서 정리할 내용들 - 초기 개발 시 기능 점검용 (원재일)
  */
@@ -53,10 +53,10 @@ public class BaseProxy {
 	
 	@SuppressWarnings("unchecked")
 	public String openSession(String joinType, String jsonString) {
-		System.out.println("join:" + joinType +  "jsonString:" + jsonString);
+		System.out.println("join:" + joinType +  " jsonString:" + jsonString);
 		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
-		String[] tokens = joinType.split(MessageManager.defaultDelimiter);
+		String[] tokens = joinType.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return "error:" + joinType;
 		}
@@ -72,7 +72,7 @@ public class BaseProxy {
 	}
 	
 	public void closeSession(String handle) {
-		String[] tokens = handle.split(MessageManager.defaultDelimiter);
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
@@ -85,33 +85,39 @@ public class BaseProxy {
 	}
 	
 	public void testAS(String loadType) {
-		boolean res = metaDataManager.putMetaData(loadType, "my_table", "key", 100, "value", "test result");
+		/**
+		TestDTO dto = new TestDTO();
+		dto.key = "111";
+		dto.value1 = "test value1";
+		dto.value2 = "test value2";
+		boolean res = metaDataManager.createMetaData(loadType, "hynix_table", dto);
 		if(res) {
-			String data = metaDataManager.getMetaData(loadType, "my_table", "key", 100);
-			System.out.println("result: " + data);
+			TestDTO dto2 = new TestDTO();
+			metaDataManager.retrieveMeta(loadType, "hynix_table", Pair.of("key", "111"), dto2);
+			System.out.println("result: " + dto2.key + " value1:" + dto2.value1 + " value2:" + dto2.value2);
 		}else {
 			System.out.println("failed");
 		}
+		**/
 	}
 	
-	public void sendMessage(String handle, String data) {
-		/**
-		Observable.intervalRange(1, 20, 100L, 100L, TimeUnit.MILLISECONDS)
-			.subscribe(Void -> {
-				messageRouter.sendMessage(handle, data);
-			});
-			**/
-		String[] tokens = handle.split(MessageManager.defaultDelimiter);
+	@SuppressWarnings("unchecked")
+	public void sendMessage(String handle, String data, String jsonProperties) {
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
 		if(tokens[0].equals("message")) {
-			messageRouter.sendMessage(handle, data);
+			Map<String,String> properties = null;
+			if(StringUtil.isNotEmpty(jsonProperties)) {
+				properties = (Map<String,String>)StringUtil.jsonToObject(jsonProperties, Map.class);
+			}
+			messageRouter.sendMessage(handle, data, properties);
 		}else { }
 	}
 	
 	public String receiveMessage(String handle) {
-		String[] tokens = handle.split(MessageManager.defaultDelimiter);
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return "";
 		}
@@ -122,8 +128,21 @@ public class BaseProxy {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void sendAndReceive(String handle, String data, String jsonProperties, String replyQueue, String selector) {
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
+		if(StringUtil.isEmpty(tokens[0])) return; 
+		if(tokens[0].equals("message")) {
+			Map<String,String> properties = null;
+			if(StringUtil.isNotEmpty(jsonProperties)) {
+				properties = (Map<String,String>)StringUtil.jsonToObject(jsonProperties, Map.class);
+			}
+			messageRouter.sendAndReceive(handle, data, properties, replyQueue, selector);
+		}else { }
+	}
+
 	public void confirmMessage(String handle) {
-		String[] tokens = handle.split(MessageManager.defaultDelimiter);
+		String[] tokens = handle.split(BaseSessModel.defaultDelimiter);
 		if(StringUtil.isEmpty(tokens[0])) {
 			return;
 		}
@@ -134,7 +153,7 @@ public class BaseProxy {
 	}
 	
 	public void sendMessageToTargets(String handles, String message) {
-		String[] targets = handles.split(MessageManager.defaultDelimiter);
+		String[] targets = handles.split(BaseSessModel.defaultDelimiter);
 		messageRouter.sendAsyncTo(targets, message);
 	}
 

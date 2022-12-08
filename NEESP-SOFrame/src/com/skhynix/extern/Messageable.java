@@ -1,5 +1,7 @@
 package com.skhynix.extern;
 
+import java.util.Map;
+
 import com.skhynix.model.message.MessageModel;
 
 /**
@@ -10,8 +12,8 @@ import com.skhynix.model.message.MessageModel;
  *
  */
 public interface Messageable {
-	public boolean sendMessage(String handle, String msg);
+	public boolean sendMessage(String handle, String msg, Map<String,String> properties);
 	public MessageModel receiveMessage(String handle);
 	public void confirmMessage(String handle);
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg);
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector);
 }

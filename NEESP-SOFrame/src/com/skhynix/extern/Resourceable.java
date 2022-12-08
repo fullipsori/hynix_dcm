@@ -1,6 +1,7 @@
 package com.skhynix.extern;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Repository(AS,DB 등) 로 구현하는 클래스들은 하기 함수들을 구현하고 ResourceManager 에 join 하게 되면,
@@ -14,4 +15,9 @@ public interface Resourceable {
 	public Object retrieve(String handle, String table, Pair<String,? extends Object> key);
 	public boolean update(String handle, String table, Pair<String,? extends Object> key, List<Pair<String, ? extends Object>> params);
 	public boolean delete(String handle, String table, Pair<String,? extends Object> key);
+
+	public boolean create(String handle, String table, Object dtoObject);
+	public boolean retrieve(String handle, String table, Pair<String,String> key, Object dtoObject);
+	public boolean update(String handle, String table, Object dtoObject);
+    public <E> List<E> executeSql(String handle, Class<E> clazz, String sqlString);
 }

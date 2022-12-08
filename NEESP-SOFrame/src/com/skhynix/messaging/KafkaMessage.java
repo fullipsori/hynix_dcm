@@ -1,5 +1,6 @@
 package com.skhynix.messaging;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -25,7 +26,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 	
 	public KafkaMessage(String connectionInfo, String serverUrl) {
-		this.connectionInfo = String.format("%s%s%s", connectionInfo, defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
+		this.connectionInfo = String.format("%s%s%s", connectionInfo, BaseSessModel.defaultDelimiter, (StringUtil.isEmpty(serverUrl)) ? defaultServerUrl : serverUrl);
 	}
 	
 	@Override
@@ -57,7 +58,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean sendMessage(String handle, String msg) {
+	public boolean sendMessage(String handle, String msg, Map<String,String> properties) {
 		Object client = sessionMap.get(handle);
 		if(client != null  && KafkaSessModel.class.isInstance(client)) {
 			KafkaSessModel kafkaSessModel = (KafkaSessModel)client;
@@ -76,7 +77,7 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 	}
 
 	@Override
-	public MessageModel sendAndReceive(String handle, String replyQueue, String selector, String msg) {
+	public MessageModel sendAndReceive(String handle, String msg, Map<String,String> properties, String replyQueue, String selector) {
 		return null;
 	}
 
@@ -112,16 +113,16 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 		// TODO Auto-generated method stub
 		if(!KafkaSessModel.class.isInstance(client)) return null;
 		KafkaSessModel kafkaSessModel = (KafkaSessModel) client;
-		return String.format("%s%s%s", Optional.ofNullable(kafkaSessModel.topic).orElse(""), defaultDelimiter, kafkaSessModel.role);
+		return String.format("%s%s%s", Optional.ofNullable(kafkaSessModel.topic).orElse(""), BaseSessModel.defaultDelimiter, kafkaSessModel.role);
 	}
 
 	@Override
 	public String tokenizeSessionName(String prefixHandle) {
 		// TODO Auto-generated method stub
-		String[] tokens = prefixHandle.split(defaultDelimiter, -1);
+		String[] tokens = prefixHandle.split(BaseSessModel.defaultDelimiter, -1);
 		/* prefix,%s,%s,%s*/
 		int size = tokens.length;
-		return String.format("%s%s%s", tokens[size-2], defaultDelimiter, tokens[size-1]);
+		return String.format("%s%s%s", tokens[size-2], BaseSessModel.defaultDelimiter, tokens[size-1]);
 	}
 
 	@Override
