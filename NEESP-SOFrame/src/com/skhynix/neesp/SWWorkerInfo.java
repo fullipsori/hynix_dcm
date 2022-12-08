@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.skhynix.neesp.util.*;
 import com.skhynix.neesp.log.*;
+import com.skhynix.neesp.util.*;
 
 public class SWWorkerInfo {
 
@@ -24,7 +24,7 @@ public class SWWorkerInfo {
 	    private String SWRequest = "";
 	    
 	    private Counter processedEventCounter = null;
-	    private NEESPLogger eqpLogger = null;
+	    private NEESPLogger eqpNEESPLogger = null;
 	    
 	    public SWWorkerInfo(String eqpId, String swnodeId) {
 	      this.eqpId = eqpId;
@@ -32,21 +32,29 @@ public class SWWorkerInfo {
 	      this.workerStatus = "created";
 	     
 	      processedEventCounter = new Counter(String.format("EventCounter-%s", eqpId));
-	      eqpLogger = new NEESPLogger(eqpId, swnodeId,LogManager.getInstance().getLogger());		
-			
+	      
+	      eqpNEESPLogger = new NEESPLogger(eqpId, swnodeId,LogManager.getInstance().getLogger());		
+	      // eqpNEESPLogger.setHandler(LogManager.getInstance().getKafkaHandler(swnodeId, eqpId, ""));
+	      
+	      // eqpNEESPLogger.setHandler(new EMSHandler(eqpId,"topic.neesp.log"));
+	      eqpNEESPLogger.setHandler(LogManager.getInstance().getEmsLogHandler());
+	      
 	      createdTime = System.currentTimeMillis();
 	      lastUpdateTime = System.currentTimeMillis();
-	    }
-	    
+	    }	    
 	    
 	    // 로그 관련 설정 초기화 시점 - Default로 초기화 그리고 
 	    public void initializeNEESPLogger() {
-	    	eqpLogger = new NEESPLogger(eqpId, swnodeId, LogManager.getInstance().getLogger());
+	    	eqpNEESPLogger = new NEESPLogger(eqpId, swnodeId, LogManager.getInstance().getLogger());
 	    }
 	    
-	    public NEESPLogger getLogger() {
-	    	return eqpLogger;
+	    public NEESPLogger getNEESPLogger() {
+	    	return eqpNEESPLogger;
 	    }	
+	    
+	    public void removeHandler() {
+	    	eqpNEESPLogger.removeHandler();
+	    }
 	    
 	    public void setEqpId(String eqpId) {this.eqpId = eqpId;}
 	    public void setSwnodeId(String swnodeId) {this.swnodeId = swnodeId;}
@@ -75,7 +83,7 @@ public class SWWorkerInfo {
 	    public String getSWRequest() {return SWRequest;}
 	    
 	    public long getCountTimeoutEvent() {return this.countTimeoutEvent;}
-	    public void increaseTimeoutEventCount() { this.countTimeoutEvent++;}
+	    public long increaseTimeoutEventCount() { this.countTimeoutEvent++; return this.countTimeoutEvent;}
 	    
 	    public long howLongDoesWorkerWork() { return (System.currentTimeMillis()-this.createdTime);}
 

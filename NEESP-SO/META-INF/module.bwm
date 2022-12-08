@@ -12,13 +12,19 @@
   <sca:property xmi:id="_56vd0GMqEe2_UINjVrQ1lg" name="TOPIC_CTRL_FROM_SWNODES" type="XMLSchema:string" publicAccess="true"/>
   <sca:property xmi:id="_FvKuIGMrEe2_UINjVrQ1lg" name="EMS_SERVER_ECM" type="XMLSchema:string" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_i6AoAGdaEe2BucqfFEnQiw" name="QUEUE_CTRL_FROM_SWNODES" type="XMLSchema:string" publicAccess="true" scalable="true"/>
-  <sca:component xmi:id="_gpHfcFGNEe21JKJ09Gk6VQ" name="ComponentProcess" compositeext:version="1.0.0.qualifier">
-    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_gpHfcVGNEe21JKJ09Gk6VQ" processName="narf-so.Listener"/>
+  <sca:component xmi:id="_Em2kkHaaEe2aYObNOzh9NQ" name="ComponentActivator" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_Em3LoHaaEe2aYObNOzh9NQ" processName="neesp-so.Activator"/>
   </sca:component>
-  <sca:component xmi:id="_Tjb0QFHdEe20urSUrwnfew" name="ComponentActivator" compositeext:version="1.0.0.qualifier">
-    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_Tjb0QVHdEe20urSUrwnfew" processName="narf-so.Activator"/>
+  <sca:component xmi:id="_EnGcMHaaEe2aYObNOzh9NQ" name="ComponentAppControlService" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_EnGcMXaaEe2aYObNOzh9NQ" processName="neesp-so.AppControlService"/>
   </sca:component>
-  <sca:component xmi:id="_pbWTMGMqEe2_UINjVrQ1lg" name="ComponentRecvWorkerFromSWN" compositeext:version="1.0.0.qualifier">
-    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_pbWTMWMqEe2_UINjVrQ1lg" processName="narf-so.RecvWorkerFromSWN"/>
+  <sca:component xmi:id="_EnNw8HaaEe2aYObNOzh9NQ" name="ComponentListenCreatedQueue" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_EnNw8XaaEe2aYObNOzh9NQ" processName="neesp-so.ListenCreatedQueue"/>
+  </sca:component>
+  <sca:component xmi:id="_EnSCYHaaEe2aYObNOzh9NQ" name="ComponentSpawnRequestor" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_EnSCYXaaEe2aYObNOzh9NQ" processName="neesp-so.SpawnRequestor"/>
+  </sca:component>
+  <sca:component xmi:id="_EnXh8HaaEe2aYObNOzh9NQ" name="ComponentEQPStatusMonitor" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_EnXh8XaaEe2aYObNOzh9NQ" processName="nessp-so-monitor.EQPStatusMonitor"/>
   </sca:component>
 </sca:composite>

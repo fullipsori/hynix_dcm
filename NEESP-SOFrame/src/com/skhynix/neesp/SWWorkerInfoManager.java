@@ -1,9 +1,13 @@
 package com.skhynix.neesp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.skhynix.neesp.log.LogManager;
 
 public class SWWorkerInfoManager {
 
@@ -19,17 +23,36 @@ public class SWWorkerInfoManager {
         System.out.printf("/// SWWorkerInfoManager 생성자\n");
     }
     
-    public boolean initSWWorkerInfo(String eqpId, String swnodeId) {
-    
-        if(mapSWWORKERINFO.containsKey(eqpId)) {
-            System.out.printf("[%s] 이미 SW-worker 있습니다.", eqpId); 
+    public boolean initSWWorkerInfo(String eqpId, String swnodeId) {	
+        if(mapSWWORKERINFO.containsKey(eqpId) == true) {
+            System.out.printf("[%s] 이미 SW-worker 있습니다.\n", eqpId); 
             // 상태 정보에 따라서 처리 방식 결정
-            return false;
-        } else {
-            mapSWWORKERINFO.put(eqpId, new SWWorkerInfo(eqpId, swnodeId));
-            System.out.printf("/// 새롭게 [%s] SW-worker 있습니다.", eqpId, swnodeId);
             return true;
+        } else {
+            mapSWWORKERINFO.put(eqpId, new SWWorkerInfo(eqpId, swnodeId));  
+            System.out.printf("/// 새롭게 [%s] SW-worker 생성하였습니다.\n", eqpId, swnodeId);
+            return false;
         }
+    }
+    
+    public String checkSWWorkersStatus() {
+    	ArrayList<String> workerIds = new ArrayList<>();
+    	
+    	if(mapSWWORKERINFO.size() > 0 ) {
+	    	Set<String> keySet = mapSWWORKERINFO.keySet();
+	    	for(String eqpId : keySet) {
+	    		long intervalAfterLastCheck = System.currentTimeMillis()-mapSWWORKERINFO.get(eqpId).getLastUpdateTime();
+	    		// if(intervalAfterLastCheck > 30000) {
+	    			mapSWWORKERINFO.get(eqpId).setWorkerStatus("deactivated");
+	    			this.printSWWorkerInfo(eqpId, "check-sw-worker-status");
+	    			workerIds.add(eqpId);
+	    		// }
+	    	}
+	    	
+	    	return workerIds.toString();
+    	} else {
+    		return "no-sw-workers";
+    	}
     }
     
     public String[] releaseSWWorkerInfo(String eqpId) {    	
@@ -39,8 +62,9 @@ public class SWWorkerInfoManager {
             // 상태 정보에 따라서 처리 방식 결정
             String logMsg = String.format("[%s] 장비관련 Worker 정보를 가져옵니다. SWorkerInfo를 제거합니다.", eqpId);
             logger.log(Level.INFO, logMsg);
-            System.out.println(logMsg);                        
-            mapSWWORKERINFO.remove(eqpId);
+            System.out.println(logMsg);   
+            mapSWWORKERINFO.get(eqpId).getNEESPLogger().removeHandler();
+            mapSWWORKERINFO.remove(eqpId);            
             retVals[0] = "ok-release-swworker";
             retVals[1] = "";
         } else {

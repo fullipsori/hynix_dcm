@@ -12,7 +12,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,21 +35,25 @@ public class LogManager {
 		return instance; 
 	}
 	
+	private String applicationName = "";
 	private ExecutorService LogQueueMonitor = null; 
 	private final Logger mLogger = Logger.getGlobal();
 	
 	private Handler OutputHandler = new ConsoleHandler();
 	private Handler KafkaHandler = null;
+	private Handler EmsHandler = null;
 	private LEVEL mLevel = LEVEL.INFO;
 	
 	private long prevMillTime = System.currentTimeMillis();
 	private long prevNanoTime = System.nanoTime();
 	
 	private Producer<String, String> producer = null;
-	
 	private String logTopic = "quickstart-events";
 	private String logServerURL = "192.168.232.142:9192";	
 	private String hostName = "localhost";
+	
+	private String logTopicEMS = "topic.neesp.log";
+	private String logServerUrlEMS = "tcp://192.168.232.142:7222";
 	
 	// Log Publisher를 이용한 비동기방식 로그 보내기
 	private ConcurrentLinkedQueue<String> asyncLogQueue = new ConcurrentLinkedQueue();
@@ -76,6 +79,7 @@ public class LogManager {
     	   	 */
     	   	while((log=asyncLogQueue.poll()) != null && count <= LP_LOGPUB_MAX_LIMIT) {
     	   		System.out.println(String.format("[%04d] %s", count, log));
+    	   		mLogger.log(Level.INFO, String.format("[%04d] %s", count, log));
     	   		count++;
     	   	}
         }
@@ -100,6 +104,10 @@ public class LogManager {
         System.out.printf("//// Log Publishing을 위하여 큐 모니터링을 시작합니다. [쓰레드 체크 간격: %d][%s]\n", LP_THREAD_INTERVAL_SEC, bStarted);
     }
 	
+	public void setLogServerInfo(String serverUrl, String topicName) {
+		this.logServerUrlEMS = serverUrl;
+		this.logTopicEMS = topicName;
+	}
 		
 	private class CustomLogFormatter extends Formatter {
 	    
@@ -131,20 +139,41 @@ public class LogManager {
 	}
 
 	
-	public Handler getKafkaHandler(String appNodeName, String eqpID, String topicName) {
-		return null;
-//		if(topicName.isEmpty() || topicName == null) {
-//			return new KafkaHandlerForSWN(appNodeName, eqpID, logTopic, producer);
-//		} else {
-//			return new KafkaHandlerForSWN(appNodeName, eqpID, topicName, producer);
-//		}
+	public Handler getKafkaHandler(String appNodeName, String eqpId, String topicName) {
+		if(topicName.isEmpty() || topicName == null) {
+			System.out.println("LogManager.getKafkaHandler(). ["+producer+"]");
+			// return new KafkaHandlerForSWN(appNodeName, eqpId, logTopic, producer);
+			return new KafkaHandler(logTopic, logServerURL);
+		} else {
+			// return new KafkaHandlerForSWN(appNodeName, eqpId, topicName, producer);
+			return new KafkaHandler(topicName, logServerURL);
+		}
 	}
 
-	public LogManager() {
-		System.out.println("/// Log Manager 초기화 작업을 수행합니다."
-				+ "");
+	public LogManager() {		
+		System.out.println("/// Log Manager 초기화 작업을 수행합니다."	+ "");
 		LogQueueMonitor = Executors.newScheduledThreadPool(1);
 	}
+	
+	public void initializeEMSHandler(String applicationName, String serverUrl, String topicName) {
+		this.applicationName = applicationName;
+		this.logServerUrlEMS = serverUrl;
+		this.logTopicEMS = topicName;
+		this.EmsHandler = new EMSHandler(applicationName, this.logTopicEMS);
+		// mLogger.addHandler(this.EmsHandler);
+		System.out.println("["+this.applicationName+"] 33-initializeEMSHandler ["+this.EmsHandler+"]");
+	}
+	
+	public Handler getEmsLogHandler () {
+		System.out.println("44-getEmsLogHandler ["+this.EmsHandler+"]");
+		if(this.EmsHandler != null) 
+			System.out.println("["+this.applicationName+"] 44-1-getEmsLogHandler 값이 있습니다.");
+		else 
+			System.out.println("["+this.applicationName+"] 44-2-EMS Handler가 공교롭게도 NULL값을 가지고 있습니다. ["+this.EmsHandler+"]");
+		
+		return this.EmsHandler; 
+	}
+	public String getLogServerUrlEMS() { return this.logServerUrlEMS; }
 	
 	public void initialize(String appNodeName) {
 		
@@ -153,10 +182,19 @@ public class LogManager {
 		
 		mLevel = LEVEL.INFO;
 		mLevel.apply(mLogger);
-        OutputHandler.setFormatter(new CustomLogFormatter());
+		OutputHandler.setFormatter(new CustomLogFormatter());
 		mLogger.addHandler(OutputHandler);		
-//		mLogger.addHandler(new KafkaHandler(logTopic, logServerURL));
-		
+	}
+	
+	public void deinitliaze() {
+		if(this.KafkaHandler != null) {
+			this.KafkaHandler.close();			
+		}
+		if(this.EmsHandler != null) {
+			this.EmsHandler.close();
+			System.err.println("/// EMSHandler Deinitialize");
+		}
+		this.removeAllHandler();
 	}
 	
 	public void initializeKafka() {

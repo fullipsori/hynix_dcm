@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StringUtil {
 	
+	public static void main(String[] args) {
+	}
+
 	public static <T> String objectToJson(T object) {
 		try {
 			ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

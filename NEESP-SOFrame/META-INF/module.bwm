@@ -9,4 +9,8 @@
   <sca:property xmi:id="_3JJ54GeyEe2p47YF-NmJ5w" name="BW.APPSPACE.NAME" type="XMLSchema:string" scalable="true"/>
   <sca:property xmi:id="_3JM9MGeyEe2p47YF-NmJ5w" name="BW.MODULE.VERSION" type="XMLSchema:string" scalable="true"/>
   <sca:property xmi:id="_3JQAgGeyEe2p47YF-NmJ5w" name="BW.MODULE.NAME" type="XMLSchema:string" scalable="true"/>
+  <sca:property xmi:id="__0Gf4HacEe2aYObNOzh9NQ" name="SERVER_URL_KAFKA" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="__6SncHacEe2aYObNOzh9NQ" name="SERVER_URL_FTL" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="___R1IHacEe2aYObNOzh9NQ" name="SERVER_URL_EMS" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_AD3aMHadEe2aYObNOzh9NQ" name="TOPIC_NAME" type="XMLSchema:string" publicAccess="true" scalable="true"/>
 </sca:composite>

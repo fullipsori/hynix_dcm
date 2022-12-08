@@ -3,12 +3,15 @@ package com.skhynix.repository;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
@@ -1254,6 +1257,205 @@ public class ASRepository extends BaseConnection implements Resourceable {
 
 
 
+
+    /*
+     * Edward Won - 2022/12/07 - 추가하기는 했으나 제대로 했는지 확인 필요 
+     * 배재호 과장 소스 - 내용 추가 파트 - putDto, getDto, queryDtoGeneric
+     * getDto 안에서 사용하는 함수: putDto 
+     * requestMeta에서 Row를 가져올 때 키 값을 여러 개를 지정할 수 있어야 함 => getDto / getRow 함수 참조 - ASRepository에 참고하라고 마지막 부분에 추가해 놓았음 
+     */
+    
+    Properties defaultProperties = null;
+    Session session = null;
+    
+    public boolean putDto(Object dto, String tableName){
+    	Row putRow = null;
+    	Table table = null;
+    	Boolean result = false;
+    	
+    	try{
+    		table = session.openTable(tableName, defaultProperties);
+    		putRow = table.createRow();
+    		
+    		for(Field field: dto.getClass().getDeclaredFields()){
+    			field.setAccessible(true);
+    			try{
+    				putRow.setString(field.getName(), (String) field.get(dto));
+    			} catch (DataGridException e){
+    				// System.out.println(String.foramt("put row column[%s] set error: %s", field.getName(), e.toString()));
+    			}	
+    		}
+    			
+    		table.put(putRow);
+    		result = true;
+    	} catch (Exception e) {
+    		System.out.println(e.toString());
+    	} finally {
+    		if(putRow != null) {
+    			try {
+    				putRow.destroy();
+    			} catch (DataGridException e) {
+    				e.printStackTrace(System.err);
+    			}
+    		}			
+    	}
+    		
+    	return result;
+    }  
+    	
+    			
+    public boolean getDto(Object dto, String tableName, Map<String, String> keyValues) {
+
+    	Row row = getRow(tableName, keyValues);
+    	boolean result = false;
+    	
+    	// row를 DTO로 전환
+    	if(row != null) {
+    		for(Field field :dto.getClass().getDeclaredFields()) {
+    		
+    			field.setAccessible(true);
+    			String rowValue;
+    			
+    			try {
+    				String ColumnName = field.getName();
+    				if(row.isColumnSet(ColumnName)) {
+    					rowValue = row.getString(ColumnName);
+    					field.set(dto, rowValue);
+    				}
+    			} catch (Exception e) {
+    				e.printStackTrace(System.err);
+    			}
+    		}
+    		result = true;
+    	} else {
+    		result = false;
+    	}
+    		
+    	return result;
+    }
+
+    /*
+     * 종속성을 가지고 있다. - class에 대한 정보가 선언되어 있어야 한다. - 목록으로 가지고 온다. 
+     */
+
+    public <E> List<E> queryDtoGeneric(Class<E> clazz, String sqlString) {
+    	List<E> dtoList =  null;	
+    	Statement statement = null;
+    	ResultSet resultSet = null;
+    	
+    	try {    	
+    		statement = session.createStatement(sqlString, defaultProperties);
+    		ResultSetMetadata rsm = statement.getResultSetMetadata();
+    		
+    		if(rsm != null) {
+    			resultSet = statement.executeQuery(defaultProperties);
+    				
+    			for(Row row : resultSet) {
+
+    				E tempDto = clazz.getDeclaredConstructor().newInstance();
+    				
+    				if(row != null){
+    				 	
+    				 	for(Field field : clazz.getClass().getDeclaredFields()) {    				 	
+    				 		field.setAccessible(true);
+    			 			String ColumnName = field.getName();
+
+    			 			if(row.isColumnSet(ColumnName)) {
+    			 				String rowValue = row.getString(ColumnName);
+    				 			field.set(tempDto, rowValue);
+    				 		} // if
+    				 	} // for 
+    				} // if
+    									
+    				if(dtoList == null) 
+    				   dtoList = new ArrayList<E>();														
+    				dtoList.add(tempDto);					
+    			} // for
+    		}	
+    	} catch(Exception e) {
+    	
+    		System.out.println("Fialed to execute the statement.");
+    		e.printStackTrace(System.err);
+    		
+    	} finally {
+    		
+    		if(resultSet != null){
+    		
+    			try {				
+    				resultSet.close();				
+    			} catch(Exception e){
+    				System.out.println("Failed to close ResultSet.");
+    			}		
+    		}		
+    				
+    		if(statement != null){
+    		
+    			try {				
+    				statement.close();												
+    			} catch(Exception e){
+    				System.out.println("Failed to close ResultSet.");
+    			}		
+    		}	
+    	}    			
+    	return dtoList;
+    }
+    
+    /** 
+     * Get a single row from the table. The value of the row is printed, if it exists.
+     *
+     * @param table the table to get the row from
+     * @param key the key for the row
+     */
+    public Row getRow(String tableName, Map<String, String> keyValues)
+    {
+        // create a row and set the user supplied key and value in it
+        Row keyRow = null;
+        Table table = null; 
+        try
+        {
+        	table = session.openTable(tableName, defaultProperties);
+            keyRow = table.createRow();
+                        
+            Set<String> keySet = keyValues.keySet();
+	    	for(String key : keySet) {
+	    		keyRow.setString(key, keyValues.get(key));
+	    	}
+	    	
+            Row getRow = table.get(keyRow);
+            
+            if (getRow != null)
+            {
+                System.out.printf("Row retrieved from table: %s%n", getRow.toString());
+                return getRow;
+            }
+            else
+            {
+                System.out.println("Row does not exist");
+            }
+        }
+        catch (DataGridException dataGridException)
+        {
+            dataGridException.printStackTrace(System.err);
+        }
+        finally
+        {
+            if (keyRow != null)
+            {
+                try
+                {
+                    keyRow.destroy();
+                }
+                catch (DataGridException e)
+                {
+                    e.printStackTrace(System.err);
+                }
+            }
+        }
+        
+        return null;
+    }
+    	
+
     /** need algorithm */
     public static void main(String[] args)
     {
@@ -1276,6 +1478,8 @@ public class ASRepository extends BaseConnection implements Resourceable {
             exception.printStackTrace();
         }
     }
+ 
 
+	
 }
 

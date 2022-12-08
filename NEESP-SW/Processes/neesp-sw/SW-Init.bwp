@@ -19,55 +19,6 @@
     xmlns:sca-bpel="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
     xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"
     xmlns:tibprop="http://ns.tibco.com/bw/property" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <tibex:VariableDescriptor type="MemorySaving">
-        <task name="flow">
-            <endingVariables>
-                <variable>ParseJSON</variable>
-            </endingVariables>
-        </task>
-        <task name="ParseJSON">
-            <endingVariables>
-                <variable>ParseJSON-input</variable>
-                <variable>RecvSOReq</variable>
-            </endingVariables>
-        </task>
-        <task name="RecvReqLog">
-            <endingVariables>
-                <variable>RecvReqLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="spawnReqLog">
-            <endingVariables>
-                <variable>spawnReqLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="SpwanServiceWorker">
-            <endingVariables>
-                <variable>SpwanServiceWorker-input</variable>
-            </endingVariables>
-        </task>
-        <task name="NoMatchLog">
-            <endingVariables>
-                <variable>NoMatchLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="ResetWorkerLog">
-            <endingVariables>
-                <variable>ResetWorkerLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="StopWorkerLog">
-            <endingVariables>
-                <variable>StopWorkerLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="CheckSWWokerInfo">
-            <endingVariables>
-                <variable>CheckSWWokerInfo-input</variable>
-                <variable>CheckSWWokerInfo</variable>
-            </endingVariables>
-        </task>
-    </tibex:VariableDescriptor>
     <tibex:Types>
         <xs:schema attributeFormDefault="unqualified"
             elementFormDefault="qualified"
@@ -815,8 +766,8 @@
                                     gradientEndColor="50431"
                                     gradientStartColor="16777215" xsi:type="bwnotation:BackgroundStyle"/>
                                     <element href="//0/@process/@activity/@activity/@activities.5"/>
-                                    <layoutConstraint x="245"
-                                    xsi:type="notation:Bounds" y="1"/>
+                                    <layoutConstraint x="152"
+                                    xsi:type="notation:Bounds" y="5"/>
                                     </children>
                                     <children type="4002">
                                     <children type="4017">
@@ -912,6 +863,37 @@
                                     height="40" width="40"
                                     x="251"
                                     xsi:type="notation:Bounds" y="135"/>
+                                    </children>
+                                    <children type="4002">
+                                    <children type="4017">
+                                    <styles fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+                                    <children type="4017">
+                                    <styles fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+                                    <children type="4017">
+                                    <styles fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+                                    <children type="4017">
+                                    <styles fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+                                    <styles fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+                                    <styles
+                                    backgroundColor="16777215"
+                                    gradientEndColor="50431"
+                                    gradientStartColor="16777215" xsi:type="bwnotation:BackgroundStyle"/>
+                                    <element href="//0/@process/@activity/@activity/@activities.9"/>
+                                    <layoutConstraint x="404"
+                                    xsi:type="notation:Bounds" y="5"/>
                                     </children>
                                     <styles xsi:type="notation:DrawerStyle"/>
                                     <styles xsi:type="notation:SortingStyle"/>
@@ -1014,7 +996,8 @@
             <styles lineColor="32768" xsi:type="notation:ConnectorStyle"/>
             <styles fontColor="32768" fontName="맑은 고딕" xsi:type="notation:FontStyle"/>
             <element href="//0/@process/@activity/@activity/@links/@children.4"/>
-            <bendpoints points="[0, 0, 0, 0]$[0, 0, 0, 0]" xsi:type="notation:RelativeBendpoints"/>
+            <bendpoints
+                points="[-9, -11, 92, 106]$[-9, -117, 92, 0]$[-76, -117, 25, 0]" xsi:type="notation:RelativeBendpoints"/>
             <sourceAnchor id="(0.5306122448979592,0.22448979591836735)" xsi:type="notation:IdentityAnchor"/>
         </edges>
         <edges
@@ -1054,6 +1037,18 @@
             <element href="//0/@process/@activity/@activity/@links/@children.7"/>
             <bendpoints points="[25, -9, -66, 0]$[67, 0, -24, 9]" xsi:type="notation:RelativeBendpoints"/>
             <targetAnchor id="(0.16326530612244897,0.5714285714285714)" xsi:type="notation:IdentityAnchor"/>
+        </edges>
+        <edges
+            source="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.8"
+            target="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.9" type="4006">
+            <children type="6002">
+                <layoutConstraint xsi:type="notation:Location" y="40"/>
+            </children>
+            <styles lineColor="0" xsi:type="notation:ConnectorStyle"/>
+            <styles fontName="맑은 고딕" xsi:type="notation:FontStyle"/>
+            <element href="//0/@process/@activity/@activity/@links/@children.8"/>
+            <bendpoints
+                points="[8, -24, -168, 106]$[8, -130, -168, 0]$[152, -130, -24, 0]" xsi:type="notation:RelativeBendpoints"/>
         </edges>
     </notation:Diagram>
     <tibex:NamespaceRegistry enabled="true">
@@ -1095,8 +1090,6 @@
             name="RecvReqLog-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns3:ActivityInput"
             name="spawnReqLog-input" sca-bpel:internal="true"/>
-        <bpws:variable element="ns5:controlCommand"
-            name="SpwanServiceWorker-input" sca-bpel:internal="true"/>
         <bpws:variable name="LISTEN_QUEUENAME"
             sca-bpel:hotUpdate="false" sca-bpel:privateProperty="true"
             sca-bpel:property="yes"
@@ -1108,11 +1101,11 @@
         <bpws:variable element="ns3:ActivityInput"
             name="StopWorkerLog-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns6:JavaInvokeActivityInput"
-            name="CheckSWWokerInfo-input" sca-bpel:internal="true"/>
+            name="CheckSWWorkerInfo-input" sca-bpel:internal="true"/>
         <bpws:variable element="ns7:JavaInvokeActivityOutput"
-            name="CheckSWWokerInfo" sca-bpel:internal="true"/>
+            name="CheckSWWorkerInfo" sca-bpel:internal="true"/>
         <bpws:variable element="ns8:ActivityErrorData"
-            name="_error_CheckSWWokerInfo" sca-bpel:internal="true"/>
+            name="_error_CheckSWWorkerInfo" sca-bpel:internal="true"/>
         <bpws:variable name="JavaGlobalInstanceProperty"
             sca-bpel:hotUpdate="false" sca-bpel:privateProperty="true"
             sca-bpel:property="yes"
@@ -1121,6 +1114,10 @@
                 <bpws:literal>narf-sw.NARF-Pack</bpws:literal>
             </bpws:from>
         </bpws:variable>
+        <bpws:variable element="ns3:ActivityInput"
+            name="UseExistWorkerLog-input" sca-bpel:internal="true"/>
+        <bpws:variable element="ns5:controlCommand"
+            name="SpwanServiceWorker-input" sca-bpel:internal="true"/>
     </bpws:variables>
     <bpws:extensions>
         <bpws:extension mustUnderstand="no" namespace="http://www.eclipse.org/gmf/runtime/1.0.2/notation"/>
@@ -1144,6 +1141,7 @@
                 <bpws:link name="CheckSWWokerInfoToStopWorkerLog"
                     tibex:label="stop-worker" tibex:linkType="SUCCESSWITHCONDITION"/>
                 <bpws:link name="ParseJSONToJavaInvoke" tibex:linkType="SUCCESS"/>
+                <bpws:link name="CheckSWWokerInfoToLog" tibex:linkType="SUCCESSWITHCONDITION"/>
             </bpws:links>
             <bpws:extensionActivity>
                 <tibex:receiveEvent createInstance="yes"
@@ -1202,7 +1200,7 @@
                                     <type href="http://ns.tibco.com/bw/palette/restjson#//JsonParser"/>
                                     <value jsonInputStyle="None"
                                     schemaType="Xsd" xsi:type="restjson:JsonParser">
-                                    <outputEditorElement href="platform:/resource/NARF-SW/Schemas/ControlMessage.xsd#//controlCommand;XSDElementDeclaration"/>
+                                    <outputEditorElement href="platform:/resource/NEESP-SW/Schemas/ControlMessage.xsd#//controlCommand;XSDElementDeclaration"/>
                                     </value>
                                 </properties>
                             </activityConfig>
@@ -1290,7 +1288,7 @@
                             expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;http://www.example.org/so-request&quot; xmlns:tns4=&quot;http://www.example.org/ControlMessage&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;ParseJSON&quot;/>&lt;xsl:template name=&quot;SpwanServiceWorker-input&quot; match=&quot;/&quot;>&lt;tns4:controlCommand>&lt;tns4:command>&lt;xsl:value-of select=&quot;$ParseJSON/tns4:command&quot;/>&lt;/tns4:command>&lt;tns4:parameter>&lt;xsl:value-of select=&quot;$ParseJSON/tns4:parameter&quot;/>&lt;/tns4:parameter>&lt;tns4:parameter2>&lt;xsl:value-of select=&quot;$ParseJSON/tns4:parameter2&quot;/>&lt;/tns4:parameter2>&lt;tns4:parameter3>&lt;xsl:value-of select=&quot;$ParseJSON/tns4:parameter3&quot;/>&lt;/tns4:parameter3>&lt;tns4:parameter4>&lt;xsl:value-of select=&quot;$ParseJSON/tns4:parameter4&quot;/>&lt;/tns4:parameter4>&lt;/tns4:controlCommand>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                     </tibex:inputBindings>
                     <tibex:CallProcess spawn="true"
-                        subProcessName="neesp-sw.SW-worker" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"/>
+                        subProcessName="neesp-sw-sub.SW-worker_MR" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"/>
                 </tibex:extActivity>
             </bpws:extensionActivity>
             <bpws:extensionActivity>
@@ -1387,9 +1385,9 @@
             </bpws:extensionActivity>
             <bpws:extensionActivity>
                 <tibex:activityExtension
-                    inputVariable="CheckSWWokerInfo-input"
-                    name="CheckSWWokerInfo"
-                    outputVariable="CheckSWWokerInfo"
+                    inputVariable="CheckSWWorkerInfo-input"
+                    name="CheckSWWorkerInfo"
+                    outputVariable="CheckSWWorkerInfo"
                     tibex:xpdlId="8f61241a-87aa-42b2-b8c5-4e44bf42b9a8" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                     <bpws:targets>
                         <bpws:target linkName="ParseJSONToJavaInvoke"/>
@@ -1423,6 +1421,13 @@
                             </tibex:DesignExpression>
                             <bpws:transitionCondition expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[##otherwise##]]></bpws:transitionCondition>
                         </bpws:source>
+                        <bpws:source linkName="CheckSWWokerInfoToLog">
+                            <tibex:DesignExpression>
+                                <tibex:expression
+                                    expression="$CheckSWWorkerInfo/MethodReturnValue[1] = &quot;use-exist-worker-thread&quot;" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"/>
+                            </tibex:DesignExpression>
+                            <bpws:transitionCondition expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[$CheckSWWorkerInfo/MethodReturnValue[1] = "use-exist-worker-thread"]]></bpws:transitionCondition>
+                        </bpws:source>
                     </bpws:sources>
                     <tibex:inputBindings>
                         <tibex:inputBinding
@@ -1455,6 +1460,37 @@
                                     <methodParameter
                                     paramName="parameter4" paramType="string"/>
                                     </value>
+                                </properties>
+                            </activityConfig>
+                        </bwext:BWActivity>
+                    </tibex:config>
+                </tibex:activityExtension>
+            </bpws:extensionActivity>
+            <bpws:extensionActivity>
+                <tibex:activityExtension
+                    inputVariable="UseExistWorkerLog-input"
+                    name="UseExistWorkerLog"
+                    tibex:xpdlId="7cc5b54b-d5c3-4090-9017-ad3c5c5d1d05" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
+                    <bpws:targets>
+                        <bpws:target linkName="CheckSWWokerInfoToLog"/>
+                    </bpws:targets>
+                    <tibex:inputBindings>
+                        <tibex:inputBinding
+                            expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns=&quot;http://www.tibco.com/pe/WriteToLogActivitySchema&quot; version=&quot;2.0&quot;>&lt;xsl:template name=&quot;UseExistWorkerLog-input&quot; match=&quot;/&quot;>&lt;tns:ActivityInput>&lt;message>&lt;xsl:value-of select=&quot;$CheckSWWorkerInfo/MethodReturnValue[2]&quot;/>&lt;/message>&lt;/tns:ActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                    </tibex:inputBindings>
+                    <tibex:config>
+                        <bwext:BWActivity
+                            activityTypeID="bw.generalactivities.log"
+                            version="6.0.0.001"
+                            xmlns:activityconfig="http://tns.tibco.com/bw/model/activityconfig"
+                            xmlns:bwext="http://tns.tibco.com/bw/model/core/bwext"
+                            xmlns:generalactivities="http://ns.tibco.com/bw/palette/generalactivities" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                            <activityConfig>
+                                <properties name="config" xsi:type="activityconfig:EMFProperty">
+                                    <type href="http://ns.tibco.com/bw/palette/generalactivities#//Log"/>
+                                    <value controlBy="Application"
+                                    role="Info"
+                                    suppressJobInfo="true" xsi:type="generalactivities:Log"/>
                                 </properties>
                             </activityConfig>
                         </bwext:BWActivity>

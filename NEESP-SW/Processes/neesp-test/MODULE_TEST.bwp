@@ -17,31 +17,6 @@
     xmlns:sca-bpel="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
     xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"
     xmlns:tibprop="http://ns.tibco.com/bw/property" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <tibex:VariableDescriptor type="MemorySaving">
-        <task name="ParseJSON">
-            <endingVariables>
-                <variable>ParseJSON-input</variable>
-            </endingVariables>
-        </task>
-        <task name="moduleTest">
-            <endingVariables>
-                <variable>moduleTest-input</variable>
-                <variable>ParseJSON</variable>
-            </endingVariables>
-        </task>
-        <task name="Log">
-            <endingVariables>
-                <variable>Log-input</variable>
-                <variable>moduleTest</variable>
-            </endingVariables>
-        </task>
-        <task name="RecvMsgLog">
-            <endingVariables>
-                <variable>RecvMsgLog-input</variable>
-                <variable>RecvTestCommand</variable>
-            </endingVariables>
-        </task>
-    </tibex:VariableDescriptor>
     <tibex:Types>
         <xs:schema attributeFormDefault="unqualified"
             elementFormDefault="qualified"

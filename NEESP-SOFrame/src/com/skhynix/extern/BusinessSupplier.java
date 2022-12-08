@@ -27,4 +27,39 @@ public interface BusinessSupplier {
 	 * @return json String
 	 */
 	String sendAndReceive(String handle, String replyQueue, String selector, String message);
+	
+	/*
+	 *  Edward Won = 2022/12/07   
+	 *  
+	 *      
+	 *  
+	 *  [수정해야 할 곳]
+	 *  DoBusiness에서 사용하고 싶은 ASRepository에 새로운 메소드 queryDtoGeneric이 있는 경우
+	 *  
+	 *  extern
+	 *  	Resourceable.java
+	 *  
+	 *  manager
+	 *  	MetaDataManager.java
+	 *  	ReousrceManager.java
+	 *  
+	 *  repository
+	 *  	ASRepository.java
+	 *  
+	 *  - 추가 함수: AS Repository 확인 필요 (종속성 여부 확인 필요) 	 
+	 * 
+	 *  1) 키값이 여러 개이다. - Retrieve 수정 필요 (이런 형태로 넣을 경우 dto 객체에 대한 클래스가 비즈니스 로직쪽에만 선언되어 있어야 하는 것인지) -
+	 *  
+	 *     참조함수: getDto (String sourceType, Object dto, String tableName, Map<String, String> keyValues)
+	 *  
+	 *  2) Create를 수정할 필요가 있는지 확인 필요
+	 *  
+	 *     참조함수: putDto (String sourceType, Object dto, String tableName)
+	 *  
+	 *  3) SQL query를 통해서 여러 개의 Row를 가져오는 방법이 필요 
+	 *     
+	 *     - 이때 종속성을 피하기 위해서 어떻게 할 것인지 결정할 필요가 있다. - 현재는 사용해야 할 WaferState와 같이 Dto Class를 알아야 한다.	   
+	 *     참조함수: <E> List<E> queryDtoGeneric(Class<E> clazz, String sqlString)
+	 *  
+	 */
 }

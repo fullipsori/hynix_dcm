@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/GeneratedQueueInfo" xmlns:tns="http://www.example.org/GeneratedQueueInfo" elementFormDefault="qualified">
+
+    <complexType name="pass_arguments">
+    	<sequence>
+    		<element name="eqpId" type="string"></element>
+    		<element name="queueName" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="pass_arguments" type="tns:pass_arguments"></element>
+</schema>

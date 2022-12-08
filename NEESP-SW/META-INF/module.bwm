@@ -27,4 +27,7 @@
   <sca:component xmi:id="_ggUX0GiOEe2_-OxfcY_slg" name="ComponentMODULE_TEST" compositeext:version="1.0.0.qualifier">
     <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_ggUX0WiOEe2_-OxfcY_slg" processName="neesp-test.MODULE_TEST"/>
   </sca:component>
+  <sca:component xmi:id="_94c9cHaaEe2aYObNOzh9NQ" name="ComponentSWWorkerMonitor" compositeext:version="1.0.0.qualifier">
+    <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_94c9cXaaEe2aYObNOzh9NQ" processName="nessp-sw-monitor.SWWorkerMonitor"/>
+  </sca:component>
 </sca:composite>

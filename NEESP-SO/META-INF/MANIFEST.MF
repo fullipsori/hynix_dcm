@@ -5,7 +5,16 @@ Bundle-SymbolicName: NEESP-SO
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: TIBCO Software Inc.
+Export-Package: com.skhynix.neesp.EventStarter
 Require-Bundle: NEESP-SOFrame;bundle-version="1.0.0"
+Import-Package: com.tibco.bw.palette.shared.java;version="[6.0.0,7.0.0)",
+ com.tibco.bw.runtime;version="[6.0.0,7.0.0)"
+TIBCO-BW-ApplicationModule: META-INF/module.bwm
+TIBCO-BW-JobSharedVariables: META-INF/module.jsv
+TIBCO-BW-ConfigProfile: META-INF/default.substvar
+TIBCO-BW-ModuleSharedVariables: META-INF/module.msv
+TIBCO-BW-Edition: bwe
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Capability: com.tibco.bw.model; filter:="(name=bwext)",
  com.tibco.bw.module; filter:="(&(name=NEESP-SOFrame)(version=1.0.0))",
  com.tibco.bw.palette; filter:="(name=bw.generalactivities)",
@@ -15,9 +24,3 @@ Require-Capability: com.tibco.bw.model; filter:="(name=bwext)",
  com.tibco.bw.sharedresource.model; filter:="(name=bw.java)",
  com.tibco.bw.sharedresource.model; filter:="(name=bw.jmsconnection)"
 TIBCO-BW-Version: 6.8.1 V21 2022-05-12
-TIBCO-BW-Edition: bwe
-TIBCO-BW-ApplicationModule: META-INF/module.bwm
-Bundle-RequiredExecutionEnvironment: JavaSE-11
-TIBCO-BW-ConfigProfile: META-INF/default.substvar
-TIBCO-BW-ModuleSharedVariables: META-INF/module.msv
-TIBCO-BW-JobSharedVariables: META-INF/module.jsv

@@ -15,10 +15,19 @@ import com.skhynix.manager.MessageManager;
 import com.skhynix.manager.MetaDataManager;
 import com.skhynix.manager.ResourceManager;
 import com.skhynix.model.message.MessageModel;
+
+
+/*
+ * Refactoring을 통해서 정리할 내용들 - 초기 개발 시 기능 점검용 (원재일)
+ */
+import com.skhynix.neesp.ConfigManager.ConfigManager;
+import com.skhynix.neesp.MessageRouterTest.*;
 import com.skhynix.neesp.log.LogManager;
 import com.skhynix.neesp.log.NEESPLogger;
-import com.skhynix.neesp.util.Counter;
-import com.skhynix.neesp.util.RandomCollection;
+import com.skhynix.neesp.log.Utils;
+// merging 과정 중 정리 필요 - 원재일
+import com.skhynix.neesp.util.*;
+
 
 
 public class BaseProxy {
@@ -39,16 +48,12 @@ public class BaseProxy {
 	public BaseProxy() {
 		// 생성자
 		System.out.println("/// BaseProxy called");
-		weightBasedRandomValue();
-		
-		String parameter = "EQP1";
-		System.out.println("/// 최초 생성- 장비 생성시점에 같이 생성한다. NEESPLogger: " + parameter);		
-		eqpLogger = new NEESPLogger(parameter, "sw-node-1", LogManager.getInstance().getLogger());		
 		LogManager.getInstance().startMonitor();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public String openSession(String joinType, String jsonString) {
+		System.out.println("join:" + joinType +  "jsonString:" + jsonString);
 		if(StringUtil.isEmpty(joinType) || StringUtil.isEmpty(jsonString)) return "";
 		Map<String, Object> params = StringUtil.jsonToObject(jsonString, Map.class);
 		String[] tokens = joinType.split(MessageManager.defaultDelimiter);
@@ -135,11 +140,13 @@ public class BaseProxy {
 
 	/** 
 	 * Message route handle 들을 Map type 으로 전달하도록 하고, 나중에 다시 변경하도록 한다.
+	 * @param eqpId
+	 * @param appNodeName
 	 * @param eventType
 	 * @param message
 	 * @return
 	 */
-	public String doBusiness(String eventType, String message, String emsHandle, String kafkaHandle, String ftlHandle) {
+	public String doBusiness(String eqpId, String appNodeName, String eventType, String message, String emsHandle, String kafkaHandle, String ftlHandle) {
 		try {
 			Map<String,String> handles = new HashMap<>();
 			if(StringUtil.isNotEmpty(emsHandle)) handles.put("ems", emsHandle);
@@ -161,14 +168,24 @@ public class BaseProxy {
 	}
 	
 	
+	/*
+	 * 초기 기능 테스트용 개발 파트 - 통합 중 변경 예상되는 영역
+	 * 
+	 */
 	public String[] moduleTest(String command, String parameter, String parameter2, String parameter3, String parameter4) {
+		
+		weightBasedRandomValue();
+		String eqpId = "EQP1";
+		System.out.println("/// 최초 생성- 장비 생성시점에 같이 생성한다. NEESPLogger: " + eqpId);		
+		eqpLogger = new NEESPLogger(eqpId, "sw-node-1", LogManager.getInstance().getLogger());
+		
 		String[] retVals = {"",""};
 		
 		System.out.println("1.moduleTest");
-		eqpLogger.syslog(parameter4);
+		eqpLogger.syslog(parameter4,"module-test","TRACE");
 		System.out.println("2.moduleTest - sysLogOff");
 		eqpLogger.syslogOff();
-		eqpLogger.syslog("sys log 외부로 내보는 것을 종료하였습니다. - KAFKA로 출력이 되나요.");
+		eqpLogger.syslog("sys log 외부로 내보는 것을 종료하였습니다. - KAFKA로 출력이 되나요.","module-test","TRACE");
 		System.out.println("3.moduleTest - rtOnOff ["+eqpLogger.isSyncLog()+"]을 종료하고 Queue를 이용한 비동기 방식으로 메시지를 전송합니다.");
 		eqpLogger.syslogOn();
 		eqpLogger.realtimeLogOff();
@@ -179,7 +196,7 @@ public class BaseProxy {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			eqpLogger.syslog("메시지를 보내는데 큐를 이용해서 버퍼링 후 전송합니다.. - KAFKA로 출력이 되나요. ("+(i+1)+")");
+			eqpLogger.syslog("메시지를 보내는데 큐를 이용해서 버퍼링 후 전송합니다.. - KAFKA로 출력이 되나요. ("+(i+1)+")","module-test","TRACE");
 		}
 				
 		retVals[0] = "로그매니저 테스트";
@@ -210,6 +227,9 @@ public class BaseProxy {
 		String[] retVals = {"","","",""};		
 		StringBuffer sb = new StringBuffer(100);
 		
+		/*
+		 * 테스트용 메시지 생성기
+		 */
 		sb.append("{");
 		sb.append(String.format("\"eqpId\":\"%s\",",eqpId));
 		sb.append(String.format("\"eventType\":\"%s\",",rc.next()));
@@ -218,193 +238,307 @@ public class BaseProxy {
 		sb.append(String.format("\"reserved\":\"%s\"","reserved"));
 		sb.append("}");
 		
-		retVals[0] = eqpId;
-		retVals[1] = sb.toString();
-		
-		System.out.printf("[%s]\n", sb.toString());
+		/*
+		 *  장비를 위한 큐 명명 유사 규칙으로 생서한다.
+		 */
+		retVals = new bwReturnValues().retVal1(String.format("QUEUE.FAB1.AREA1.PHOTO.%s", eqpId), sb.toString());
+		System.out.printf("[%s]\n", retVals[1]);
+		logger.log(Level.INFO,retVals[1]);
 		
 		return retVals;
 	}
 	
-	
 	/*
-	 * Transaction Log 관련 체크 함수 모듬
+	 * NEESPLogInfo- Transaction Log 사용을 위한 함수 호출
+	 * Transaction Log 관련 체크 함수 모듬 - TRACE TRX 쫓기위한 로그
 	 */
 	
-	public String[] trxStartLog(String eqpId, String eventType, String msgId, String message, String log) {
-		String[] retVals = {"",""};
-		String gxtnId = "gtxnId";
-		String extnId = "extnId";		
-		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getLogger().logTrxStart(log, eventType, gxtnId, extnId, message);		
-		return retVals;
+	public String[] trxStartLog(String eqpId, String eventType, String msgId, String message, String log, String jobType) {
+	/*
+		 * 테스트용으로 gtxnId와 extnId를 임의로 생성한다.
+	 */
+		String gxtnId = String.format("gtxnId-%d", System.nanoTime());
+		String extnId = String.format("extnId-%s", Utils.getInstnace().yyyymmdd_hhmmssSSS(Utils.currentTime) );		
+	
+		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getNEESPLogger().logTrxStart(log, eventType, gxtnId, extnId, msgId, jobType);
+		return new bwReturnValues().retVal1("succeed-trx-log", "trxStartLog를 출력하였습니다.");
 	}
 	
-	public String[] trxProcLog(String eqpId, String log) {
-		String[] retVals = {"",""};
-		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getLogger().logTrxProc(log);		
-		return retVals;
+	public String[] trxProcLog(String eqpId, String log, String jobType) {		
+		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getNEESPLogger().logTrxProc(log, jobType);		
+		return new bwReturnValues().retVal1("succeed-trx-log", "trxProcLog를 출력하였습니다.");
 	}
 	
-	public String[] trxEndLog(String eqpId, String log) {
-		String[] retVals = {"",""};
-		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getLogger().logTrxEnd(eqpId);
-		return retVals;
+	public String[] trxEndLog(String eqpId, String log, String jobType) {
+		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getNEESPLogger().logTrxEnd(log, jobType);
+		return new bwReturnValues().retVal1("succeed-trx-log", "trxStartLog를 출력하였습니다.");
+	}
+	
+	/*
+	 * NEESP-SO & NEESP-SW 하트비트 체크를 위한 모니터링 체크 함수 모음
+	 */
+	public String[] checkEqpsStatus() {
+		String[] retVals = null;		
+		String eqpIds = EQPInfoManager.getInstance().checkEqpsStatus();
+		System.out.printf("장비 상태 체크: %s\n", eqpIds);
+		return new bwReturnValues().retVal1("succeed-check-eqps-status", eqpIds);
+	}
+	
+	public String[] checkSWWorkersStatus() {
+		String[] retVals = null;		
+		String swWorkerIds = SWWorkerInfoManager.getInstance().checkSWWorkersStatus();
+		System.out.printf("장비 상태 체크: %s\n", swWorkerIds);
+		return new bwReturnValues().retVal1("succeed-check-sw-workers-list", swWorkerIds);
 	}
 	
 	
 	/*
-	 * NEESP-SO 수행에 필요한 함수
+	 * NEESP-SO 수행에 필요한 함수	 * 
 	 */
     public String[] addNewSWNode(String appNodeName, String procInstanceId) {
-        String[] retVals = {"",""};        
         String logMsg = String.format("[%s][%s] 새로운 SWNode Id를 추가하였습니다.", appNodeName, procInstanceId);
-        retVals = SWNodeInfoManager.getInstnace().addNewSWNode(appNodeName, procInstanceId);
+        System.err.printf("%s\n", logMsg);
+        return SWNodeInfoManager.getInstnace().addNewSWNode(appNodeName, procInstanceId);
+    }
+    
+    public String[] initializeSWNode(String appNodeName) {
+        String[] retVals = {"",""};
+        String logMsg = String.format("[%s] SWNode Id가 새롭게 기동되었습니다. [SO]", appNodeName);
+        System.err.printf("%s\n", logMsg);
+        // retVals = SWNodeInfoManager.getInstnace().initializeSWNode(appNodeName);
         return retVals;      
     }
     
     public String[] releaseSWNode(String appNodeName) {
         String[] retVals = {"",""};
         String logMsg = String.format("[%s] SWNode Id를 제거하였습니다. [SO]", appNodeName);
-        retVals = SWNodeInfoManager.getInstnace().releaseSWNode(appNodeName);
-        return retVals;      
+        System.err.printf("%s\n", logMsg);
+        return SWNodeInfoManager.getInstnace().releaseSWNode(appNodeName);
     }    
     
-    public String[] initSWWorker(String eqpId) {
+    public String[] initSWWorker(String eqpId, String inboundQueue) {
         String[] retVals = {"",""};        
-        String logMsg = String.format("[%s] 새로운 SW Worker를 초기화하였습니다. [SO]", eqpId);
-        retVals = EQPInfoManager.getInstance().initEQPInfo(eqpId);        
+        String logMsg = String.format("[%s] 새로운 SW Worker를 초기화하였습니다. [SO][%s]", eqpId, inboundQueue);
+        System.err.printf("%s\n", logMsg);
         EQPInfoManager.getInstance().printEQPInfo(eqpId,"init-new-worker");
-        
-        return retVals;
+        return EQPInfoManager.getInstance().initEQPInfo(eqpId, inboundQueue);
     }
     
     public String[] addNewSWWorker(String eqpId, String appNodeName, String procInstanceId) {
-        String[] retVals = {"",""};        
+        String[] retVals = null;        
         String logMsg = String.format("[%s][%s][%s] 새로운 SW Worker를 추가하였습니다. [SO]", eqpId, appNodeName, procInstanceId);
         retVals = SWNodeInfoManager.getInstnace().addNewSWWorker(eqpId, appNodeName);
+        if(retVals[0].contains("succeed")) {
         retVals = EQPInfoManager.getInstance().changeEQPInfoWhenCreated(eqpId, appNodeName, procInstanceId, "active","ready");
         EQPInfoManager.getInstance().printEQPInfo(eqpId,"add-new-worker");
+        }
         return retVals;
     }
     
+	public String[] updateSWWorker(String eqpId, String appNodeName, String procInstanceId, String workerStatus) {
+		/*
+		 * init-sworker request from SWNode
+		 * SWNodeInfoManager의  SWNodeInfo에 eqpIds 추가
+		 */
+		String[] retVals = null;
+		long step =0;
+		logger.log(Level.INFO, String.format("[%s]",eqpId));
+		
+		try {		
+			// SWNodeInfo 및 장비 상태 정보 갱신 - 재기동 여부를 확인하고 거기에 맞는 활동을 수행한다.			
+			SWNodeInfoManager.getInstnace().addNewSWWorker(eqpId, appNodeName);
+			step++;
+			retVals = EQPInfoManager.getInstance().changeEQPInfoWhenCreated(eqpId, appNodeName, procInstanceId, "active", workerStatus);
+			step++;
+			// 상태 정보 추력
+			EQPInfoManager.getInstance().printEQPInfo(eqpId,"update-sw-worker-status");
+			step++;
+			SWNodeInfoManager.getInstnace().getSWNodeInfo(appNodeName).printSWNodeInfo("success-init-swworker-from-swn");
+			step++;
+		} catch (Exception ex) {
+			return new bwReturnValues().retVal1("error", String.format("Exception Error - 문제가 발생하였습니다. step count[%d]",step));
+		}
+		
+		return retVals;
+	}
     
     public String[] releaseSWWorker(String eqpId, String appNodeName) {
         String[] retVals = {"",""};        
         String logMsg = String.format("[%s][%s] 새로운 SW Worker를 노드에서 제거하였습니다. [SO]", eqpId, appNodeName);
         retVals = SWNodeInfoManager.getInstnace().releaseSWWorker(eqpId, appNodeName);
+        if(retVals[0].contains("succeed")) {
         retVals = EQPInfoManager.getInstance().changeEQPInfoWhenReleased(eqpId, "", "", "deactive","stopped");
-        EQPInfoManager.getInstance().printEQPInfo(eqpId,"add-new-worker");
+        	EQPInfoManager.getInstance().printEQPInfo(eqpId,"released-sw-worker");
+        }
+        return retVals;
+    }
+    
+    public String[] getSpawnRequestInfo(String eqpId) {
+    	String[] retVals = null;    	
+    	String queueName = EQPInfoManager.getInstance().getEQPInfo(eqpId).getInboundQueue();
+    	String swnodeId = EQPInfoManager.getInstance().getEQPInfo(eqpId).getSwnodeId();
+    	System.err.printf("/// [%s][%s][%s] getSpawnRequestInfo: SWN 초기화에 따른 SWWorker 생성 요청\n", eqpId, swnodeId, queueName);
+    	retVals = this.allocateChannelInfo(eqpId, swnodeId, queueName);    	
+    	System.err.printf("/// allocated and Request Command: %s \n", retVals[2]);    	
         return retVals;
     }
 
-	public String[] allocatSWN_forNEWEQP(String eqpId) {
+    public String[] handleGetMsgTimeoutEvent(String eqpId, String appNodeName, String timeoutCount, String procInstanceId ) {
+        String[] retVals = {"",""};
+        String logMsg = String.format("[%s][%s] SWWorker에서 타임아웃 이벤트가 발생하였습니다.[%s][SO]", eqpId, appNodeName, timeoutCount);
+
+        // retVals = SWNodeInfoManager.getInstnace().releaseSWWorker(eqpId, appNodeName);
+        if(EQPInfoManager.getInstance().getEQPInfo(eqpId) != null) {
+        	EQPInfoManager.getInstance().getEQPInfo(eqpId).setCountTimeoutEvent(Long.parseLong(timeoutCount));
+        	EQPInfoManager.getInstance().printEQPInfo(eqpId, "check-info-by-timeout-event");
+        } else {
+        	/*
+        	 *  기본 시작 순서: SO 먼저 기동 => SWN 기동
+        	 *  운영 환경 상: SO가 죽은 경우 => SWN은 실행 중인 상태 => 이 경우  
+        	 *  SO가 나중에 기동되었다는 의미 - 이 경우 동기화 작업을 위하여
+        	 *  SWNode 정보 설정을 새롭게 하고, 필요한 정보들을 만드나.          	 
+        	 */        	
+        	this.addNewSWNode(appNodeName, procInstanceId);
+        	this.initSWWorker(eqpId, ""); // 어떻게 받을 것인지 확인한다. - EDWARD-WON: InboundQueue명을 찾아서 만들어준다. 꼭 수정필요 12/5
+        	
+        	// 실제 매니저에 설정한다.
+        	System.out.printf("/// [%s][%s] NEESP-SO가 NEESP-SW에 SW-worker 실행 중에 재기동된 상태\n", eqpId, appNodeName);
+        	retVals = SWNodeInfoManager.getInstnace().addNewSWWorker(eqpId, appNodeName);
+        	if(retVals[0].contains("succeed")) {
+        		retVals = EQPInfoManager.getInstance().changeEQPInfoWhenCreated(eqpId, appNodeName, procInstanceId, "active","ready");        	
+        		EQPInfoManager.getInstance().printEQPInfo(eqpId,"add-swnode-and-worker-by-TimeoutEvent [완료]");
+        	} else {
+        		System.err.printf("/// [%s][%s] 오류가 발생하였습니다.", retVals[0], retVals[1]);
+        	}
+        }
+        return retVals;
+    }
+
+	public String[] checkEqpId(String queueName){
 		String[] retVals = {"",""};
-		// String logMsg = String.format("{\"eqp_id\":\"%s\",\"swnode_id\":\"%s\",\"msg\":\"%s\"}", eqpId, "swnode_01","새롭게 장비가 추가되었습니다. Worker 생성 필요.")		
-        String swnodeId = SWNodeInfoManager.getInstnace().allocateSWnode(eqpId, "round-robin")[1];	
+		/*
+		 * 큐 명에서 장비 ID를 분리한다.
+		 * 1) EQP 마스터에 등록된 장비인지 확인한다.	 
+		 * 2) 등록되지 않은 장비인 경우 - 장비 마스터 DB 조회 => 조회 시에도 존재하지 않는 경우 => 신규 미등록 장비 알람을 보내준다.
+		 * 3)	 
+		 */
+		 int index = queueName.lastIndexOf(".");
+		 retVals[1] = queueName.substring(index+1);
+		 System.err.printf("/// checkEqpId [%s] 큐 명에서 [%s] eqpId를 분리하고 확인하였습니다.", queueName, retVals[1]);		 
+		 return retVals;
+	}
+	
+	public String[] allocatSWNodeForNewEqp(String eqpId) {
+		String[] retVals = null;		
+        retVals = SWNodeInfoManager.getInstnace().allocateSWnode(eqpId, "round-robin");
+        
+        String code = retVals[0];
+        String swnodeId = retVals[1];
+        
 		EQPInfoManager.getInstance().setSWNodeId(eqpId, swnodeId, "wait-worker-ready");
 		EQPInfoManager.getInstance().printEQPInfo(eqpId, "allocated-swnode");
 		
-        StringBuffer sb = new StringBuffer(100);
+		logger.log(Level.INFO,String.format("[%s] 장비 할당 요청 이벤트 메시지 발신 [%s]", eqpId, swnodeId));
 		
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","spawn-request"));
-		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-		sb.append(String.format("\"parameter2\":\"%s\",",swnodeId));
-		sb.append(String.format("\"parameter3\":\"%s\",","round-robin 할당 방식"));
-		sb.append(String.format("\"parameter4\":\"%s\"",String.format("새로운 장비 [%s]가 추가되었습니다.", eqpId)));
-		sb.append("}");
+		return new bwReturnValues().retVal2(code, String.format("queue.so.%s.ctl", swnodeId), swnodeId);
+	}
 		
-		retVals[0] = String.format("queue.so.%s.ctl", swnodeId); // 장비 제어용 토픽 토픽 진행
-    	retVals[1] = sb.toString();		
+	public String[] allocateChannelInfo(String eqpId, String swnodeId, String queueName) {
+        
+        /*
+         * 진짜 할당을 위해서는 설정 정보를 관리해야 한다. - Database 설정 정보 관리 - Configuration Manager
+         *   
+         * String channelInfo = ChannelInfoManager.getChannelInfo(eqpId);
+         * = 전달 포맷에 대해서는 정의가 필요합니다. JSON 형식으로 할 것인지 아래와 같이 정의된 구분자 타입으로 할지를 결정할 필요가 있다.
+         */
+        String strAckMode = "AUTO_ACK";
+        /*
+         * 임시 방편으로 만들어진 것임 - 기설정된 EMS INBOUND, OUTBOUND 정보를 전달한다. - 가용한 자원을 할당하여 처리하게 만드는 것을 목표로 한다.
+         */
+        String channelInfo = ConfigManager.getInstance().allocateChannelInformation(eqpId, swnodeId, queueName, strAckMode);
+        
+        System.err.printf("///////////////////////////////////////////////////////////////\n");
+        System.err.printf("/// 할당된 채널 인/아웃바운드 채널 정보 : %s\n", channelInfo);
+        System.err.printf("///////////////////////////////////////////////////////////////\n");
+        
+		String destinationQueueName = String.format("queue.so.%s.ctl", swnodeId); // 장비 제어용 토픽 토픽 진행
+    	String req = new SORequestCommand().make("spawn-request", eqpId, swnodeId, channelInfo, String.format("[%s] 정상적으로 채널정보가 할당되었습니다.", eqpId));
 
+        String[] retVals = new bwReturnValues().retVal2("succeed-allocated-swn", destinationQueueName, req);
 		logger.log(Level.INFO,String.format("[%s] 장비 할당 요청 이벤트 메시지 발신 [%s]", eqpId, retVals[1]));
 		
 		return retVals;
 	}
 	
 	/*
-	 * stop-request
+	 * stop-request: SWN 내 SW-worker(장비 이벤트 처리)를 종료시키기 위한 명령어
 	 */
 	public String[] stopSWWorker(String eqpId, String reqCommand) {
 		
-		String[] retVals = {"",""};		
 		EQPInfo eqpInfo = null;
 		
 		if((eqpInfo =EQPInfoManager.getInstance().getEQPInfo(eqpId, reqCommand)) == null) {
-			
-			return retVals;
+			return new bwReturnValues().retVal1("error-not-found-eqpinfo", String.format("주어진 장비 Id [%s] 에 해당하는 장비 정보가 없습니다.", eqpId));
 		}
 		
+		// EQPInfo 장비 정보 객체가 존재하는 경우 명령를 생성한다.
 		String swnodeId = eqpInfo.getSwnodeId();
 		String procInstanceId = eqpInfo.getWorkerId();
 		
-		StringBuffer sb = new StringBuffer(100);		
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","stop-request"));
-		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-		sb.append(String.format("\"parameter2\":\"%s\",",swnodeId));
-		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		sb.append(String.format("\"parameter4\":\"%s\"","SWN 관련 정리 작업을 부탁드립니다."));
-		sb.append("}");
+		String destinationQueue = String.format("queue.so.%s.ctl", swnodeId);
+		String req = new SORequestCommand().make("stop-request", eqpId, swnodeId, procInstanceId, String.format("\"parameter4\":\"%s\"","SWN 관련 정리 작업을 부탁드립니다."));
 		
-		retVals[0] = String.format("queue.so.%s.ctl", swnodeId);
-		retVals[1] = sb.toString();
-		
-		return retVals;
+		return new bwReturnValues().retVal2("stop-request", destinationQueue, req);
 	}
 	
     /*
      * NEESP-SWN 수행에 필요한 함수 목록
      */
     public String[] checkSWorkerInfo(String command, String parameter, String parameter2, String parameter3, String parameter4) {
-        String[] retVals = {"","","",""}; 
+        String[] retVals = null; 
         String eqpId = parameter;
         String swnodeId = parameter2;
         
-        retVals[0] = command; // spawn-request
-        retVals[1] = eqpId;
-        retVals[2] = swnodeId;
-        retVals[3] = String.format("[%s] 장비를 위한 Worker 생성 요청", eqpId);
-
         if("spawn-request".equalsIgnoreCase(command)) {        	
             boolean bExist = SWWorkerInfoManager.getInstance().initSWWorkerInfo(eqpId, swnodeId);            
             if(bExist) {
-            
+            	// 이미 기존에 정보를 가기오 있는 경우 판단한다. 정보만 있는지 아니면 실행이 정지되어 있는 상태인지를
                 SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setSwnodeId(swnodeId);
                 SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setWorkerStatus("ready");
+                
                 if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getWorkerStatus().equalsIgnoreCase("stop") == false) {
-                    retVals[0] = "use-exist-worker-thread";
+                    retVals = new bwReturnValues().retVal3("use-exist-worker-thread", String.format("[%s] 이미 실행 중인 작업자가 있습니다.", eqpId), eqpId, swnodeId);
+                    System.out.println(retVals[1]);
                 } else {
-                    System.out.printf("[%s] Thread Spawning 필요\n", eqpId);
+                    retVals = new bwReturnValues().retVal3("need-to-spawn-worker-thread", "기존에 생성한 정보가 있느나 정지되어서 삭제되어 있는 상태", eqpId, swnodeId);
+                    System.out.printf("[%s] Thread Spawning 필요 [%s]\n", eqpId, retVals[0]);
                 }
                 
                 SWWorkerInfoManager.getInstance().printSWWorkerInfo(eqpId,"check-swworker-info");
+                
+            } else {
+            	retVals = new bwReturnValues().retVal3("need-to-spawn-worker-thread", "기존에 정보가 없는 경우에 해당합니다.", eqpId, swnodeId);
             }            
           
         } else if("stop-request".equalsIgnoreCase(command)) {
             if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) != null) {
                 SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setSORequest("stop-request");
-                System.out.printf("[%s] 작업자 정지 요청\n", eqpId);
                 SWWorkerInfoManager.getInstance().printSWWorkerInfo(eqpId,"set-stop-request");
+                retVals = new bwReturnValues().retVal3("succeed-set-stop-request", "SW-Worker 정지 작업을 위한 값 설정 완료", eqpId, swnodeId);
+                System.err.printf("/// [%s] 작업자 정지 요청\n", eqpId);
             } else {
-                System.out.printf("[%s] 장비를 위한 작업자가 없습니다.\n", eqpId);  
+                System.err.printf("/// [%s] 장비를 위한 작업자가 없습니다.\n", eqpId); 
+                retVals = new bwReturnValues().retVal3("error-not-found-swworkerinfo",String.format("[%s]에 해당하는 SWWorkerInfo를 찾을 수 없습니다.", eqpId), eqpId, swnodeId);
             }
         }
         
-                      
         return retVals;
     }
     
     public String[] prepareAndCheckDup(String eqpId, String messageId) {
-        String[] retVals = {"",""}; 
-        
-        retVals[0] = "succeed-prepare-to-data";
-        retVals[1] = String.format("[%s][%s] 수신 메시지가 중복 처리 유무를 확인합니다.", eqpId, messageId);
 
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId)==null) {
-             retVals[0] = "error-swworker-not-found";
-             retVals[1] ="찾을 수 없습니다.";
-             return retVals;
+             return new bwReturnValues().retVal1("error-swworker-not-found", String.format("[%s] 찾을 수 없습니다. messageId %s", eqpId, messageId));
         }
         
         /*
@@ -424,21 +558,18 @@ public class BaseProxy {
         SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setMsgProcStage("ready");
         SWWorkerInfoManager.getInstance().printSWWorkerInfo(eqpId,"prepare-to-check-dup");
         
-        retVals[0] = SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getMsgProcStage();
+        String msgProcStage = SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getMsgProcStage();
+        String logMsg = String.format("/// [%s] 메시지 프로세싱 상태는 [messageId %s][%s]", eqpId, messageId, msgProcStage);
         
-        return retVals;
-    }
+        System.err.println(logMsg);
     
-     public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge, String emsHandle, String kafkaHandle, String ftlHandle) {
-        String[] retVals = {"",""}; 
+        return new bwReturnValues().retVal1(msgProcStage, logMsg);
+    }
         
-        retVals[0] = "succeed-do-business";
-        retVals[1] = String.format("[%s][%s] 메시지 작업을 수행합니다.", eqpId, eventType);
+     public String[] doBusiness(String eqpId, String appNodeName, String eventType, String messge) {
 
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId)==null) {
-             retVals[0] = "error-swworker-not-found-do-business";
-             retVals[1] ="찾을 수 없습니다.";
-             return retVals;
+             return new bwReturnValues().retVal1("error-swworker-not-found-do-business", String.format("[%s][%s] WorkerInfo가 존재하지 않습니다.", eqpId, eventType));
         }
         
         /*
@@ -456,14 +587,11 @@ public class BaseProxy {
         
         // 처리 이벤트 카운트 하기
         SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).increaseEventCount(eventType);
-        
-        // fullipsori
-        doBusiness(eventType, messge, emsHandle, kafkaHandle, ftlHandle);
-        return retVals;
+        return new bwReturnValues().retVal1("succeed-do-business", String.format("[%s][%s] 이벤트 작업이 정상적으로 마무리되었습니다.", eqpId, eventType));
     }
      
     public String[] checkNextStepWhenGetTimeout(String eqpId, String appNodeName, String procInstanceId) {
-    	String[] retVals = {"",""};
+    	String[] retVals = null;
     	
 		/*
 		 * 1. SWWorkerInfo 상태 체크: 
@@ -471,103 +599,150 @@ public class BaseProxy {
 		 * 3. 작업이 완료되었다면 결과 메시지를 만든다.
 		 */
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) == null) {           
-           retVals[0] = "error-not-found-swworker";
-           retVals[1] = String.format("[%s] 장비의 SWWorkerInfo 정보가 없습니다. 동기화를 위한 메시지가 필요합니다.", eqpId);           
+           retVals = new bwReturnValues().retVal1("error-not-found-swworker", String.format("[%s] 장비의 SWWorkerInfo 정보가 없습니다. 동기화를 위한 메시지가 필요합니다.", eqpId));
         } else if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getSORequest().equalsIgnoreCase("stop-request")) {
         
-            StringBuffer sb = new StringBuffer(100);		
-	    	sb.append("{");
-		    sb.append(String.format("\"command\":\"%s\",","release-swworker"));
-    		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-    		sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-	    	sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		    sb.append(String.format("\"parameter4\":\"%s\"", "SWNode Worker가 삭제되었습니다. SO내 EQPInfo 정보의 변경이 필요합니다."));
-    		sb.append("}");
-    		
-    		retVals[0] = "succeed-release-swworker";
-    		retVals[1] = sb.toString();
+    		String req = new SORequestCommand().make("release-swworker", eqpId, appNodeName, procInstanceId, String.format("\"parameter4\":\"%s\"", "SWNode Worker가 삭제되었습니다. SO내 EQPInfo 정보의 변경이 필요합니다."));
+    		retVals = new bwReturnValues().retVal1("succeed-release-swworker", req);
         
         } else {
-        
-           retVals[0] = "error-no-match-command";
+           retVals = new bwReturnValues().retVal1("error-no-match-command", String.format("SORequest [%s]에 매칭되는 command가 없습니다.",  SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getSORequest()));
         }
 		
-		logger.log(Level.INFO,String.format("[%s][%s] checkMsgFromSO 후 작업을 마무리 하겠습니다.", eqpId, procInstanceId));
+		logger.log(Level.INFO,String.format("[%s][%s]  checkNextSetpWhenGetTimeout 발생했을 때 - 작업을 마무리 하겠습니다.", eqpId, procInstanceId));
 		
 		return retVals;
  	}
     
     public String[] makeTimeoutEventMsg(String eqpId, String appNodeName, String procInstanceId) {
-		String[] retVals = {"",""};
-		StringBuffer sb = new StringBuffer(100);
+    	/*
+    	 * ReceiveGetTimeout 발생 횟수를 전달한다.
+    	 */
+    	long timeoutCount = SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).increaseTimeoutEventCount();
 		
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","getmsg-timeout"));
-		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-		sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		sb.append(String.format("\"parameter4\":\"%s\"","Get Message Timeout 이벤트가 발생하였습니다."));
-		sb.append("}");
+		String req = new SORequestCommand().make("getmsg-timeout", eqpId, appNodeName, String.format("%d", timeoutCount),procInstanceId);		
+		return  new bwReturnValues().retVal1("succeed-created-timeout-msg", req);
+	}
 		
-		retVals[0] = "succeed-handle-timeout-event";
-		retVals[1] = sb.toString();
+	public String[] initializeSWN(String appNodeName, String applicationName, String procInstanceId ) {
+		
+		String ret = String.format("[%s][%s][%s] 정상적으로 초기화 되었습니다.", appNodeName, applicationName, procInstanceId);	
+		
+		/*
+		 * 초기화 작업을 수행합니다. 작업이 성공적으로 끝나면  해당 이벤트를 보내줍니다.
+		 * 오류가 발생시 - shutdown 하고 생성 오류 메시지를 만들어서 보내주고 정리한다.
+		 */
+		String req = new SORequestCommand().make("init-swnode", appNodeName, applicationName, procInstanceId, ret);	
+		return  new bwReturnValues().retVal1("succeed-initilized-swnode", req);
+	}
+		
+	public String[] releaseSWN(String appNodeName, String applicationName, String procInstanceId) {
+		
+		String ret = String.format("[%s][%s][%s] 모든 정리작업을 수행하였습니다. - 마무리 처리 부탁합니다.", appNodeName, applicationName, procInstanceId);
+		/*
+		 * SWN 노드를 릴리즈 하고 나서 SO에게 알려준다.
+		 */
+		String req = new SORequestCommand().make("release-swnode", appNodeName, applicationName, procInstanceId, ret);	
+		return  new bwReturnValues().retVal1("succeed-initilized-swnode", req);
+	}
+		
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+	 * channelInfo = parameter3 형식 - 구분자 사용:  
+	 * 
+	 * 예)"parameter3" = "src,EMS,ems#01,tcp://192.168.232.142:7222,EQP1|tar,EMS,ems@02,tcp://192.168.232.142:7223,EQP1" 
+	 * 
+	 */
+	private void printCheckValue(String[] inbound, String[] outbound) {
+		System.err.println("-------------------------------------------------");
+		for(int i=0; i<inbound.length; i++){
+			System.err.printf("[%d][%s]\n", i, inbound[i]);
+		}
+		System.err.println("-------------------------------------------------");		
+		for(int i=0; i<outbound.length; i++){
+			System.err.printf("[%d][%s]\n", i, outbound[i]);
+		}
+		System.err.println("-------------------------------------------------");
+	}
+		
+	public String initializeChannelInfo(String eqpId, String appNodeName, String channelInfo){
+		
+		String retVal = "";
+		
+		try {			
+			System.err.printf("채널 정보 보여주기 [%s][%s][%s]￦n", eqpId, appNodeName, channelInfo);
+			
+			String[] inbound = channelInfo.split("\\|")[0].split(",");
+			String[] outbound = channelInfo.split("\\|")[1].split(",");
+			
+			printCheckValue(inbound, outbound);
+			
+			/*
+			 *  신규 서버 정보를 생성하고  채널 정보 관리자에 등록한다.
+			 */
+			ChannelInfoManager.getInstance().setChannelServerInfo(new ChannelServerInfo(inbound));
+			ChannelInfoManager.getInstance().setChannelServerInfo(new ChannelServerInfo(outbound));
+			
+			/*
+			 *  MessageRouter에 저장할 Router정보 저장 - session 기반으로 연결에 필요한 내용을 정리한다.
+			 *  session객체를 이용하여  destination과 topic 혹은 queue를 생성한다.
+			 */
+
+			EMSMessageRouter inboundEMSCI = new EMSMessageRouter(inbound);
+			EMSMessageRouter outboundEMSCI = new EMSMessageRouter(outbound);
+			
+			/*
+			 * MessageRouter에 EqpId와 In/Outbound EMS Channel Info를 등록한다.
+			 */
+			MessageRouterTest.getInstance().setInOutChannelInfo(eqpId, inboundEMSCI, outboundEMSCI);
+			
+		}catch(Exception ex) {
+		
+		}
+		return retVal;
+	}
+	
+	public String[] receiveMessage(String eqpId, long waitTimeOut) {		
+		String[] retVals = null;		
+		try {
+			String receivedMessage = MessageRouterTest.getInstance().consumeMessage(eqpId, waitTimeOut);
+			retVals = new bwReturnValues().retVal1("succeed-received-message", receivedMessage);
+		} catch(Exception ex) {
+			System.err.println(ex.getMessage());
+			retVals = new bwReturnValues().retVal1("error-general-exception", ex.getMessage());
+		} catch(ReceivedTimeoutException er) {
+			System.err.println(er.getMessage());
+			retVals = new bwReturnValues().retVal1("error-received-timeout", er.getMessage());
+		}
 		
 		return retVals;
 	}
 		
-	public String initializeSWN(String appNodeName, String applicationName, String procInstanceId ) {
-		String[] retVals = {"",""};	
-		String retVal = String.format("[%s][%s][%s] 초기화 작업을 수행해야 합니다.", appNodeName, applicationName, procInstanceId);
-		
-//		LogManager.getInstance().initialize(appNodeName);
-//		logger.addHandler(LogManager.getInstance().getKafkaHandler(appNodeName,applicationName, ""));
-//		logger.log(Level.INFO, retVal);
-//		logger.log(Level.INFO, "기본 설정 작업 마무리 후 메시지 전달하기 ");
-		
-		StringBuffer sb = new StringBuffer(100);
-		
-		// {"command":"load-jar", "parameter":"AStest","parameter2":"D:/00_SKhynix/test-project/test-as", "parameter3":"doBusiness","parameter4":""}
-		
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","init-swnode"));
-		sb.append(String.format("\"parameter\":\"%s\",",appNodeName));
-		sb.append(String.format("\"parameter2\":\"%s\",",applicationName));
-		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		sb.append(String.format("\"parameter4\":\"%s\"","정상적으로 초기화가 되었습니다."));
-		sb.append("}");
-		
-		return sb.toString();
+	public String[] produceMessage(String eqpId, String message) {
+		try {
+			MessageRouterTest.getInstance().produceMessage(eqpId, message);
+			return new bwReturnValues().retVal1("succeed-send-message", "메시지 전송을 정상적으로 마무리 하였습니다.");
+		} catch(Exception ex) {
+			return new bwReturnValues().retVal1("error-send-message", ex.getMessage());
 	}
-	
-	public String releaseSWN(String appNodeName, String applicationName, String procInstanceId) {
-		String[] retVals = {"",""};	
-		String retVal = String.format("[%s][%s][%s] 모든 정리작업을 수행하였습니다. - 마무리 처리 부탁합니다.", appNodeName, applicationName, procInstanceId);
-		LogManager.getInstance().initialize(appNodeName);
-		logger.addHandler(LogManager.getInstance().getKafkaHandler(appNodeName,applicationName, ""));
-		logger.log(Level.INFO, retVal);
-		logger.log(Level.INFO, "기본 설정 작업 마무리 후 메시지 전달하기 ");
-		
-		StringBuffer sb = new StringBuffer(100);		
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","release-swnode"));
-		sb.append(String.format("\"parameter\":\"%s\",",appNodeName));
-		sb.append(String.format("\"parameter2\":\"%s\",",applicationName));
-		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		sb.append(String.format("\"parameter4\":\"%s\"","SWN 관련 정리 작업을 부탁드립니다."));
-		sb.append("}");
-		
-		return sb.toString();
 	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public String[] initSWWorker(String eqpId, String appNodeName, String applicationName, String procInstanceId) {
+	public String[] initSWWorker(String eqpId, String appNodeName, String applicationName, String procInstanceId, String channelInfo) {
 		
+		String[] retVals = null;
 		/*
 		 * 1. 초기화 작업을 진행합니다.
 		 */		
-		String[] retVals = {"",""};		 
-		retVals[1] = String.format("%s|%s|%s|%s| 장비 큐 처리용 작업자 정상적으로 생성되었습니다..", eqpId, appNodeName, applicationName, procInstanceId);
+		String ret = initializeChannelInfo(eqpId, appNodeName, channelInfo);
+		
+		if(ret.contains("error")) {
+    		String req = new SORequestCommand().make("error-init-swworker-channel-setup", eqpId, appNodeName, ret, String.format("[%s] 채널 형성 중 오류 다음과 같은 오류가 발생하였습니다. [%s]", eqpId));			
+			return new bwReturnValues().retVal1(ret, req);
+		}
 		
 		if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) != null) {
+			
             SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setSwnodeId(appNodeName);
             SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setWorkerId(procInstanceId);
             SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setWorkerStatus("ready");
@@ -575,94 +750,66 @@ public class BaseProxy {
             SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setMsgProcStage("n/a");
             SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getSWWorkerInfo("init-swworker");
             
-            StringBuffer sb = new StringBuffer(100);		
-    		sb.append("{");
-    		sb.append(String.format("\"command\":\"%s\",","init-swworker"));
-    		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-    		sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-    		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-    		sb.append(String.format("\"parameter4\":\"%s\"", String.format("[%s] 정상적으로 초기화 되었습니다.", eqpId)));
-    		sb.append("}");
-    		
-            retVals[0] = "succeed-init-swworker";
-            retVals[1] = sb.toString(); 
+    		String req = new SORequestCommand().make("init-swworker", eqpId, appNodeName, procInstanceId, String.format("[%s] 정상적으로 초기화 되었습니다.", eqpId));
+            retVals = new bwReturnValues().retVal1("succeed-init-swworker", req);
 
          } else {
-            // 없는 경우
-           retVals[0] = "error-not-found-swworker";           
-           StringBuffer sb = new StringBuffer(100);		
-   		   sb.append("{");
-   		   sb.append(String.format("\"command\":\"%s\",","error-init-swworker"));
-   		   sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-   		   sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-   		   sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-   		   sb.append(String.format("\"parameter4\":\"%s\"", String.format("[%s] SWWorker 생성에 실패하였습니다. [error-code:%s]", eqpId, retVals[0])));
-   		   sb.append("}");
-   		   retVals[1] = sb.toString();
+           // 해당하는 장비의 eqpId가 없는 경우
+   		   String req = new SORequestCommand().make("error-init-swworker-not-found", eqpId, appNodeName, procInstanceId, String.format("[%s] SWWorker 생성에 실패하였습니다. [error: not found swworker]", eqpId));
+   		   retVals = new bwReturnValues().retVal1("error-init-swworker-not-found", req);
          }
 		
-		logger.log(Level.INFO,String.format("[%s][%s] 장비를 위한 SW-Worker 초기화 작업을 완료하였습니다.", eqpId, procInstanceId));
+		logger.log(Level.INFO,String.format("[%s][%s] 장비를 위한 SW-Worker 초기화 작업 수행을 완료하였습니다. [%s]", eqpId, procInstanceId, retVals[0]));
 		
 		return retVals;
 	}
 	
-	public String releaseSWWorker(String eqpId, String appNodeName, String applicationName, String procInstanceId) {
-    	String[] retVals = {"",""};
-		String retVal = String.format("%s|%s|%s|%s| 장비 큐 처리용 작업자가 정리되었습니다.", eqpId, appNodeName, applicationName, procInstanceId);
+	public String[]  releaseSWWorker(String eqpId, String appNodeName, String applicationName, String procInstanceId) {
+		
+		String ret = String.format("%s|%s|%s|%s| 장비 큐 처리용 작업자가 정리되었습니다.", eqpId, appNodeName, applicationName, procInstanceId);
+		String code = "";
 		
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) != null) {
            SWWorkerInfoManager.getInstance().releaseSWWorkerInfo(eqpId);          
-           retVals[0] = "succeed-removed-swworker";
+           code = "succeed-removed-swworker";
         } else {
-           retVals[0] = "error-not-found-swworker";
+           code = "error-not-found-swworker";
+           ret = String.format("%s|%s|%s|%s| 장비 큐 처리용 작업자를 찾을 수 없습니다.", eqpId, appNodeName, applicationName, procInstanceId);
         }
 		
-		StringBuffer sb = new StringBuffer(100);
-		sb.append("{");
-		sb.append(String.format("\"command\":\"%s\",","release-swworker"));
-		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-		sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		sb.append(String.format("\"parameter4\":\"%s\"",retVal));
-		sb.append("}");
-		
-		return sb.toString();
+		String req = new SORequestCommand().make("release-swworker", eqpId, appNodeName, procInstanceId, ret);
+		return new bwReturnValues().retVal1(code, req);
 	}
 	
-	public String updateSWWorkerInfo(String messageBody) {
-		logger.log(Level.INFO, String.format("[%s]",messageBody));
-		return String.format("[%s]",messageBody);
+	public String[] updateSWWorkerInfo(String eqpId, String appNodeName, String applicationName, String workerStatus) {
+		/*
+		 * updateSWWorkerInfo 필요할 때 코드를 추가한다.
+		 */
+		
+		return new bwReturnValues().retVal1("succeed-update-swworkerinfo", String.format("[%s][%s] SWWorkerInfo정보를 업데이트했습니다.", eqpId, workerStatus));
 	}
 	
 	public String[] readyToNext(String eqpId, String appNodeName, String applicationName, String procInstanceId) {
-    	String[] retVals = {"",""};
+    	String[] retVals = null;
 		
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) != null) {
         	
         	if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getSORequest().equalsIgnoreCase("stop-request")) {        		
-        		StringBuffer sb = new StringBuffer(100);
-        		sb.append("{");
-        		sb.append(String.format("\"command\":\"%s\",","release-swworker"));
-        		sb.append(String.format("\"parameter\":\"%s\",",eqpId));
-        		sb.append(String.format("\"parameter2\":\"%s\",",appNodeName));
-        		sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-        		sb.append(String.format("\"parameter4\":\"%s\"", "SWnode Worker를 제거하였습니다."));
-        		sb.append("}");
         		
-        		retVals[0] = "stop-request";
-        		retVals[1] = sb.toString();
+        		String req = new SORequestCommand().make("release-swworker", eqpId, appNodeName, procInstanceId, String.format("[%s][%s] SW-worker를 정리합니다.", eqpId, appNodeName));        		
+        		retVals = new bwReturnValues().retVal1("stop-request", req);
         		
         	} else {	           
-        		retVals[0] = "succeed-ready-to-next";
-        		retVals[1] = String.format("[%s][%s] 메시지 처리가 잘 수행하고 다음 작업을 수행합니다.", eqpId, SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getMessageId());
+        		
+        		retVals = new bwReturnValues().retVal1("succeed-ready-to-next", String.format("[%s][%s] 메시지 처리가 잘 수행하고 다음 작업을 수행합니다.", eqpId, SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getMessageId()));
         		
         		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setWorkerStatus("ready");
         		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setMsgProcStage("ready");
         		SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).setMessageId("wait-new-event-msg");
         	}
         } else {
-           retVals[0] = "error-not-found-swworker";
-           retVals[0] =  String.format("[%s] 장비를 찾을 수 없습니다. 확인이 필요합니다.", eqpId);
+        	
+           retVals = new bwReturnValues().retVal1("error-not-found-swworker", String.format("[%s][%s] 메시지 처리가 잘 수행하고 다음 작업을 수행합니다.", eqpId, appNodeName));
         }
 		
 		logger.log(Level.INFO,String.format("[%s][%s] 다음 처리를 위하여 준비합니다. ReadyToNext: [다음 작업: %s]", eqpId, procInstanceId, retVals[1]));		
@@ -673,7 +820,7 @@ public class BaseProxy {
 	}
 	
 	public String[] checkMsgFromSO(String eqpId, String appNodeName, String applicationName, String procInstanceId) {		
-    	String[] retVals = {"",""};
+    	String[] retVals =null;
     	
 		/*
 		 * 1. SWWorkerInfo 상태 체크: 
@@ -682,23 +829,12 @@ public class BaseProxy {
 		 */
         if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId) == null) {
            
-           retVals[0] = "error-not-found-swworker";
-           retVals[1] = String.format("[%s] 장비의 SWWorkerInfo 정보가 없습니다. 체크 알람 메시지 생성 필요", eqpId);
+           retVals = new bwReturnValues().retVal1("error-not-found-swworker", String.format("[%s] 장비의 SWWorkerInfo 정보가 없습니다. 체크 알람 메시지 생성 필요", eqpId));
            
         } else if(SWWorkerInfoManager.getInstance().getSWWorkerInfo(eqpId).getSORequest().equalsIgnoreCase("stop-request")) {
         
-        
-            StringBuffer sb = new StringBuffer(100);		
-	    	sb.append("{");
-		    sb.append(String.format("\"command\":\"%s\",","release-swworker"));
-    		sb.append(String.format("\"parameter\":\"%s\",",appNodeName));
-    		sb.append(String.format("\"parameter2\":\"%s\",",applicationName));
-	    	sb.append(String.format("\"parameter3\":\"%s\",",procInstanceId));
-		    sb.append(String.format("\"parameter4\":\"%s\"", eqpId));
-    		sb.append("}");
-    		
-    		retVals[0] = "succeed-release-worker";
-    		retVals[1] = sb.toString();
+    		String req = new SORequestCommand().make("release-swworker", eqpId, appNodeName, applicationName, procInstanceId);
+    		retVals = new bwReturnValues().retVal1("succeed-release-worker", req);
         
         } else {
         
@@ -706,27 +842,52 @@ public class BaseProxy {
         }
 		
 		logger.log(Level.INFO,String.format("[%s][%s] checkMsgFromSO 후 작업을 마무리 하겠습니다.", eqpId, procInstanceId));
-		
 		return retVals;
 	}
-	
-	
 	
 	/*
  	* Activate Startup 관련 메시지
  	*/
-	public String onStartUpEvent(String appNodeName, String applicationName, String procInstanceId ) {
+	public String[] onStartUpEvent(String appNodeName, String applicationName, String procInstanceId ) {
 		String retVal = String.format("[%s][%s][%s] 초기화 작업을 수행해야 합니다.", appNodeName, applicationName, procInstanceId);
-		LogManager.getInstance().initialize(appNodeName);		
-//		logger.addHandler(LogManager.getInstance().getKafkaHandler(appNodeName,applicationName, ""));
-		logger.log(Level.INFO, "test logger in BaseProxy");
+		/*
+		 * 로그 초기화를 수행합니다. - 카프카 핸들러를 기본으로 합니다. - EMS를 로깅서버로 사용합니다.
+		 */
 		logger.log(Level.INFO, retVal);
-		return retVal;
+		return new bwReturnValues().retVal1("succeed-initialize-in-startup", retVal);
 	}
 	
-	public String onShutdownEvent(String appName, String engineName, String procInstanceId ) {
-		String retVal = String.format("[%s][%s][%s] 종료전 정리 작업을 수행해야 합니다.", appName, engineName, procInstanceId);
+	public String[] initLogServerInfo(String appNodeName, String applicationName, String emsLogServerUrl, String emsLogTopicName) {
+		/*
+		 * LogManager EMS 서버 설정 방법 = 가장 먼저해야 하는 설정 작업
+		 * LogManager.getInstance().initializeEMSHandler(applicationName, "tcp://192.168.232.142:7222", "topic.neesp.log");
+		 */
+		String retVal = String.format("[%s][%s][%s][%s] LogManager 초기화 작업이 완료하였습니다..", appNodeName, applicationName, emsLogServerUrl, emsLogTopicName);
+		System.err.printf("/// 1. [%s][%s] 초기화 작업을 수행합니다.\n", emsLogServerUrl, emsLogTopicName);
+		LogManager.getInstance().initializeEMSHandler(applicationName, emsLogServerUrl, emsLogTopicName);
+		System.err.printf("/// 2. [%s][%s] EMS 서버 연결 작업이 완료되었습니다.\n", emsLogServerUrl, emsLogTopicName);
+		logger.addHandler(LogManager.getInstance().getEmsLogHandler());
 		logger.log(Level.INFO, retVal);
+		
+		return new bwReturnValues().retVal1("succeed-initialize-logver", retVal);
+	}
+	
+	public String onShutdownEvent(String appNodeName, String applicationName, String procInstanceId ) {
+		String retVal = String.format("[%s][%s][%s] 종료전 정리 작업을 수행해야 합니다.", appNodeName, applicationName, procInstanceId);
+		logger.log(Level.INFO, retVal);
+		
+		/*
+		 * application 종료 작업을 수행한다. 
+		 * - 제일 마지막으로 LogManager Instance에 있는 핸들러들을 정리한다.
+		 */
+		
+		/*
+		 * 반드시 삭제해준다.
+		 * To-Do shutdown process - 로그 관련 외부 통신 채널을 모두 정리한다.
+		 * BaseProxy 관련 로그의 kafka Handler를 정리합니다.		
+		 */
+		logger.removeHandler(LogManager.getInstance().getEmsLogHandler());
+		LogManager.getInstance().deinitliaze();
 		return retVal;
 	}
 	
@@ -740,18 +901,15 @@ public class BaseProxy {
 		return String.format("[%d][%s] 장비 메시지를 전달하였습니다.", EQPseqno, "createEQPEvent");
 	}
 	
-
-	
 	public String sayHello(String eqpID, String message) {		
 		String OS = System.getProperty("os.name");
 		String val = String.format("[%s][%s]test messageg 로그가 어떻게 남는지 확인이 필요하다. ",OS, eqpID);
 		logger.log(Level.INFO, val);
 		
-		//Thread.currentThread().setContextClassLoader(LoadDynamic.class.getClassLoader());						
+		// Thread.currentThread().setContextClassLoader(LoadDynamic.class.getClassLoader());						
 		// bedb.registerDataSource("oracle", "oracle", "edward", "system", "tkfkd1104", "jdbc:oracle:thin:@192.168.0.20:1521/XEPDB1",  null, 50);	
 		return val;
 	}
-
 }
 
 

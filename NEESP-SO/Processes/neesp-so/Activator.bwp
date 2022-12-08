@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpws:process exitOnStandardFault="no" name="narf-so.Activator"
+<bpws:process exitOnStandardFault="no" name="neesp-so.Activator"
     suppressJoinFailure="yes"
-    targetNamespace="http://xmlns.example.com/20221022164405"
+    targetNamespace="http://xmlns.example.com/20221208103208"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:info="http://www.tibco.com/bw/process/info"
     xmlns:ns="http://xmlns.example.com/20221022164405PLT"
@@ -9,6 +9,9 @@
     xmlns:ns1="http://tibco.com/bw/bw6/system/ModuleActivator"
     xmlns:ns10="www.tibco.com/plugin/java/JavaInvokeActivityOutput+2918a56f-e8a5-4a38-91b8-055ee87b9336+JavaInvokeActivityOutput"
     xmlns:ns11="http://tns.tibco.com/bw/palette/internal/activityerror+2918a56f-e8a5-4a38-91b8-055ee87b9336"
+    xmlns:ns12="www.tibco.com/plugin/java/JavaInvokeActivityInput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityInput"
+    xmlns:ns13="www.tibco.com/plugin/java/JavaInvokeActivityOutput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityOutput"
+    xmlns:ns14="http://tns.tibco.com/bw/palette/internal/activityerror+1c93805e-e62a-4a06-9a5f-7678c03d614f"
     xmlns:ns2="http://www.tibco.com/pe/WriteToLogActivitySchema"
     xmlns:ns3="www.tibco.com/plugin/java/JavaInvokeActivityInput+1b0fe720-7f13-42a7-a191-2b5fa8e09bcc+JavaInvokeActivityInput"
     xmlns:ns4="www.tibco.com/plugin/java/JavaInvokeActivityOutput+1b0fe720-7f13-42a7-a191-2b5fa8e09bcc+JavaInvokeActivityOutput"
@@ -21,30 +24,6 @@
     xmlns:sca-bpel="http://docs.oasis-open.org/ns/opencsa/sca-bpel/200801"
     xmlns:tibex="http://www.tibco.com/bpel/2007/extensions"
     xmlns:tibprop="http://ns.tibco.com/bw/property" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <tibex:VariableDescriptor type="MemorySaving">
-        <task name="onStartUpLog">
-            <endingVariables>
-                <variable>onStartUpLog-input</variable>
-            </endingVariables>
-        </task>
-        <task name="callStartUp">
-            <endingVariables>
-                <variable>callStartUp-input</variable>
-                <variable>callStartUp</variable>
-            </endingVariables>
-        </task>
-        <task name="onShutdow">
-            <endingVariables>
-                <variable>onShutdow-input</variable>
-            </endingVariables>
-        </task>
-        <task name="callShutdown">
-            <endingVariables>
-                <variable>callShutdown-input</variable>
-                <variable>callShutdown</variable>
-            </endingVariables>
-        </task>
-    </tibex:VariableDescriptor>
     <tibex:Types>
         <xs:schema attributeFormDefault="unqualified"
             elementFormDefault="qualified"
@@ -313,9 +292,9 @@
             <complexType name="MutTypeMethodParameters">
                 <sequence>
                     <element form="unqualified" maxOccurs="1"
-                        minOccurs="1" name="appName" type="string"/>
+                        minOccurs="1" name="appNodeName" type="string"/>
                     <element form="unqualified" maxOccurs="1"
-                        minOccurs="1" name="engineName" type="string"/>
+                        minOccurs="1" name="applicationName" type="string"/>
                     <element form="unqualified" maxOccurs="1"
                         minOccurs="1" name="procInstanceId" type="string"/>
                 </sequence>
@@ -335,7 +314,7 @@
             <element name="JavaInvokeActivityOutput" type="tns:MutTypeMethodOutputRoot"/>
             <complexType name="MutTypeMethodOutputRoot">
                 <sequence>
-                    <element form="unqualified" maxOccurs="1"
+                    <element form="unqualified" maxOccurs="unbounded"
                         minOccurs="0" name="MethodReturnValue" type="string"/>
                 </sequence>
             </complexType>
@@ -344,6 +323,54 @@
             targetNamespace="http://tns.tibco.com/bw/palette/internal/activityerror+2918a56f-e8a5-4a38-91b8-055ee87b9336"
             xmlns="http://www.w3.org/2001/XMLSchema"
             xmlns:Q1="http://www.example.org/JavaExceptions" xmlns:tns="http://tns.tibco.com/bw/palette/internal/activityerror+2918a56f-e8a5-4a38-91b8-055ee87b9336">
+            <import namespace="http://www.example.org/JavaExceptions"/>
+            <element name="ActivityErrorData" type="tns:ActivityErrorDataType"/>
+            <complexType name="ActivityErrorDataType">
+                <choice>
+                    <element maxOccurs="1" minOccurs="0" ref="Q1:InvocationException"/>
+                </choice>
+            </complexType>
+        </schema>
+        <schema attributeFormDefault="unqualified"
+            elementFormDefault="qualified"
+            targetNamespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityInput"
+            xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="www.tibco.com/plugin/java/JavaInvokeActivityInput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityInput">
+            <complexType name="MutTypeMethodParameters">
+                <sequence>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="appNodeName" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="applicationName" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="emsLogServerUrl" type="string"/>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="emsLogTopicName" type="string"/>
+                </sequence>
+            </complexType>
+            <element name="JavaInvokeActivityInput" type="tns:MutTypeMethodInputRoot"/>
+            <complexType name="MutTypeMethodInputRoot">
+                <sequence>
+                    <element form="unqualified" maxOccurs="1"
+                        minOccurs="1" name="MethodParameters" type="tns:MutTypeMethodParameters"/>
+                </sequence>
+            </complexType>
+        </schema>
+        <schema attributeFormDefault="unqualified"
+            elementFormDefault="qualified"
+            targetNamespace="www.tibco.com/plugin/java/JavaInvokeActivityOutput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityOutput"
+            xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="www.tibco.com/plugin/java/JavaInvokeActivityOutput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityOutput">
+            <element name="JavaInvokeActivityOutput" type="tns:MutTypeMethodOutputRoot"/>
+            <complexType name="MutTypeMethodOutputRoot">
+                <sequence>
+                    <element form="unqualified" maxOccurs="unbounded"
+                        minOccurs="0" name="MethodReturnValue" type="string"/>
+                </sequence>
+            </complexType>
+        </schema>
+        <schema elementFormDefault="unqualified"
+            targetNamespace="http://tns.tibco.com/bw/palette/internal/activityerror+1c93805e-e62a-4a06-9a5f-7678c03d614f"
+            xmlns="http://www.w3.org/2001/XMLSchema"
+            xmlns:Q1="http://www.example.org/JavaExceptions" xmlns:tns="http://tns.tibco.com/bw/palette/internal/activityerror+1c93805e-e62a-4a06-9a5f-7678c03d614f">
             <import namespace="http://www.example.org/JavaExceptions"/>
             <element name="ActivityErrorData" type="tns:ActivityErrorDataType"/>
             <complexType name="ActivityErrorDataType">
@@ -638,7 +665,117 @@
                                     <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@activities.3"/>
 
                                     <layoutConstraint
-                                    x="159"
+                                    x="268"
+                                    xsi:type="notation:Bounds" y="43"/>
+                                    </children>
+
+                                    <children type="4002">
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <styles
+                                    backgroundColor="16777215"
+                                    gradientEndColor="50431"
+                                    gradientStartColor="16777215" xsi:type="bwnotation:BackgroundStyle"/>
+
+                                    <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@activities.4"/>
+
+                                    <layoutConstraint
+                                    x="402"
+                                    xsi:type="notation:Bounds" y="43"/>
+                                    </children>
+
+                                    <children type="4002 bw.java.javamethod">
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <children type="4017">
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <layoutConstraint xsi:type="notation:Bounds"/>
+                                    </children>
+
+                                    <styles
+                                    fontName="맑은 고딕"
+                                    lineColor="0" xsi:type="notation:ShapeStyle"/>
+
+                                    <styles
+                                    backgroundColor="16777215"
+                                    gradientEndColor="50431"
+                                    gradientStartColor="16777215" xsi:type="bwnotation:BackgroundStyle"/>
+
+                                    <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@activities.5"/>
+
+                                    <layoutConstraint
+                                    height="40"
+                                    width="40"
+                                    x="112"
                                     xsi:type="notation:Bounds" y="43"/>
                                     </children>
 
@@ -665,8 +802,8 @@
                                     <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity"/>
 
                                     <layoutConstraint
-                                    height="131"
-                                    width="437" xsi:type="notation:Bounds"/>
+                                    height="187"
+                                    width="763" xsi:type="notation:Bounds"/>
                                     </children>
 
                                     <styles xsi:type="notation:SortingStyle"/>
@@ -1136,13 +1273,35 @@
         </edges>
         <edges
             source="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0"
-            target="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.1" type="4006">
+            target="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.3" type="4006">
             <children type="6002">
                 <layoutConstraint xsi:type="notation:Location" y="40"/>
             </children>
             <styles lineColor="0" xsi:type="notation:ConnectorStyle"/>
             <styles fontName="맑은 고딕" xsi:type="notation:FontStyle"/>
             <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@links/@children.0"/>
+            <bendpoints points="[0, 0, 0, 0]$[0, 0, 0, 0]" xsi:type="notation:RelativeBendpoints"/>
+        </edges>
+        <edges
+            source="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.1"
+            target="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2" type="4006">
+            <children type="6002">
+                <layoutConstraint xsi:type="notation:Location" y="40"/>
+            </children>
+            <styles lineColor="0" xsi:type="notation:ConnectorStyle"/>
+            <styles fontName="맑은 고딕" xsi:type="notation:FontStyle"/>
+            <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@links/@children.1"/>
+            <bendpoints points="[0, 0, 0, 0]$[0, 0, 0, 0]" xsi:type="notation:RelativeBendpoints"/>
+        </edges>
+        <edges
+            source="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.3"
+            target="//@children.0/@children.4/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.2/@children.0/@children.1/@children.0/@children.0/@children.0/@children.0/@children.0/@children.0/@children.1" type="4006">
+            <children type="6002">
+                <layoutConstraint xsi:type="notation:Location" y="40"/>
+            </children>
+            <styles lineColor="0" xsi:type="notation:ConnectorStyle"/>
+            <styles fontName="맑은 고딕" xsi:type="notation:FontStyle"/>
+            <element href="//0/@process/@activity/@activity/@activities.0/@messages.0/@activity/@activity/@links/@children.2"/>
             <bendpoints points="[0, 0, 0, 0]$[0, 0, 0, 0]" xsi:type="notation:RelativeBendpoints"/>
         </edges>
     </notation:Diagram>
@@ -1155,6 +1314,10 @@
             namespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+1b0fe720-7f13-42a7-a191-2b5fa8e09bcc+JavaInvokeActivityInput" prefix="tns2"/>
         <tibex:namespaceItem
             namespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+2918a56f-e8a5-4a38-91b8-055ee87b9336+JavaInvokeActivityInput" prefix="tns3"/>
+        <tibex:namespaceItem
+            namespace="http://www.tibco.com/bw/xpath/bw-custom-functions" prefix="bw"/>
+        <tibex:namespaceItem
+            namespace="www.tibco.com/plugin/java/JavaInvokeActivityInput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityInput" prefix="tns4"/>
     </tibex:NamespaceRegistry>
     <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" namespace="http://tibco.com/bw/bw6/system/ModuleActivator"/>
     <bpws:partnerLinks>
@@ -1193,6 +1356,14 @@
             name="callStartUp" sca-bpel:internal="true"/>
         <bpws:variable element="ns11:ActivityErrorData"
             name="_error_callStartUp" sca-bpel:internal="true"/>
+        <bpws:variable element="ns2:ActivityInput"
+            name="StartUpEndLog-input" sca-bpel:internal="true"/>
+        <bpws:variable element="ns12:JavaInvokeActivityInput"
+            name="InitiEmsLogServer-input" sca-bpel:internal="true"/>
+        <bpws:variable element="ns13:JavaInvokeActivityOutput"
+            name="InitiEmsLogServer" sca-bpel:internal="true"/>
+        <bpws:variable element="ns14:ActivityErrorData"
+            name="_error_InitiEmsLogServer" sca-bpel:internal="true"/>
     </bpws:variables>
     <bpws:extensions>
         <bpws:extension mustUnderstand="no" namespace="http://www.eclipse.org/gmf/runtime/1.0.2/notation"/>
@@ -1215,6 +1386,9 @@
                             <bpws:links>
                                 <bpws:link
                                     name="onStartUpLogToJavaInvoke" tibex:linkType="SUCCESS"/>
+                                <bpws:link name="callStartUpToLog" tibex:linkType="SUCCESS"/>
+                                <bpws:link
+                                    name="JavaInvokeTocallStartUp" tibex:linkType="SUCCESS"/>
                             </bpws:links>
                             <bpws:empty name="OnMessageStart"
                                 tibex:constructor="onMessageStart" tibex:xpdlId="ddfd93fe-5640-4f5c-9ba8-57c781013680"/>
@@ -1260,11 +1434,14 @@
                                     outputVariable="callStartUp"
                                     tibex:xpdlId="2918a56f-e8a5-4a38-91b8-055ee87b9336" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
                                     <bpws:targets>
-                                    <bpws:target linkName="onStartUpLogToJavaInvoke"/>
+                                    <bpws:target linkName="JavaInvokeTocallStartUp"/>
                                     </bpws:targets>
+                                    <bpws:sources>
+                                    <bpws:source linkName="callStartUpToLog"/>
+                                    </bpws:sources>
                                     <tibex:inputBindings>
                                     <tibex:inputBinding
-                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+2918a56f-e8a5-4a38-91b8-055ee87b9336+JavaInvokeActivityInput&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;_processContext&quot;/>&lt;xsl:template name=&quot;callStartUp-input&quot; match=&quot;/&quot;>&lt;tns3:JavaInvokeActivityInput>&lt;MethodParameters>&lt;appName>&lt;xsl:value-of select=&quot;$_processContext/ApplicationName&quot;/>&lt;/appName>&lt;engineName>&lt;xsl:value-of select=&quot;$_processContext/EngineName&quot;/>&lt;/engineName>&lt;procInstanceId>&lt;xsl:value-of select=&quot;$_processContext/ProcessInstanceId&quot;/>&lt;/procInstanceId>&lt;/MethodParameters>&lt;/tns3:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns3=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+2918a56f-e8a5-4a38-91b8-055ee87b9336+JavaInvokeActivityInput&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;_processContext&quot;/>&lt;xsl:template name=&quot;callStartUp-input&quot; match=&quot;/&quot;>&lt;tns3:JavaInvokeActivityInput>&lt;MethodParameters>&lt;appNodeName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&lt;/appNodeName>&lt;applicationName>&lt;xsl:value-of select=&quot;$_processContext/ApplicationName&quot;/>&lt;/applicationName>&lt;procInstanceId>&lt;xsl:value-of select=&quot;$_processContext/ProcessInstanceId&quot;/>&lt;/procInstanceId>&lt;/MethodParameters>&lt;/tns3:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
                                     </tibex:inputBindings>
                                     <tibex:config>
                                     <bwext:BWActivity
@@ -1282,13 +1459,94 @@
                                     isNewActivity="true"
                                     javaGlobalInstance="JavaGlobalInstanceProperty"
                                     methodName="onStartUpEvent"
-                                    methodReturn="string" xsi:type="java:JavaMethod">
+                                    methodReturn="String[]" xsi:type="java:JavaMethod">
                                     <methodParameter
-                                    paramName="appName" paramType="string"/>
+                                    paramName="appNodeName" paramType="string"/>
                                     <methodParameter
-                                    paramName="engineName" paramType="string"/>
+                                    paramName="applicationName" paramType="string"/>
                                     <methodParameter
                                     paramName="procInstanceId" paramType="string"/>
+                                    </value>
+                                    </properties>
+                                    </activityConfig>
+                                    </bwext:BWActivity>
+                                    </tibex:config>
+                                </tibex:activityExtension>
+                            </bpws:extensionActivity>
+                            <bpws:extensionActivity>
+                                <tibex:activityExtension
+                                    inputVariable="StartUpEndLog-input"
+                                    name="StartUpEndLog"
+                                    tibex:xpdlId="bdec577a-1c1b-4b97-9a0a-8137df638364" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
+                                    <bpws:targets>
+                                    <bpws:target linkName="callStartUpToLog"/>
+                                    </bpws:targets>
+                                    <tibex:inputBindings>
+                                    <tibex:inputBinding
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns1=&quot;http://www.tibco.com/pe/WriteToLogActivitySchema&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;callStartUp&quot;/>&lt;xsl:template name=&quot;StartUpEndLog-input&quot; match=&quot;/&quot;>&lt;tns1:ActivityInput>&lt;message>&lt;xsl:value-of select=&quot;$callStartUp/MethodReturnValue[2]&quot;/>&lt;/message>&lt;/tns1:ActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    </tibex:inputBindings>
+                                    <tibex:config>
+                                    <bwext:BWActivity
+                                    activityTypeID="bw.generalactivities.log"
+                                    version="6.0.0.001"
+                                    xmlns:activityconfig="http://tns.tibco.com/bw/model/activityconfig"
+                                    xmlns:bwext="http://tns.tibco.com/bw/model/core/bwext"
+                                    xmlns:generalactivities="http://ns.tibco.com/bw/palette/generalactivities" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <activityConfig>
+                                    <properties
+                                    name="config" xsi:type="activityconfig:EMFProperty">
+                                    <type href="http://ns.tibco.com/bw/palette/generalactivities#//Log"/>
+                                    <value
+                                    controlBy="Application"
+                                    role="Info"
+                                    suppressJobInfo="true" xsi:type="generalactivities:Log"/>
+                                    </properties>
+                                    </activityConfig>
+                                    </bwext:BWActivity>
+                                    </tibex:config>
+                                </tibex:activityExtension>
+                            </bpws:extensionActivity>
+                            <bpws:extensionActivity>
+                                <tibex:activityExtension
+                                    inputVariable="InitiEmsLogServer-input"
+                                    name="InitiEmsLogServer"
+                                    outputVariable="InitiEmsLogServer"
+                                    tibex:xpdlId="1c93805e-e62a-4a06-9a5f-7678c03d614f" xmlns:tibex="http://www.tibco.com/bpel/2007/extensions">
+                                    <bpws:targets>
+                                    <bpws:target linkName="onStartUpLogToJavaInvoke"/>
+                                    </bpws:targets>
+                                    <bpws:sources>
+                                    <bpws:source linkName="JavaInvokeTocallStartUp"/>
+                                    </bpws:sources>
+                                    <tibex:inputBindings>
+                                    <tibex:inputBinding
+                                    expression="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xa;&lt;xsl:stylesheet xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:tns4=&quot;www.tibco.com/plugin/java/JavaInvokeActivityInput+1c93805e-e62a-4a06-9a5f-7678c03d614f+JavaInvokeActivityInput&quot; xmlns:bw=&quot;http://www.tibco.com/bw/xpath/bw-custom-functions&quot; version=&quot;2.0&quot;>&lt;xsl:param name=&quot;_processContext&quot;/>&lt;xsl:template name=&quot;InitiEmsLogServer-input&quot; match=&quot;/&quot;>&lt;tns4:JavaInvokeActivityInput>&lt;MethodParameters>&lt;appNodeName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;BW.APPNODE.NAME&amp;quot;)&quot;/>&lt;/appNodeName>&lt;applicationName>&lt;xsl:value-of select=&quot;$_processContext/ApplicationName&quot;/>&lt;/applicationName>&lt;emsLogServerUrl>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;//NEESP-SOFrame//SERVER_URL_EMS&amp;quot;)&quot;/>&lt;/emsLogServerUrl>&lt;emsLogTopicName>&lt;xsl:value-of select=&quot;bw:getModuleProperty(&amp;quot;//NEESP-SOFrame//TOPIC_NAME&amp;quot;)&quot;/>&lt;/emsLogTopicName>&lt;/MethodParameters>&lt;/tns4:JavaInvokeActivityInput>&lt;/xsl:template>&lt;/xsl:stylesheet>" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xslt1.0"/>
+                                    </tibex:inputBindings>
+                                    <tibex:config>
+                                    <bwext:BWActivity
+                                    activityTypeID="bw.java.javamethod"
+                                    xmlns:activityconfig="http://tns.tibco.com/bw/model/activityconfig"
+                                    xmlns:bwext="http://tns.tibco.com/bw/model/core/bwext"
+                                    xmlns:java="http://ns.tibco.com/bw/palette/java" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <activityConfig>
+                                    <properties
+                                    name="config" xsi:type="activityconfig:EMFProperty">
+                                    <type href="http://ns.tibco.com/bw/palette/java#//JavaMethod"/>
+                                    <value
+                                    className="com.skhynix.neesp.BaseProxy"
+                                    isNew="true"
+                                    isNewActivity="true"
+                                    javaGlobalInstance="JavaGlobalInstanceProperty"
+                                    methodName="initLogServerInfo"
+                                    methodReturn="String[]" xsi:type="java:JavaMethod">
+                                    <methodParameter
+                                    paramName="appNodeName" paramType="string"/>
+                                    <methodParameter
+                                    paramName="applicationName" paramType="string"/>
+                                    <methodParameter
+                                    paramName="emsLogServerUrl" paramType="string"/>
+                                    <methodParameter
+                                    paramName="emsLogTopicName" paramType="string"/>
                                     </value>
                                     </properties>
                                     </activityConfig>

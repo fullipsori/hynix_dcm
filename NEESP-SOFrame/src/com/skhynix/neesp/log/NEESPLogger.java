@@ -1,5 +1,6 @@
 package com.skhynix.neesp.log;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,24 +24,24 @@ public class NEESPLogger {
 	
 	private boolean trxOnOff = true;
 	private boolean sysOnOff = true;	
-	private boolean rtOnOff = true;	// 로그시 바로 전송할지 LogManager의 큐에 넣어서 비동기 방식으로로 보낼 것인지 결정한다. - 디폴트 값: 실시간 	 
+	private boolean rtOnOff = true;	// Default가 모아서 보낸다.: 로그시 바로 전송할지 LogManager의 큐에 넣어서 비동기 방식으로로 보낼 것인지 결정한다. - 디폴트 값: 실시간 	 
 	
 	private long sysStartTime = 0;
 	private long sysLastUpdateTime = 0;
 	private long sysTotalElapsedTime = 0;
 	private String commonLogHeader = "";
 	
+	private ConcurrentLinkedQueue<String> asyncTrxLogQueue = new ConcurrentLinkedQueue();
 	
-	public NEESPLogger (String eqpId, String swnodeId, Logger sysLogger) {
-		System.out.printf("/// NEESPLogger: [%s][%s]\n", eqpId, swnodeId);
+	public NEESPLogger (String eqpId, String swnodeId, Logger sysLogger) {		
 		this.eqpId = eqpId;
 		this.swnodeId = swnodeId;		
 		this.sysLogger = sysLogger;		
 		this.sysStartTime = System.currentTimeMillis();
 		this.sysLastUpdateTime = this.sysStartTime;		
-		this.commonLogHeader = String.format("[%s][%s]", swnodeId, eqpId);
+		this.commonLogHeader = String.format("%s|%s", swnodeId, eqpId);
 		// 장비명을 가지고 만들어준다.
-		eqpLogger = Logger.getLogger(eqpId);
+		eqpLogger = Logger.getLogger(eqpId);		
 	}
 	
 	public boolean isTrxlogOn () { return trxOnOff; }
@@ -74,7 +75,7 @@ public class NEESPLogger {
 		if(this.eqpId.equalsIgnoreCase(eqpId)) {
 			this.eqpId = eqpId;
 			this.swnodeId = swnodeId;
-			this.commonLogHeader = String.format("[%s][%s]", swnodeId, eqpId);
+			this.commonLogHeader = String.format("%s|%s", swnodeId, eqpId); // reset 해준다.
 			retVals[0]= "succeed-set-basic-info";
 			retVals[1]= "기본값을 정상적으로 설정하였습니다." + commonLogHeader;
 		} else {
@@ -86,8 +87,20 @@ public class NEESPLogger {
 	}
 	
 	public void setHandler(Handler newHandler) {
-		if(this.eqpLogHandler!=null) this.eqpLogHandler.close();
+		if(this.eqpLogHandler!=null) {
+			this.eqpLogHandler.close();
+		}
 		this.eqpLogHandler = newHandler;
+		eqpLogger.addHandler(newHandler);
+	}
+	
+	public void removeHandler() {
+		if(eqpLogHandler != null) {
+			eqpLogHandler.close();
+			this.eqpLogger.removeHandler(eqpLogHandler);
+		} else { 
+			sysLogger.log(Level.INFO,"Handler 값이 0입니다.를 제거하는데 실패하였습니다.");
+		}
 	}
 	
 	public long calcTrxlogElapsed () {
@@ -110,9 +123,10 @@ public class NEESPLogger {
 	 * EvenType: TCE, ACE, RCE, ECE 등 실제 이벤트 유형
 	 */
 	public void setTransactionId(String eventType, String gtxnId, String extnId, String messageId) {
+		String eqpInfo = String.format("|%s|%s|%s|%s|%s|%s","FAB1","ZONE1","AREA1","PHOTO","LOT_START","TCE");
 		this.gtxnId = gtxnId;
 		this.messageId = messageId;
-		this.trxId = String.format("[%s|%s|%s|%s]", eventType, gtxnId, extnId, messageId);
+		this.trxId = String.format("%s|%s|%s|%s|%s", eventType, gtxnId, extnId, messageId, eqpInfo);
 	}
 	
 	/* 
@@ -128,82 +142,124 @@ public class NEESPLogger {
 	 * 예: [sw-node-1][EQP1][1][TCE][마스터 데이터 정보 조회][2][10] 
 	 *    
 	 */
-	public void logTrxStart(String log, String eventType, String gtxnId, String extnId, String messageId) {
-		
-		this.trxId = String.format("[%s|%s|%s|%s]", eventType, gtxnId, extnId, messageId);		
+	public void logTrxStart(String log, String eventType, String gtxnId, String extnId, String messageId, String jobType) {		
+		// 로그 기반 이벤트 분석에 필요한 기본적인 데이터
+		// FAB ID, ZONE ID, AREA ID, 장비 유형, 이벤트 종류, 작업 종류
+		String eqpInfo = String.format("%s|%s|%s|%s|%s|%s","FAB1","ZONE1","AREA1","PHOTO","LOT_START","TCE");
+		this.trxId = String.format("%s|%s|%s|%s|%s", eventType, gtxnId, extnId, messageId, eqpInfo);		
 		this.trxSeq=1;
 		this.trxTotalElapsedTime = 0;
-		String logMessage = String.format("%s[START]][%s][%d][%s][%d][%d]", commonLogHeader, trxId, trxSeq++, log, 0, trxTotalElapsedTime);		
+		String logMessage = String.format("%s|START|%s|%d|%d|%d|%s|TRX|%s", commonLogHeader, trxId, trxSeq++, 0, trxTotalElapsedTime, jobType, log);		
 		this.trxStartTime = System.currentTimeMillis();
 		this.trxLastUpdateTime = System.currentTimeMillis();
 		
 		if(trxOnOff) {
-			if(rtOnOff) eqpLogger.log(Level.INFO, logMessage);
-			else LogManager.getInstance().addLog(log);
-		}		
+			if(rtOnOff) sycnSendTrxLog(logMessage);
+			else asyncTrxLogQueue.add(logGeneratedTime(logMessage));
+			
+		} else System.out.println(logMessage);
 		System.out.println(logMessage);
 	}
 	
 	/*
 	 * 모든 값이 설정된 것을 기준으로 
 	 */
-	public void logTrxStart(String log ) {
+	public void logTrxStart(String log, String jobType) {
 		
 		this.trxSeq=1;
 		this.trxTotalElapsedTime = 0;
-		String logMessage = String.format("%s[START][%s][%d][%s][%d][%d]", commonLogHeader, trxId, trxSeq++, log, 0, trxTotalElapsedTime);		
+		String logMessage = String.format("%s|START|%s|%d|%d|%d|%s|TRX|%s", commonLogHeader, trxId, trxSeq++, 0, trxTotalElapsedTime, jobType, log);		
 		this.trxStartTime = System.currentTimeMillis();
 		this.trxLastUpdateTime = System.currentTimeMillis();
 		
 		if(trxOnOff) {
-			if(rtOnOff) eqpLogger.log(Level.INFO, logMessage);
-			else LogManager.getInstance().addLog(log);
+			if(rtOnOff) sycnSendTrxLog(logMessage);
+			else asyncTrxLogQueue.add(logGeneratedTime(logMessage));
 		}
 		System.out.println(logMessage);
 	}
 	
-	public long logTrxProc(String log) {		
+	public long logTrxProc(String log, String jobType) {		
 		long trxStepElapsedTime = calcTrxlogElapsed();
-		String logMessage = String.format("%s[PROC][%s][%d][%s][%d][%d]", commonLogHeader, trxId, trxSeq++, log, trxStepElapsedTime, trxTotalElapsedTime);
+		String logMessage = String.format("%s|PROCESS|%s|%d|%d|%d|%s|TRX|%s", commonLogHeader, trxId, trxSeq++, trxStepElapsedTime, trxTotalElapsedTime, jobType, log);
 		
 		if(trxOnOff) {
-			if(rtOnOff) eqpLogger.log(Level.INFO, logMessage);
-			else LogManager.getInstance().addLog(log);
+			if(rtOnOff) sycnSendTrxLog(logMessage);
+			else asyncTrxLogQueue.add(logGeneratedTime(logMessage));
 		}
 		
-		System.out.println(logMessage);
-		
+		System.out.println(logMessage);		
 		// 이전 단계부터 소요된 시간을 돌려준다.
 		return trxStepElapsedTime;
 	}
 	
-	public long logTrxEnd(String log) {
+	public long logTrxEnd(String log, String jobType) {
 		long trxStepElapsedTime = calcTrxlogElapsed();
-		String logMessage = String.format("%s[END][%s][%d][%s][%d][%d]", commonLogHeader, trxId, trxSeq, log, trxStepElapsedTime, trxTotalElapsedTime);		
+		String logMessage = String.format("%s|END|%s|%d|%d|%d|%s|TRX|%s", commonLogHeader, trxId, trxSeq, trxStepElapsedTime, trxTotalElapsedTime, jobType, log);		
 		
 		if(trxOnOff) {
-			if(rtOnOff) eqpLogger.log(Level.INFO, logMessage);
-			else LogManager.getInstance().addLog(log);
+			if(rtOnOff) sycnSendTrxLog(logMessage);
+			else {
+				asyncTrxLogQueue.add(logGeneratedTime(logMessage));
+				batchSendTrxLog();
+			}
 		}
 		
+		System.out.println("//////////////////////////////////////////////////////////////////");	
 		System.out.println(logMessage);
+		System.out.println("//////////////////////////////////////////////////////////////////");
 		// 1개의 트랜잭션 총 소요 시간을 돌려준다.
 		return trxStepElapsedTime;
 	}
 	
+	public String logGeneratedTime(String logMessage) {
+		return String.format("%d|%d|%s", System.currentTimeMillis(), System.nanoTime(),logMessage);
+	}
+	
+	public void sycnSendTrxLog(String logMessage) {
+		StringBuffer sb = new StringBuffer(100);
+		sb.append("{ \"logmessages\": [");
+	   	sb.append(String.format("{\"message\":\"%s\"}", logGeneratedTime(logMessage)));
+		sb.append("]}");
+		
+		// JSON 메시지를 발송한다.
+		System.out.println(sb.toString());
+		eqpLogger.log(Level.INFO,sb.toString());
+	}
+	
+	public void batchSendTrxLog() {
+		String logMessage = "";
+		StringBuffer sb = new StringBuffer(100);
+		sb.append("{ \"logmessages\": [");
+		boolean isFirst=true;
+		while((logMessage=asyncTrxLogQueue.poll()) != null) {
+	   		System.out.println(logMessage);
+	   		if(isFirst) {
+	   			sb.append(String.format("{\"message\":\"%s\"}", logMessage));
+	   			isFirst = false;
+	   		} else 
+	   			sb.append(String.format(",{\"message\":\"%s\"}", logMessage));
+	   	}
+		sb.append("]}");
+		
+		// JSON 메시지를 발송한다.
+		System.out.println(sb.toString());
+		eqpLogger.log(Level.INFO,sb.toString());
+	}
+	
 	/*
 	 * system 프로세싱에서 발생하는 일반적인 로그 출력시 사용 LogManager 에서 설정한 전역 Logger 사용
+	 * 
 	 */
-	public long syslog(String log) {
+	public long syslog(String log, String jobType, String logType) {
 		long syslogStepElapsedTime = calcSyslogElapsed();		
-		String logMessage = String.format("%s[SYSLOG][%s][%d][%s][%d][%d]", commonLogHeader, trxId, trxSeq, log, syslogStepElapsedTime, sysTotalElapsedTime);
+		String logMessage = String.format("%s|SYSLOG|%s|%d|%d|%d|%s|%s|%s", commonLogHeader, trxId, trxSeq, syslogStepElapsedTime, sysTotalElapsedTime, jobType, logType, log);
 		
 		if(sysOnOff) {
-			if(rtOnOff) eqpLogger.log(Level.INFO, logMessage);
+			if(rtOnOff) eqpLogger.log(Level.INFO, logGeneratedTime(logMessage));
 			else LogManager.getInstance().addLog(log);
 		}
-		System.out.println(logMessage); 
-			
+		System.out.println(logMessage); 			
 		return syslogStepElapsedTime;
 	}
 	
