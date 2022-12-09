@@ -9,34 +9,26 @@ import com.skhynix.neesp.log.LogManager;
 public class BusinessManager extends BaseManager {
 	private static final BusinessManager instance = new BusinessManager();
 	private BusinessLogic businessLogic = BusinessLogic.getInstance();
-	private DynaClassManager dynaClassManager = DynaClassManager.getInstance();
 	private LogManager logManager = LogManager.getInstance();
 	
 	public static BusinessManager getInstance() {
 		return instance;
 	}
 	
-	public BusinessManager() {
-		setupObservable();
+	public BusinessManager() { }
+
+	@Override
+	public void addAction(Object instance) {
+		// TODO Auto-generated method stub
+		if(instance != null && BusinessBehavior.class.isInstance(instance)) {
+			businessLogic.setBusinessBehavior((BusinessBehavior)instance);
+		}
+		
 	}
-
-	public void setupObservable() {
-		dynaClassManager.loadJarSubject
-			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
-			.subscribe(jarInfo -> {
-				Object clazz = dynaClassManager.getClassInstance(jarInfo.getSecond());
-				if(clazz != null && BusinessBehavior.class.isInstance(clazz)) {
-					businessLogic.setBusinessBehavior((BusinessBehavior)clazz);
-					System.out.println("load jar:" + jarInfo.getSecond()); 
-				}
-			});
-
-		dynaClassManager.unloadJarSubject
-			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
-			.subscribe(jarInfo -> { 
-				businessLogic.setBusinessBehavior(null);
-				System.out.println("unload jar:" + jarInfo.getSecond()); 
-			});
+	@Override
+	public void removeAction(String className) {
+		// TODO Auto-generated method stub
+		businessLogic.setBusinessBehavior(null);
 	}
 
 	@Override

@@ -69,11 +69,11 @@ public class BaseProxy {
 			sessModel.role = (tokens[0].equalsIgnoreCase("OUTBOUND"))?  "sender" : "receiver"; 
 			// fullip : ip가 fix 되어서 들어온다. 
 			if(sessModel.role.equals("receiver")) {
-				// sessModel.serverUrl = tokens[3];
+//				sessModel.serverUrl = tokens[3];
 				sessModel.serverUrl = "localhost:7222";
 				sessModel.sessionMode = SESS_MODE.EXPLICIT_CLIENT.modeType;
 			}else {
-				// sessModel.serverUrl = tokens[3];
+//				sessModel.serverUrl = tokens[3];
 				sessModel.serverUrl = "localhost:7223";
 				sessModel.sessionMode = SESS_MODE.AUTO.modeType;
 			}

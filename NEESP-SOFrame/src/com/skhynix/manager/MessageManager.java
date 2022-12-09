@@ -21,26 +21,6 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	
 	public MessageManager() {
 		// TODO Auto-generated constructor stub
-		registerObserver();
-	}
-	
-	public void registerObserver() {
-		dynaClassManager.loadJarSubject
-			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
-			.subscribe(jarInfo -> {
-				Optional.ofNullable(dynaClassManager.getClassInstance(jarInfo.getSecond())).ifPresent(clazz -> {
-					register(jarInfo.getFirst(), clazz);
-					System.out.println("load jar:" + jarInfo.getSecond()); 
-				});
-			});
-
-		dynaClassManager.unloadJarSubject
-			.filter(jarInfo -> jarInfo.getFirst().startsWith(getDomain()))
-			.subscribe(jarInfo -> { 
-				unregister(jarInfo.getFirst());
-				System.out.println("unload jar:" + jarInfo.getSecond()); 
-			});
-		
 	}
 	
 	public static MessageManager getInstance() {
@@ -51,6 +31,16 @@ public class MessageManager extends BaseManager implements Messageable, SessionB
 	@Override
 	public String getDomain() {
 		return "message";
+	}
+	@Override
+	public void addAction(Object instance) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void removeAction(String className) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

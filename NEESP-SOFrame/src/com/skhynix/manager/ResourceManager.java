@@ -39,6 +39,17 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 		// TODO Auto-generated method stub
 		return "resource";
 	}
+	
+	@Override
+	public void addAction(Object instance) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void removeAction(String className) {
+		// TODO Auto-generated method stub
+		
+	}
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
 		// TODO Auto-generated method stub

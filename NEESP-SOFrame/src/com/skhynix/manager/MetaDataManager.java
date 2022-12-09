@@ -32,6 +32,17 @@ public class MetaDataManager extends BaseManager {
 		// TODO Auto-generated method stub
 		return "meta";
 	}
+	
+	@Override
+	public void addAction(Object instance) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void removeAction(String className) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public Joinable createMember(String jointype, String serverUrl) {
