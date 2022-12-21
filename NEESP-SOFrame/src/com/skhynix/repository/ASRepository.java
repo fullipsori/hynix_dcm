@@ -9,13 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
-
-import javax.naming.OperationNotSupportedException;
 
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
@@ -293,32 +291,14 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	}
 
 	@Override
-	public boolean create(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
-		// TODO Auto-generated method stub
-
-		Object client = sessionMap.get(handle);
-		if(client != null && ASSessModel.class.isInstance(client)) {
-			ASSessModel asSessModel = (ASSessModel) client;
-			if(asSessModel.session != null) {
-				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return false;
-	}
-	
-	@Override
-	public boolean create(String handle, String table, Object dtoObject) {
+	public boolean create(String handle, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client != null && ASSessModel.class.isInstance(client)) {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.PUT, null, dtoObject);
+					return (Boolean)runCommand(asSessModel, tableName, OPERATION.PUT, null, dtoObject);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -328,31 +308,14 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	}
 
 	@Override
-	public Object retrieve(String handle, String table, Pair<String,? extends Object> key) {
+	public boolean retrieve(String handle, String tableName, Map<String, String> keyValue, Object dtoObject) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client != null && ASSessModel.class.isInstance(client)) {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return runCommand(asSessModel, table, OPERATION.GET, key.getFirst(), key.getSecond(), null, null);
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return null;
-	}
-	
-	@Override
-	public boolean retrieve(String handle, String table, Pair<String, String> key, Object dtoObject) {
-		// TODO Auto-generated method stub
-		Object client = sessionMap.get(handle);
-		if(client != null && ASSessModel.class.isInstance(client)) {
-			ASSessModel asSessModel = (ASSessModel) client;
-			if(asSessModel.session != null) {
-				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.GET, key, dtoObject);
+					return (Boolean)runCommand(asSessModel, tableName, OPERATION.GET, keyValue, dtoObject);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -363,31 +326,14 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	
 
 	@Override
-	public boolean update(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params) {
+	public boolean update(String handle, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client != null && ASSessModel.class.isInstance(client)) {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.UPDATE, key.getFirst(), key.getSecond(), params.get(0).getFirst(), (String)params.get(0).getSecond());
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return false;
-	}
-	
-	@Override
-	public boolean update(String handle, String table, Object dtoObject) {
-		// TODO Auto-generated method stub
-		Object client = sessionMap.get(handle);
-		if(client != null && ASSessModel.class.isInstance(client)) {
-			ASSessModel asSessModel = (ASSessModel) client;
-			if(asSessModel.session != null) {
-				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.UPDATE, null, dtoObject);
+					return (Boolean)runCommand(asSessModel, tableName, OPERATION.UPDATE, null, dtoObject);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -397,14 +343,14 @@ public class ASRepository extends BaseConnection implements Resourceable {
 	}
 
 	@Override
-	public boolean delete(String handle, String table, Pair<String,? extends Object> key) {
+	public boolean delete(String handle, String tableName, Map<String,String> keyValue) {
 		// TODO Auto-generated method stub
 		Object client = sessionMap.get(handle);
 		if(client != null && ASSessModel.class.isInstance(client)) {
 			ASSessModel asSessModel = (ASSessModel) client;
 			if(asSessModel.session != null) {
 				try {
-					return (Boolean)runCommand(asSessModel, table, OPERATION.DELETE, key.getFirst(), key.getSecond(), null, null);
+					return (Boolean)runCommand(asSessModel, tableName, OPERATION.DELETE, keyValue, null);
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -436,7 +382,7 @@ public class ASRepository extends BaseConnection implements Resourceable {
 						if(row != null) {
 							try {
 								E tempDto = clazz.getDeclaredConstructor().newInstance();
-								 for(Field field : clazz.getClass().getDeclaredFields()) {    				 	
+								 for(Field field : tempDto.getClass().getDeclaredFields()) {    				 	
 									 field.setAccessible(true);
 									 String ColumnName = field.getName();
 									 if(row.isColumnSet(ColumnName)) {
@@ -702,15 +648,17 @@ public class ASRepository extends BaseConnection implements Resourceable {
     {
         // create a row and set the user supplied key and value in it
     	if(param == null || dtoObject == null) return false;
-    	if(!Pair.class.isInstance(param)) return false;
+    	if(!Map.class.isInstance(param)) return false;
     	
-    	Pair<String,String> keyValue = (Pair<String,String>)param;
+    	Map<String,String> keyValue = (Map<String,String>)param;
         Row keyRow = null;
         String result = null;
         try
         {
             keyRow = table.createRow();
-            keyRow.setString(keyValue.getFirst(), keyValue.getSecond());
+            for(Entry<String, String> entry : keyValue.entrySet()) {
+				keyRow.setString(entry.getKey(), entry.getValue());
+            }
             Row getRow = table.get(keyRow);
             if (getRow != null)
             {
@@ -946,13 +894,15 @@ public class ASRepository extends BaseConnection implements Resourceable {
     @SuppressWarnings("unchecked")
 	private Boolean deleteRow(Table table, Object param, Properties defaultProperties) 
     {
-    	if(param == null || !Pair.class.isInstance(param)) return false;
-    	Pair<String,String> keyValue = (Pair<String,String>)param;
+    	if(param == null || !Map.class.isInstance(param)) return false;
+    	Map<String,String> keyValue = (Map<String,String>)param;
         Row keyRow = null;
         String result = null;
         try {
             keyRow = table.createRow();
-            keyRow.setString(keyValue.getFirst(), keyValue.getSecond());
+            for(Entry<String, String> entry : keyValue.entrySet()) {
+				keyRow.setString(entry.getKey(), entry.getValue());
+            }
             table.delete(keyRow);
             return true;
         } catch (DataGridException dataGridException) {

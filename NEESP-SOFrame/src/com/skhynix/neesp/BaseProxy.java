@@ -1,6 +1,7 @@
 package com.skhynix.neesp;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -117,14 +118,19 @@ public class BaseProxy {
 		dto.key = "111";
 		dto.value1 = "test value1";
 		dto.value2 = "test value2";
-		boolean res = metaDataManager.createMetaData(loadType, "hynix_table", dto);
+		boolean res = metaDataManager.createMeta(loadType, "hynix_table", dto);
 		if(res) {
 			TestDTO dto2 = new TestDTO();
-			metaDataManager.retrieveMeta(loadType, "hynix_table", Pair.of("key", "111"), dto2);
+			metaDataManager.retrieveMeta(loadType, "hynix_table", Map.of("key", "111"), dto2);
 			System.out.println("result: " + dto2.key + " value1:" + dto2.value1 + " value2:" + dto2.value2);
 		}else {
 			System.out.println("failed");
 		}
+
+		List<TestDTO> retRows = metaDataManager.executeSql(loadType, TestDTO.class, "select key, value1, value2 from hynix_table");			
+		retRows.stream().forEach(obj -> {
+			System.out.printf("%s,%s,%s\n", obj.key, obj.value1, obj.value2);
+		});
 		**/
 	}
 	
@@ -213,7 +219,7 @@ public class BaseProxy {
 			if(StringUtil.isNotEmpty(emsHandle)) handles.put("ems", emsHandle);
 			if(StringUtil.isNotEmpty(kafkaHandle)) handles.put("kafka", kafkaHandle);
 			if(StringUtil.isNotEmpty(ftlHandle)) handles.put("ftl", ftlHandle);
-			return businessLogic.doBusiness(eventType, message, handles, null, null);
+			return businessLogic.doBusiness(eventType, message, handles);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "error";

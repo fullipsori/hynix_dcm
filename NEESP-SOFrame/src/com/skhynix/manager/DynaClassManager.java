@@ -2,7 +2,6 @@ package com.skhynix.manager;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -11,9 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Pair;
-import com.skhynix.neesp.log.LogManager;
 
 import io.reactivex.rxjava3.subjects.PublishSubject;
 
@@ -41,15 +38,16 @@ public class DynaClassManager {
 		File jarFile = new File(jarFilePath);
 		
 		try {
-			Thread thread = Thread.currentThread();
-			ClassLoader contextLoader = thread.getContextClassLoader();
+//			Thread thread = Thread.currentThread();
+//			ClassLoader contextLoader = thread.getContextClassLoader();
 			URL classURL = new URL("jar:" + jarFile.toURI().toURL() + "!/");
 			
 			if(loaderMap.containsKey(className)) {
 				unloadJar(className, classDomain);
 			}
 			
-			URLClassLoader urlClassLoader = new URLClassLoader(new URL [] {classURL}, contextLoader);
+//			URLClassLoader urlClassLoader = new URLClassLoader(new URL [] {classURL}, contextLoader);
+			URLClassLoader urlClassLoader = new URLClassLoader(new URL [] {classURL});
 			loaderMap.put(className, urlClassLoader);
 
 			try {

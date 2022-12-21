@@ -14,16 +14,16 @@ public interface BusinessSupplier {
 	/** 요청은 모든 String 타입으로 되어 있음으로 이를 기반으로 동작되도록 하며, multi- operation 이 필요한지 여부는 확인이 필요함. */
 	/**
 	 * 
-	 * @param sourcetype activespace 의 경우 "resource-as" 이다. 
-	 * @param table  접속할 Table정보 
+	 * @param resourceType activespace 의 경우 "resource-as" 이다. 
+	 * @param tableName  접속할 Table정보 
 	 * @param dtoObject data Class Object
 	 * @return
 	 */
-	public boolean createMeta(String sourcetype, String table, Object dtoObject);
-	public boolean retrieveMeta(String sourcetype, String table, Pair<String,String> key, Object dtoObject);
-	public boolean updateMeta(String sourcetype, String table, Object dtoObject);
-	public boolean deleteMeta(String sourcetype, String table, Pair<String,? extends Object> key);
-    public <E> List<E> executeSql(String sourcetype, Class<E> clazz, String sqlString);
+	public boolean createMeta(String resourceType, String tableName, Object dtoObject);
+	public boolean retrieveMeta(String resourceType, String tableName, Pair<String,String> key, Object dtoObject);
+	public boolean updateMeta(String resourceType, String tableName, Object dtoObject);
+	public boolean deleteMeta(String resourceType, String tableName, Pair<String,? extends Object> key);
+    public <E> List<E> executeSql(String resourceType, Class<E> clazz, String sqlString);
 	
 	/* 메세지를 여러 ep 로 보내기 위한 용도로 사용하는 함수이다. */
 	public void sendSyncMessage(String[] handles, String message);

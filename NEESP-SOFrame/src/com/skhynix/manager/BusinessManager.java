@@ -1,5 +1,7 @@
 package com.skhynix.manager;
 
+import java.util.function.BiFunction;
+
 import com.skhynix.base.BaseManager;
 import com.skhynix.controller.BusinessLogic;
 import com.skhynix.extern.BusinessBehavior;
@@ -17,12 +19,11 @@ public class BusinessManager extends BaseManager {
 	
 	public BusinessManager() { }
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void addAction(Object instance) {
 		// TODO Auto-generated method stub
-		if(instance != null && BusinessBehavior.class.isInstance(instance)) {
-			businessLogic.setBusinessBehavior((BusinessBehavior)instance);
-		}
+		businessLogic.setBusinessBehavior((BiFunction<Object,Object,Object>) instance);
 		
 	}
 	@Override

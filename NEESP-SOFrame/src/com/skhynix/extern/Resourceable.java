@@ -11,13 +11,9 @@ import java.util.Map;
  *
  */
 public interface Resourceable {
-	public boolean create(String handle, String table, Pair<String,? extends Object> key, List<Pair<String,? extends Object>> params);
-	public Object retrieve(String handle, String table, Pair<String,? extends Object> key);
-	public boolean update(String handle, String table, Pair<String,? extends Object> key, List<Pair<String, ? extends Object>> params);
-	public boolean delete(String handle, String table, Pair<String,? extends Object> key);
-
+	public boolean delete(String handle, String table, Map<String,String> keyValue);
 	public boolean create(String handle, String table, Object dtoObject);
-	public boolean retrieve(String handle, String table, Pair<String,String> key, Object dtoObject);
+	public boolean retrieve(String handle, String table, Map<String,String> keyValue, Object dtoObject);
 	public boolean update(String handle, String table, Object dtoObject);
     public <E> List<E> executeSql(String handle, Class<E> clazz, String sqlString);
 }

@@ -20,5 +20,5 @@ public interface BusinessBehavior {
 	 * @return 로직처리 결과 
 	 * @throws Exception
 	 */
-	public String doBusiness(String eventType, String message, Map<String,String> handles, BusinessSupplier supplier, Consumer<Object> resultConsumer) throws Exception ;
+	public String doBusiness(String eventType, String message, Map<String,String> handles) throws Exception ;
 }

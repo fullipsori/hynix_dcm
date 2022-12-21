@@ -17,14 +17,13 @@ import javax.jms.TextMessage;
 
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.EmsSessModel;
 import com.skhynix.model.session.EmsSessModel.SESS_MODE;
 
-public class EmsMessage extends BaseConnection implements DynaLoadable, Messageable {
+public class EmsMessage extends BaseConnection implements Messageable {
 	
 	private final String defaultServerUrl = "localhost:7222";
 	
@@ -327,19 +326,4 @@ public class EmsMessage extends BaseConnection implements DynaLoadable, Messagea
 		}
 	}
 	
-	@Override
-	public void loadClass() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void unloadClass() {
-		// TODO Auto-generated method stub
-		if(unregister != null) {
-			unregister.run();
-			unregister = null;
-		}
-	}
-
 }

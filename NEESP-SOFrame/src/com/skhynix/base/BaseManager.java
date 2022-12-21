@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Joinable;
 import com.skhynix.manager.DynaClassManager;
 import com.skhynix.model.session.BaseSessModel;
@@ -22,7 +21,6 @@ public abstract class BaseManager {
 			.subscribe(jarInfo -> {
 				Object instance = DynaClassManager.getInstance().getClassInstance(jarInfo.getSecond());
 				if(instance != null) {
-					if(DynaLoadable.class.isInstance(instance)) ((DynaLoadable)instance).getClass();
 					register(jarInfo.getFirst(), instance);
 					addAction(instance);
 				}

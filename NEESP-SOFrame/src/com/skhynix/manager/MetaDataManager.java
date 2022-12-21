@@ -1,13 +1,10 @@
 package com.skhynix.manager;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 
 import com.skhynix.base.BaseManager;
-import com.skhynix.common.StringUtil;
 import com.skhynix.extern.Joinable;
-import com.skhynix.extern.Pair;
 
 /**
  * 메타데이터 매니저는 데이터를 로컬로 관리하는 역할도 진행한다.  즉 데이터가 hit 되는 경우에는 Map에서 아닌경우에만 AS 를 접속한다.
@@ -50,28 +47,28 @@ public class MetaDataManager extends BaseManager {
 		return null;
 	}
 	
-	public boolean createMetaData(String sourcetype, String table, Object dtoObject) {
+	public boolean createMeta(String resourceType, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return resourceManager.create(sourcetype, table, dtoObject);
+		return resourceManager.create(resourceType, tableName, dtoObject);
 	}
 
-	public boolean retrieveMeta(String sourcetype, String table, Pair<String, String> key, Object dtoObject) {
+	public boolean retrieveMeta(String resourceType, String tableName, Map<String, String> keyValue, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return resourceManager.retrieve(sourcetype, table, key, dtoObject);
+		return resourceManager.retrieve(resourceType, tableName, keyValue, dtoObject);
 	}
 
-	public boolean updateMeta(String sourcetype, String table, Object dtoObject) {
+	public boolean updateMeta(String resourceType, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return resourceManager.update(sourcetype, table, dtoObject);
+		return resourceManager.update(resourceType, tableName, dtoObject);
 	}
 
-	public boolean deleteMeta(String sourcetype, String table, Pair<String, ? extends Object> key) {
+	public boolean deleteMeta(String resourceType, String tableName, Map<String, String> keyValue) {
 		// TODO Auto-generated method stub
-		return resourceManager.delete(sourcetype, table, key);
+		return resourceManager.delete(resourceType, tableName, keyValue);
 	}
 
-	public <E> List<E> executeSql(String sourcetype, Class<E> clazz, String sqlString) {
+	public <E> List<E> executeSql(String resourceType, Class<E> clazz, String sqlString) {
 		// TODO Auto-generated method stub
-		return resourceManager.executeSql(sourcetype, clazz, sqlString);
+		return resourceManager.executeSql(resourceType, clazz, sqlString);
 	}
 }

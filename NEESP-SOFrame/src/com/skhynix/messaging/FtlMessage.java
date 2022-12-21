@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
@@ -18,7 +17,7 @@ import com.tibco.ftl.Publisher;
 import com.tibco.ftl.Realm;
 import com.tibco.ftl.TibProperties;
 
-public class FtlMessage extends BaseConnection implements DynaLoadable, Messageable {
+public class FtlMessage extends BaseConnection implements Messageable {
 	private final LogManager logger = LogManager.getInstance();
 
 	private final String defaultServerUrl = "localhost:8585";
@@ -205,22 +204,6 @@ public class FtlMessage extends BaseConnection implements DynaLoadable, Messagea
 			}
 			ftlSessModel.msgObject = null;
 		}
-	}
-
-	@Override
-	public void loadClass() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void unloadClass() {
-		// TODO Auto-generated method stub
-		if(unregister != null) {
-			unregister.run();
-			unregister = null;
-		}
-		disconnectServer();
 	}
 
 	public static void main(String[] args) {

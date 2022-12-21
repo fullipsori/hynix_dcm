@@ -128,7 +128,6 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private Optional<Pair<Resourceable,String>> getClient(String joinType) {
 		String handle = resourceMap.get(joinType);
 		if(StringUtil.isEmpty(handle)) return null;
@@ -140,39 +139,24 @@ public class ResourceManager extends BaseManager implements SessionBehavior, Res
 	}
 	
 	@Override
-	public boolean create(String joinType, String table, Pair<String, ? extends Object> key,
-			List<Pair<String, ? extends Object>> params) {
-		return getClient(joinType).map(pair -> pair.getFirst().create(pair.getSecond(), table, key, params)).orElse(false);
-	}
-	@Override
-	public Object retrieve(String joinType, String table, Pair<String, ? extends Object> key) {
+	public boolean delete(String jointype, String tableName, Map<String, String> keyValue) {
 		// TODO Auto-generated method stub
-		return getClient(joinType).map(pair -> pair.getFirst().retrieve(pair.getSecond(), table, key)).orElse("");
+		return getClient(jointype).map(pair -> pair.getFirst().delete(pair.getSecond(), tableName, keyValue)).orElse(false);
 	}
 	@Override
-	public boolean update(String jointype, String table, Pair<String, ? extends Object> key,
-			List<Pair<String, ? extends Object>> params) {
-		return getClient(jointype).map(pair -> pair.getFirst().update(pair.getSecond(), table, key, params)).orElse(false);
-	}
-	@Override
-	public boolean delete(String jointype, String table, Pair<String, ? extends Object> key) {
+	public boolean create(String jointype, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return getClient(jointype).map(pair -> pair.getFirst().delete(pair.getSecond(), table, key)).orElse(false);
+		return getClient(jointype).map(pair -> pair.getFirst().create(pair.getSecond(), tableName, dtoObject)).orElse(false);
 	}
 	@Override
-	public boolean create(String jointype, String table, Object dtoObject) {
+	public boolean retrieve(String jointype, String tableName, Map<String, String> keyValue, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return getClient(jointype).map(pair -> pair.getFirst().create(pair.getSecond(), table, dtoObject)).orElse(false);
+		return getClient(jointype).map(pair -> pair.getFirst().retrieve(pair.getSecond(), tableName, keyValue, dtoObject)).orElse(false);
 	}
 	@Override
-	public boolean retrieve(String jointype, String table, Pair<String, String> key, Object dtoObject) {
+	public boolean update(String jointype, String tableName, Object dtoObject) {
 		// TODO Auto-generated method stub
-		return getClient(jointype).map(pair -> pair.getFirst().retrieve(pair.getSecond(), table, key, dtoObject)).orElse(false);
-	}
-	@Override
-	public boolean update(String jointype, String table, Object dtoObject) {
-		// TODO Auto-generated method stub
-		return getClient(jointype).map(pair -> pair.getFirst().update(pair.getSecond(), table, dtoObject)).orElse(false);
+		return getClient(jointype).map(pair -> pair.getFirst().update(pair.getSecond(), tableName, dtoObject)).orElse(false);
 	}
 	@Override
 	public <E> List<E> executeSql(String jointype, Class<E> clazz, String sqlString) {

@@ -11,9 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StringUtil {
 	
-	public static void main(String[] args) {
-	}
-
 	public static <T> String objectToJson(T object) {
 		try {
 			ObjectMapper mapper = new ObjectMapper()
@@ -70,4 +67,22 @@ public class StringUtil {
 		Set<String> secondS = (secondArray != null)? new HashSet<String>(Arrays.asList(secondArray)) : new HashSet<String>();
 		return firstS.containsAll(secondS);
 	}
+
+	public static void main(String[] args) {
+		
+		ObjectMapper mapper = new ObjectMapper()
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		JackSonTest testJson = new JackSonTest();
+		testJson.id = "iiiii";
+		testJson.key = "keyyyy";
+		testJson.value = "vvvvvvv";
+
+		String jsonString = objectToJson(testJson);
+		System.out.println("result:" + jsonString);
+		
+		JackSonTest jackson = (JackSonTest) jsonToObject(jsonString, JackSonTest.class);
+		System.out.println("value:" + jackson.value);
+
+	}
+
 }

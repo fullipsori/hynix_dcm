@@ -10,13 +10,12 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.skhynix.base.BaseConnection;
 import com.skhynix.common.StringUtil;
-import com.skhynix.extern.DynaLoadable;
 import com.skhynix.extern.Messageable;
 import com.skhynix.model.message.BaseMsgModel;
 import com.skhynix.model.session.BaseSessModel;
 import com.skhynix.model.session.KafkaSessModel;
 
-public class KafkaMessage extends BaseConnection implements DynaLoadable, Messageable {
+public class KafkaMessage extends BaseConnection implements Messageable {
 	
 	private final String defaultServerUrl = "localhost:9092";
 
@@ -35,22 +34,6 @@ public class KafkaMessage extends BaseConnection implements DynaLoadable, Messag
 		return defaultServerUrl;
 	}
 
-	@Override
-	public void loadClass() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void unloadClass() {
-		// TODO Auto-generated method stub
-		if(unregister != null) {
-			unregister.run();
-			unregister = null;
-		}
-		disconnectServer();
-	}
-	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
